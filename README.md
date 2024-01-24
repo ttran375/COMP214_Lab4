@@ -1,6 +1,6 @@
 # Lab Exercises for Chapter 2 - Oracle 11g PLSQL Programming Text Book
 
-Lab Exercises for Chapter 2 
+Lab Exercises for Chapter 2
 
 Questions 1 - 10 of the Hands-On Assignments in the Oracle 11g PLSQL Programming Text Book. Refer to your textbook for each assignments details.
 
