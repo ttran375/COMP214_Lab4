@@ -59,3 +59,131 @@ BEGIN
     END IF;
 END;
 /
+
+
+DECLARE
+    v_table_name VARCHAR2(30) := 'MY_TABLE';
+    v_column1_name VARCHAR2(30) := 'ID';
+    v_column1_type VARCHAR2(30) := 'NUMBER(4) PRIMARY KEY';
+    v_column2_name VARCHAR2(30) := 'NAME';
+    v_column2_type VARCHAR2(30) := 'VARCHAR2(50)';
+    v_sql_statement VARCHAR2(200);
+BEGIN
+    -- Creating the SQL statement dynamically
+    v_sql_statement := 'CREATE TABLE ' || v_table_name || ' (' ||
+                       v_column1_name || ' ' || v_column1_type || ', ' ||
+                       v_column2_name || ' ' || v_column2_type || ')';
+
+    -- Executing the SQL statement
+    EXECUTE IMMEDIATE v_sql_statement;
+
+    -- Committing the changes
+    COMMIT;
+END;
+/
+
+
+DECLARE
+    v_table_name VARCHAR2(30) := 'MY_TABLE';
+    v_column1_name VARCHAR2(30) := 'ID';
+    v_column1_type VARCHAR2(30) := 'NUMBER(4) PRIMARY KEY';
+    v_column2_name VARCHAR2(30) := 'NAME';
+    v_column2_type VARCHAR2(30) := 'VARCHAR2(50)';
+    v_sql_statement VARCHAR2(200);
+BEGIN
+    -- Creating the SQL statement dynamically
+    v_sql_statement := 'CREATE TABLE ' || v_table_name || ' (' ||
+                       v_column1_name || ' ' || v_column1_type || ', ' ||
+                       v_column2_name || ' ' || v_column2_type || ')';
+
+    -- Executing the SQL statement
+    EXECUTE IMMEDIATE v_sql_statement;
+
+    -- Committing the changes
+    COMMIT;
+END;
+/
+
+DECLARE
+    v_table_name VARCHAR2(30) := 'MY_TABLE';
+    v_column1_name VARCHAR2(30) := 'ID';
+    v_column1_type VARCHAR2(30) := 'NUMBER(4) PRIMARY KEY';
+    v_column2_name VARCHAR2(30) := 'NAME';
+    v_column2_type VARCHAR2(30) := 'VARCHAR2(50)';
+    v_sql_statement VARCHAR2(200);
+BEGIN
+    -- Creating the SQL statement dynamically
+    v_sql_statement := 'CREATE TABLE ' || v_table_name || ' (' ||
+                       v_column1_name || ' ' || v_column1_type || ', ' ||
+                       v_column2_name || ' ' || v_column2_type || ')';
+
+    -- Executing the SQL statement
+    EXECUTE IMMEDIATE v_sql_statement;
+
+    -- Committing the changes
+    COMMIT;
+END;
+/
+
+DECLARE
+    v_table_name VARCHAR2(30) := 'MY_TABLE';
+    v_column1_name VARCHAR2(30) := 'ID';
+    v_column1_type VARCHAR2(30) := 'NUMBER(4) PRIMARY KEY';
+    v_column2_name VARCHAR2(30) := 'NAME';
+    v_column2_type VARCHAR2(30) := 'VARCHAR2(50)';
+    v_sql_statement VARCHAR2(200);
+BEGIN
+    -- Creating the SQL statement dynamically
+    v_sql_statement := 'CREATE TABLE ' || v_table_name || ' (' ||
+                       v_column1_name || ' ' || v_column1_type || ', ' ||
+                       v_column2_name || ' ' || v_column2_type || ')';
+
+    -- Executing the SQL statement
+    EXECUTE IMMEDIATE v_sql_statement;
+
+    -- Committing the changes
+    COMMIT;
+END;
+/
+
+DECLARE
+    v_table_name VARCHAR2(30) := 'MY_TABLE';
+    v_column1_name VARCHAR2(30) := 'ID';
+    v_column1_type VARCHAR2(30) := 'NUMBER(4) PRIMARY KEY';
+    v_column2_name VARCHAR2(30) := 'NAME';
+    v_column2_type VARCHAR2(30) := 'VARCHAR2(50)';
+    v_sql_statement VARCHAR2(200);
+BEGIN
+    -- Creating the SQL statement dynamically
+    v_sql_statement := 'CREATE TABLE ' || v_table_name || ' (' ||
+                       v_column1_name || ' ' || v_column1_type || ', ' ||
+                       v_column2_name || ' ' || v_column2_type || ')';
+
+    -- Executing the SQL statement
+    EXECUTE IMMEDIATE v_sql_statement;
+
+    -- Committing the changes
+    COMMIT;
+END;
+/
+
+DECLARE
+    v_table_name VARCHAR2(30) := 'MY_TABLE';
+    v_column1_name VARCHAR2(30) := 'ID';
+    v_column1_type VARCHAR2(30) := 'NUMBER(4) PRIMARY KEY';
+    v_column2_name VARCHAR2(30) := 'NAME';
+    v_column2_type VARCHAR2(30) := 'VARCHAR2(50)';
+    v_sql_statement VARCHAR2(200);
+BEGIN
+    -- Creating the SQL statement dynamically
+    v_sql_statement := 'CREATE TABLE ' || v_table_name || ' (' ||
+                       v_column1_name || ' ' || v_column1_type || ', ' ||
+                       v_column2_name || ' ' || v_column2_type || ')';
+
+    -- Executing the SQL statement
+    EXECUTE IMMEDIATE v_sql_statement;
+
+    -- Committing the changes
+    COMMIT;
+END;
+/
