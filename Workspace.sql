@@ -20,25 +20,42 @@ BEGIN
 END;
 /
 
--- Existing code...
-
--- Insert statements for DD_Donor table
-INSERT INTO dd_donor  
-  VALUES (301, 'Mary', 'Treanor', 'I','243 main St.', 'Norfolk', 'VA','23510',NULL,NULL,'mtrea492@mdv.com','Y','01-SEP-2012');
-
--- Add an IF statement to check if the donor is a business ('B')
+CREATE OR REPLACE TRIGGER update_project_status
+AFTER INSERT OR UPDATE ON DD_Payment
+FOR EACH ROW
 DECLARE
-    v_typecode CHAR(1);
+    total_paid NUMBER;
 BEGIN
-    v_typecode := 'B';  -- Change this to the desired typecode
+    -- Calculate the total amount paid for the project
+    SELECT NVL(SUM(Payamt), 0) INTO total_paid
+    FROM DD_Payment
+    WHERE idPledge = :NEW.idPledge;
 
-    IF v_typecode = 'B' THEN
-        INSERT INTO dd_donor  
-        VALUES (306, NULL, 'Coastal Developers', 'B','3667 Shore Dr.', 'Virginia Beach', 'VA','23450','8889220004',NULL,'coastVA@cdev.com','Y','30-SEP-2012');
+    -- Update project status based on the total paid amount
+    IF total_paid >= (
+        SELECT Projfundgoal
+        FROM DD_Project
+        WHERE idProj = (
+            SELECT idProj
+            FROM DD_Pledge
+            WHERE idPledge = :NEW.idPledge
+        )
+    ) THEN
+        UPDATE DD_Project
+        SET Projstatus = 'Complete'
+        WHERE idProj = (
+            SELECT idProj
+            FROM DD_Pledge
+            WHERE idPledge = :NEW.idPledge
+        );
+    ELSE
+        UPDATE DD_Project
+        SET Projstatus = 'Open'
+        WHERE idProj = (
+            SELECT idProj
+            FROM DD_Pledge
+            WHERE idPledge = :NEW.idPledge
+        );
     END IF;
 END;
 /
-
--- Continue with the rest of the insert statements...
-
--- Existing code...
