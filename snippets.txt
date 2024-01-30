@@ -17,7 +17,7 @@ source ~/.bashrc
 rm instantclient-basiclite-linux.x64-21.1.0.0.0.zip
 rm instantclient-sqlplus-linux.x64-21.1.0.0.0.zip
 sqlplus COMP214_W24_nic_x/password@199.212.26.208:1521/SQLD
-sqlplus system/oracle@172.17.0.2:49161/xe
+
 BEGIN
    FOR c IN (SELECT table_name FROM user_tables) LOOP
       EXECUTE IMMEDIATE ('DROP TABLE ' || c.table_name || ' CASCADE CONSTRAINTS');
@@ -47,20 +47,24 @@ BEGIN
 END;
 /
 
+// docker-oracle-xe-11g
 git clone https://github.com/wnameless/docker-oracle-xe-11g.git
 cd docker-oracle-xe-11g
 docker build -t wnameless/oracle-xe-11g .
-docker run -d -p 49161:1521 -e ORACLE_ALLOW_REMOTE=true wnameless/oracle-xe-11g-r2
 
+// localhost
+docker run -d -p 49161:1521 wnameless/oracle-xe-11g-r2
+// remote
+docker run -d -p 49161:1521 -e ORACLE_ALLOW_REMOTE=true wnameless/oracle-xe-11g-r2
+// container_id_or_name
+docker exec -it <id> /bin/bash
+// hostname
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' <container_id_or_name>
 
-
-docker run -d -p 49161:1521 wnameless/oracle-xe-11g-r2
-docker exec -it e898260bc76f /bin/bash
-
-sqlplus system/oracle@localhost:49161/XE
-hostname: localhost
+hostname: localhost || hostname
 port: 49161
 sid: xe
 username: system
 password: oracle
+
+sqlplus system/oracle@hostname:49161/xe
