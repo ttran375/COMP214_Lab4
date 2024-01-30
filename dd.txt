@@ -1,0 +1,73 @@
+-- Create Tables
+CREATE TABLE DD_Donor (
+    idDonor NUMBER(4) PRIMARY KEY,
+    Firstname VARCHAR2(15),
+    Lastname VARCHAR2(30),
+    Typecode CHAR(1),
+    Street VARCHAR2(40),
+    City VARCHAR2(20),
+    State CHAR(2),
+    Zip VARCHAR2(9),
+    Phone VARCHAR2(10),
+    Fax VARCHAR2(10),
+    Email VARCHAR2(25),
+    News CHAR(1),
+    dtentered VARCHAR2(20)
+);
+
+CREATE TABLE DD_Project (
+    idProj NUMBER(6) PRIMARY KEY,
+    Projname VARCHAR2(60) UNIQUE,
+    Projstartdate VARCHAR2(20),
+    Projenddate VARCHAR2(20),
+    Projfundgoal NUMBER(12,2),
+    ProjCoord VARCHAR2(20)
+);
+
+CREATE TABLE DD_Status (
+    idStatus NUMBER(2) PRIMARY KEY,
+    Statusdesc VARCHAR2(15)
+);
+
+CREATE TABLE DD_Pledge (
+    idPledge NUMBER(5) PRIMARY KEY,
+    idDonor NUMBER(4),
+    Pledgedate VARCHAR2(20),
+    Pledgeamt NUMBER(8,2),
+    idProj NUMBER(5),
+    idStatus NUMBER(2),
+    Writeoff NUMBER(8,2),
+    paymonths NUMBER(3),
+    Campaign NUMBER(4),
+    Firstpledge CHAR(1),
+    CONSTRAINT pledge_idDonor_fk FOREIGN KEY (idDonor) REFERENCES DD_Donor (idDonor),
+    CONSTRAINT pledge_idProj_fk FOREIGN KEY (idProj) REFERENCES DD_Project (idProj),
+    CONSTRAINT pledge_idStatus_fk FOREIGN KEY (idStatus) REFERENCES DD_Status (idStatus)
+);
+
+CREATE TABLE DD_Payment (
+    idPay NUMBER(6) PRIMARY KEY,
+    idPledge NUMBER(5),
+    Payamt NUMBER(8,2),
+    Paydate VARCHAR2(20),
+    Paymethod CHAR(2),
+    CONSTRAINT pay_idpledge_fk FOREIGN KEY (idPledge) REFERENCES DD_Pledge (idPledge)
+);
+
+-- Insert Data
+INSERT INTO DD_Donor VALUES (301, 'Mary', 'Treanor', 'I', '243 main St.', 'Norfolk', 'VA', '23510', NULL, NULL, 'mtrea492@mdv.com', 'Y', '01-SEP-2012');
+-- (Add other donor records similarly)
+
+INSERT INTO DD_Project VALUES (500, 'Elders Assistance League', '01-SEP-2012', '31-OCT-2012', 15000, 'Shawn Hasee');
+-- (Add other project records similarly)
+
+INSERT INTO DD_Status VALUES (10, 'Open');
+-- (Add other status records similarly)
+
+INSERT INTO DD_Pledge VALUES (100, 303, '18-SEP-2012', 80, 500, 20, NULL, 0, 738, 'Y');
+-- (Add other pledge records similarly)
+
+INSERT INTO DD_Payment VALUES (1425, 100, 80, '18-SEP-2012', 'CC');
+-- (Add other payment records similarly)
+
+COMMIT;
