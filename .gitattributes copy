@@ -1,0 +1,2 @@
+*.sql linguist-detectable=true
+*.txt linguist-detectable=false

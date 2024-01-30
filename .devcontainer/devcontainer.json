@@ -7,6 +7,7 @@
         "CrappyCodeMaker.ccm-plsql-oracle",
         "EwanDubashinski.plsqllint",
         "Oracle.oracledevtools",
+        "Oracle.sql-developer",
         "adpyke.vscode-sql-formatter",
         "apng.orclapex-autocomplete",
         "casian.plsql",
@@ -15,7 +16,9 @@
         "streetsidesoftware.code-spell-checker",
         "EditorConfig.EditorConfig",
         "DavidAnson.vscode-markdownlint",
-        "inferrinizzard.prettier-sql-vscode"
+        "Advanced_Challenge_Workspace.sql",
+        "inferrinizzard.prettier-sql-vscode",
+        "markdownlint.markdownlint"
       ]
     }
   }
