@@ -9,8 +9,9 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE(LV_TEST_NUM);
     DBMS_OUTPUT.PUT_LINE(LV_TEST_TXT);
 END;
- -- - Assignment 2-2: Creating a Flowchart
- -- - Assignment 2-3: Using IF Statements
+
+-- - Assignment 2-2: Creating a Flowchart
+-- - Assignment 2-3: Using IF Statements
 DECLARE
     LV_TOTAL_NUM NUMBER(6, 2) := 150;
 BEGIN
@@ -22,7 +23,8 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('LOW');
     END IF;
 END;
- -- - Assignment 2-4: Using CASE Statements
+
+-- - Assignment 2-4: Using CASE Statements
 DECLARE
     LV_TOTAL_NUM NUMBER(6, 2) := 150;
 BEGIN
@@ -35,7 +37,8 @@ BEGIN
             DBMS_OUTPUT.PUT_LINE('LOW');
     END CASE;
 END;
- -- - Assignment 2-5: Using a Boolean Variable
+ 
+-- - Assignment 2-5: Using a Boolean Variable
 DECLARE
     LV_BAL_NUM NUMBER(8, 2) := 150.50;
     LV_PAY_NUM NUMBER(8, 2) := 95.00;
@@ -49,7 +52,8 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('Account Fully Paid');
     END IF;
 END;
- -- - Assignment 2-6: Using Looping Statements
+
+-- - Assignment 2-6: Using Looping Statements
 DECLARE
     LV_TOTAL_NUM NUMBER(6, 2) := 200;
     LV_PRICE_NUM NUMBER(5, 2) := 32;
@@ -66,8 +70,9 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('# purchase = '
                          || LV_QTY_NUM);
 END;
- -- - Assignment 2-7: Creating a Flowchart
- -- - Assignment 2-8: Using IF Statements
+
+-- - Assignment 2-7: Creating a Flowchart
+-- - Assignment 2-8: Using IF Statements
 DECLARE
     LV_MEM_TXT  CHAR(1) := 'Y';
     LV_QTY_NUM  NUMBER(3) := 8;
@@ -97,7 +102,8 @@ BEGIN
 
     DBMS_OUTPUT.PUT_LINE(LV_SHIP_NUM);
 END;
- -- - Assignment 2-9: Using a FOR Loop
+
+-- - Assignment 2-9: Using a FOR Loop
 DECLARE
     LV_START_DATE   DATE := '01-OCT-2012';
     LV_PAYAMT_NUM   NUMBER(8, 2) := 20;
@@ -122,7 +128,8 @@ BEGIN
         LV_DUEDATE_DATE := ADD_MONTHS(LV_DUEDATE_DATE, 1);
     END LOOP;
 END;
- -- - Assignment 2-10: Using a Basic Loop
+
+-- - Assignment 2-10: Using a Basic Loop
 DECLARE
     LV_START_DATE   DATE := '01-OCT-2012';
     LV_PAYAMT_NUM   NUMBER(8, 2) := 20;
