@@ -1,141 +1,152 @@
 -- - Assignment 2-1: Using Scalar Variables
 DECLARE
- lv_test_date DATE := '10-DEC-2012';
- lv_test_num NUMBER(3) := 10;
- lv_test_txt VARCHAR2(10);
+    LV_TEST_DATE DATE := '10-DEC-2012';
+    LV_TEST_NUM  NUMBER(3) := 10;
+    LV_TEST_TXT  VARCHAR2(10);
 BEGIN
- lv_test_txt := '???????';
- DBMS_OUTPUT.PUT_LINE(lv_test_date);
- DBMS_OUTPUT.PUT_LINE(lv_test_num);
- DBMS_OUTPUT.PUT_LINE(lv_test_txt);
+    LV_TEST_TXT := '???????';
+    DBMS_OUTPUT.PUT_LINE(LV_TEST_DATE);
+    DBMS_OUTPUT.PUT_LINE(LV_TEST_NUM);
+    DBMS_OUTPUT.PUT_LINE(LV_TEST_TXT);
 END;
--- - Assignment 2-2: Creating a Flowchart
--- - Assignment 2-3: Using IF Statements
+ -- - Assignment 2-2: Creating a Flowchart
+ -- - Assignment 2-3: Using IF Statements
 DECLARE
- lv_total_num NUMBER(6,2) := 150;
+    LV_TOTAL_NUM NUMBER(6, 2) := 150;
 BEGIN
- IF lv_total_num > 200 THEN
- DBMS_OUTPUT.PUT_LINE('HIGH');
- ELSIF lv_total_num > 100 THEN
- DBMS_OUTPUT.PUT_LINE('MID');
- ELSE
- DBMS_OUTPUT.PUT_LINE('LOW');
- END IF;
+    IF LV_TOTAL_NUM > 200 THEN
+        DBMS_OUTPUT.PUT_LINE('HIGH');
+    ELSIF LV_TOTAL_NUM > 100 THEN
+        DBMS_OUTPUT.PUT_LINE('MID');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('LOW');
+    END IF;
 END;
--- - Assignment 2-4: Using CASE Statements
+ -- - Assignment 2-4: Using CASE Statements
+DECLARE
+    LV_TOTAL_NUM NUMBER(6, 2) := 150;
+BEGIN
+    CASE
+        WHEN LV_TOTAL_NUM > 200 THEN
+            DBMS_OUTPUT.PUT_LINE('HIGH');
+        WHEN LV_TOTAL_NUM > 100 THEN
+            DBMS_OUTPUT.PUT_LINE('MID');
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('LOW');
+    END CASE;
+END;
+ -- - Assignment 2-5: Using a Boolean Variable
+DECLARE
+    LV_BAL_NUM NUMBER(8, 2) := 150.50;
+    LV_PAY_NUM NUMBER(8, 2) := 95.00;
+    LV_DUE_BLN BOOLEAN;
+BEGIN
+    IF (LV_BAL_NUM - LV_PAY_NUM) > 0 THEN
+        LV_DUE_BLN := TRUE;
+        DBMS_OUTPUT.PUT_LINE('Balance Due');
+    ELSE
+        LV_DUE_BLN := FALSE;
+        DBMS_OUTPUT.PUT_LINE('Account Fully Paid');
+    END IF;
+END;
+ -- - Assignment 2-6: Using Looping Statements
+DECLARE
+    LV_TOTAL_NUM NUMBER(6, 2) := 200;
+    LV_PRICE_NUM NUMBER(5, 2) := 32;
+    LV_SPENT_NUM NUMBER(6, 2) := 0;
+    LV_QTY_NUM   NUMBER(6) := 0;
+BEGIN
+    WHILE (LV_SPENT_NUM + LV_PRICE_NUM) < LV_TOTAL_NUM LOOP
+        LV_SPENT_NUM := LV_SPENT_NUM + LV_PRICE_NUM;
+        LV_QTY_NUM := LV_QTY_NUM + 1;
+    END LOOP;
 
+    DBMS_OUTPUT.PUT_LINE('Total Spent = '
+                         || LV_SPENT_NUM);
+    DBMS_OUTPUT.PUT_LINE('# purchase = '
+                         || LV_QTY_NUM);
+END;
+ -- - Assignment 2-7: Creating a Flowchart
+ -- - Assignment 2-8: Using IF Statements
 DECLARE
- lv_total_num NUMBER(6,2) := 150;
+    LV_MEM_TXT  CHAR(1) := 'Y';
+    LV_QTY_NUM  NUMBER(3) := 8;
+    LV_SHIP_NUM NUMBER(6, 2);
 BEGIN
- CASE
- WHEN lv_total_num > 200 THEN
- DBMS_OUTPUT.PUT_LINE('HIGH');
- WHEN lv_total_num > 100 THEN
- DBMS_OUTPUT.PUT_LINE('MID');
- ELSE
- DBMS_OUTPUT.PUT_LINE('LOW');
- END CASE;
-END; 
+    IF LV_MEM_TXT = 'Y' THEN
+        IF LV_QTY_NUM > 10 THEN
+            LV_SHIP_NUM := 9;
+        ELSIF LV_QTY_NUM >= 7 THEN
+            LV_SHIP_NUM := 7;
+        ELSIF LV_QTY_NUM >= 4 THEN
+            LV_SHIP_NUM := 5;
+        ELSE
+            LV_SHIP_NUM := 3;
+        END IF;
+    ELSE
+        IF LV_QTY_NUM > 10 THEN
+            LV_SHIP_NUM := 12;
+        ELSIF LV_QTY_NUM >= 7 THEN
+            LV_SHIP_NUM := 10;
+        ELSIF LV_QTY_NUM >= 4 THEN
+            LV_SHIP_NUM := 7.50;
+        ELSE
+            LV_SHIP_NUM := 5;
+        END IF;
+    END IF;
 
--- - Assignment 2-5: Using a Boolean Variable
-DECLARE
- lv_bal_num NUMBER(8,2) := 150.50;
- lv_pay_num NUMBER(8,2) := 95.00;
- lv_due_bln BOOLEAN;
-BEGIN
- IF (lv_bal_num - lv_pay_num) > 0 THEN
- lv_due_bln := TRUE;
- DBMS_OUTPUT.PUT_LINE('Balance Due');
- ELSE
- lv_due_bln := FALSE;
- DBMS_OUTPUT.PUT_LINE('Account Fully Paid');
- END IF;
+    DBMS_OUTPUT.PUT_LINE(LV_SHIP_NUM);
 END;
--- - Assignment 2-6: Using Looping Statements
+ -- - Assignment 2-9: Using a FOR Loop
 DECLARE
- lv_total_num NUMBER(6,2) := 200;
- lv_price_num NUMBER(5,2) := 32;
- lv_spent_num NUMBER(6,2) := 0;
- lv_qty_num NUMBER(6) := 0;
+    LV_START_DATE   DATE := '01-OCT-2012';
+    LV_PAYAMT_NUM   NUMBER(8, 2) := 20;
+    LV_PAYMTHS_NUM  NUMBER(8, 2) := 24;
+    LV_BAL_NUM      NUMBER(8, 2) := 0;
+    LV_DUEDATE_DATE DATE;
+    LV_DUEDATE_TXT  VARCHAR2(25);
 BEGIN
- WHILE (lv_spent_num + lv_price_num) < lv_total_num LOOP
- lv_spent_num := lv_spent_num + lv_price_num;
- lv_qty_num := lv_qty_num + 1;
- END LOOP;
- DBMS_OUTPUT.PUT_LINE('Total Spent = ' || lv_spent_num);
- DBMS_OUTPUT.PUT_LINE('# purchase = ' || lv_qty_num);
-END; 
--- - Assignment 2-7: Creating a Flowchart
--- - Assignment 2-8: Using IF Statements
-DECLARE
- lv_mem_txt CHAR(1) := 'Y';
- lv_qty_num NUMBER(3) := 8;
- lv_ship_num NUMBER(6,2);
-BEGIN
- IF lv_mem_txt = 'Y' THEN
- IF lv_qty_num > 10 THEN
- lv_ship_num := 9;
- ELSIF lv_qty_num >= 7 THEN
- lv_ship_num := 7;
- ELSIF lv_qty_num >= 4 THEN
- lv_ship_num := 5;
- ELSE
- lv_ship_num := 3;
- END IF;
- ELSE
- IF lv_qty_num > 10 THEN
- lv_ship_num := 12;
- ELSIF lv_qty_num >= 7 THEN
- lv_ship_num := 10;
- ELSIF lv_qty_num >= 4 THEN
- lv_ship_num := 7.50;
- ELSE
- lv_ship_num := 5;
- END IF;
- END IF;
- DBMS_OUTPUT.PUT_LINE(lv_ship_num);
+    LV_BAL_NUM := LV_PAYAMT_NUM * LV_PAYMTHS_NUM;
+    LV_DUEDATE_DATE := LV_START_DATE;
+    FOR I IN 1..LV_PAYMTHS_NUM LOOP
+        LV_BAL_NUM := LV_BAL_NUM - LV_PAYAMT_NUM;
+        LV_DUEDATE_TXT := TO_CHAR(LV_DUEDATE_DATE, 'mm/dd/yyyy');
+        DBMS_OUTPUT.PUT_LINE('Pay #: '
+                             || I
+                             || ' Due: '
+                             || LV_DUEDATE_TXT
+                             || ' Amt: '
+                             || TO_CHAR(LV_PAYAMT_NUM, '$999.99')
+                                || ' Bal: '
+                                || TO_CHAR(LV_BAL_NUM, '$9,999.99'));
+        LV_DUEDATE_DATE := ADD_MONTHS(LV_DUEDATE_DATE, 1);
+    END LOOP;
 END;
--- - Assignment 2-9: Using a FOR Loop
+ -- - Assignment 2-10: Using a Basic Loop
 DECLARE
- lv_start_date DATE := '01-OCT-2012';
- lv_payamt_num NUMBER(8,2) := 20;
- lv_paymths_num NUMBER(8,2) := 24;
- lv_bal_num NUMBER(8,2) := 0;
- lv_duedate_date DATE;
- lv_duedate_txt VARCHAR2(25);
+    LV_START_DATE   DATE := '01-OCT-2012';
+    LV_PAYAMT_NUM   NUMBER(8, 2) := 20;
+    LV_PAYMTHS_NUM  NUMBER(8, 2) := 24;
+    LV_BAL_NUM      NUMBER(8, 2) := 0;
+    LV_DUEDATE_DATE DATE;
+    LV_DUEDATE_TXT  VARCHAR2(25);
+    LV_CNT_NUM      NUMBER(2) := 1;
 BEGIN
- lv_bal_num := lv_payamt_num * lv_paymths_num;
- lv_duedate_date := lv_start_date;
- FOR i IN 1..lv_paymths_num LOOP
- lv_bal_num := lv_bal_num - lv_payamt_num;
- lv_duedate_txt := TO_CHAR(lv_duedate_date,'mm/dd/yyyy');
- DBMS_OUTPUT.PUT_LINE('Pay #: ' || i || ' Due: ' || lv_duedate_txt
- || ' Amt: ' || TO_CHAR(lv_payamt_num,'$999.99')
- || ' Bal: ' || TO_CHAR(lv_bal_num,'$9,999.99'));
- lv_duedate_date := ADD_MONTHS(lv_duedate_date,1);
- END LOOP;
-END;
--- - Assignment 2-10: Using a Basic Loop
-DECLARE
- lv_start_date DATE := '01-OCT-2012';
- lv_payamt_num NUMBER(8,2) := 20;
- lv_paymths_num NUMBER(8,2) := 24;
- lv_bal_num NUMBER(8,2) := 0;
- lv_duedate_date DATE;
- lv_duedate_txt VARCHAR2(25);
- lv_cnt_num NUMBER(2) := 1;
-BEGIN
- lv_bal_num := lv_payamt_num * lv_paymths_num;
- lv_duedate_date := lv_start_date;
- LOOP
- lv_bal_num := lv_bal_num - lv_payamt_num; 
- lv_duedate_txt := TO_CHAR(lv_duedate_date,'mm/dd/yyyy');
- DBMS_OUTPUT.PUT_LINE('Pay #: ' || lv_cnt_num || ' Due: ' ||
-lv_duedate_txt
- || ' Amt: ' || TO_CHAR(lv_payamt_num,'$999.99')
- || ' Bal: ' || TO_CHAR(lv_bal_num,'$9,999.99'));
- lv_duedate_date := ADD_MONTHS(lv_duedate_date,1);
- EXIT WHEN (lv_cnt_num = lv_paymths_num);
- lv_cnt_num := lv_cnt_num + 1;
- END LOOP;
+    LV_BAL_NUM := LV_PAYAMT_NUM * LV_PAYMTHS_NUM;
+    LV_DUEDATE_DATE := LV_START_DATE;
+    LOOP
+        LV_BAL_NUM := LV_BAL_NUM - LV_PAYAMT_NUM;
+        LV_DUEDATE_TXT := TO_CHAR(LV_DUEDATE_DATE, 'mm/dd/yyyy');
+        DBMS_OUTPUT.PUT_LINE('Pay #: '
+                             || LV_CNT_NUM
+                             || ' Due: '
+                             || LV_DUEDATE_TXT
+                             || ' Amt: '
+                             || TO_CHAR(LV_PAYAMT_NUM, '$999.99')
+                                || ' Bal: '
+                                || TO_CHAR(LV_BAL_NUM, '$9,999.99'));
+        LV_DUEDATE_DATE := ADD_MONTHS(LV_DUEDATE_DATE, 1);
+        EXIT WHEN (LV_CNT_NUM = LV_PAYMTHS_NUM);
+        LV_CNT_NUM := LV_CNT_NUM + 1;
+    END LOOP;
 END;
