@@ -512,8 +512,8 @@ END;
 -- should determine and then display the correct rental rating. Test the block, using a variety of
 -- rental amounts.
 DECLARE
-    v_donor_type CHAR(1) := '&input_donor_type'; -- Input: Donor type code
-    v_pledge_amount NUMBER := '&input_pledge_amount'; -- Input: Pledge amount
+    v_donor_type CHAR(1) := 'I'; -- Replace with the actual donor type code ('I', 'B', or 'G')
+    v_pledge_amount NUMBER := 300; -- Replace with the actual pledge amount
     v_matching_percentage NUMBER; -- Calculated matching percentage
 
 BEGIN
