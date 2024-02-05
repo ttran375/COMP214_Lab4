@@ -446,6 +446,8 @@ BEGIN
 
     -- Generate payment schedule using WHILE loop
     WHILE payment_number <= v_total_payments LOOP
+    -- Update total paid to date
+        v_total_paid := v_total_paid + v_monthly_payment;
         -- Calculate next due date
         v_start_date := ADD_MONTHS(TO_DATE('2024-01-01', 'YYYY-MM-DD'), payment_number - 1);
 
@@ -456,9 +458,6 @@ BEGIN
             ' | ' || v_monthly_payment ||
             ' | ' || v_total_paid
         );
-
-        -- Update total paid to date
-        v_total_paid := v_total_paid + v_monthly_payment;
 
         -- Increment payment number
         payment_number := payment_number + 1;
