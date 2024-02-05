@@ -13,16 +13,12 @@
 -- |--------------------------------------|
 -- Create a PL/SQL block using nested IF statements to accomplish the task. Input values for the block are the donor type code and the pledge amount.
 DECLARE
-    -- Input parameters
-    lv_donor_type CHAR(1) := 'I'; -- Replace with the actual donor type code ('I', 'B', or 'G')
-    lv_pledge_amount NUMBER := 300; -- Replace with the actual pledge amount
+    lv_donor_type CHAR(1) := 'I';
+    lv_pledge_amount NUMBER := 300;
 
-    -- Output variables
     lv_matching_percent NUMBER;
     lv_matching_amount NUMBER;
-
 BEGIN
-    -- Determine matching percentage based on donor type and pledge amount
     IF lv_donor_type = 'I' THEN
         IF lv_pledge_amount >= 100 AND lv_pledge_amount <= 249 THEN
             lv_matching_percent := 0.5;
@@ -31,7 +27,6 @@ BEGIN
         ELSE
             lv_matching_percent := 0.2;
         END IF;
-
     ELSIF lv_donor_type = 'B' THEN
         IF lv_pledge_amount >= 100 AND lv_pledge_amount <= 499 THEN
             lv_matching_percent := 0.2;
@@ -40,26 +35,20 @@ BEGIN
         ELSE
             lv_matching_percent := 0.05;
         END IF;
-
     ELSIF lv_donor_type = 'G' THEN
         IF lv_pledge_amount >= 100 THEN
             lv_matching_percent := 0.05;
         END IF;
-
     ELSE
-        -- Handle invalid donor type
         DBMS_OUTPUT.PUT_LINE('Invalid donor type');
         RETURN;
     END IF;
-
-    -- Calculate matching amount
+   
     lv_matching_amount := lv_pledge_amount * lv_matching_percent;
 
-    -- Display the results
     DBMS_OUTPUT.PUT_LINE('Donor Type: ' || lv_donor_type);
     DBMS_OUTPUT.PUT_LINE('Pledge Amount: $' || lv_pledge_amount);
     DBMS_OUTPUT.PUT_LINE('Matching Percentage: ' || TO_CHAR(lv_matching_percent * 100) || '%');
     DBMS_OUTPUT.PUT_LINE('Matching Amount: $' || lv_matching_amount);
-
 END;
 /

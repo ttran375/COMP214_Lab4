@@ -1,8 +1,8 @@
 -- Assignment 2-8: Using IF Statements
 -- Create a block to accomplish the task outlined in Assignment 2-7. Include a variable containing a Y or N to indicate membership status and a variable to represent the number of items purchased. Test with a variety of values.
 DECLARE
-    lv_nonmember_cost NUMBER := 0.0;
-    lv_member_cost NUMBER := 0.0;
+    lv_nonmember_cost NUMBER;
+    lv_member_cost NUMBER;
     lv_quantity_of_items NUMBER := 5;
     lv_is_member CHAR := 'Y';
 BEGIN
