@@ -1,33 +1,22 @@
 -- Assignment 2-1: Using Scalar Variables
--- Create a PL/SQL block containing the following variables:
--- Name Data Type Option Initial Value
--- lv_test_date DATE December 10, 2012
--- lv_test_num NUMBER(3) CONSTANT 10
--- lv_test_txt VARCHAR2(10)
--- Assign your last name as the value of the text variable in the executable section of the
--- block. Include statements in the block to display each variable’s value onscreen.
+-- Create a PL/SQL block containing the following variables: Name Data Type Option Initial Value lv_test_date DATE December 10, 2012 lv_test_num NUMBER(3) CONSTANT 10 lv_test_txt VARCHAR2(10) Assign your last name as the value of the text variable in the executable section of the block. Include statements in the block to display each variable’s value onscreen.
 DECLARE
-    LV_TEST_DATE DATE := '10-DEC-2012';
-    LV_TEST_NUM  NUMBER(3) := 10;
-    LV_TEST_TXT  VARCHAR2(10);
+  lv_test_date DATE := TO_DATE('10-DEC-2012', 'DD-MON-YYYY');
+  lv_test_num CONSTANT NUMBER(3) := 10;
+  lv_test_txt VARCHAR2(10);
 BEGIN
-    LV_TEST_TXT := '???????';
-    DBMS_OUTPUT.PUT_LINE(LV_TEST_DATE);
-    DBMS_OUTPUT.PUT_LINE(LV_TEST_NUM);
-    DBMS_OUTPUT.PUT_LINE(LV_TEST_TXT);
+  lv_test_txt := 'Copilot'; -- Assigning the last name
+  DBMS_OUTPUT.PUT_LINE('Date: ' || TO_CHAR(lv_test_date, 'DD-MON-YYYY'));
+  DBMS_OUTPUT.PUT_LINE('Number: ' || lv_test_num);
+  DBMS_OUTPUT.PUT_LINE('Text: ' || lv_test_txt);
 END;
+/
 
--- Assignment 2-2: Creating a Flowchart
--- The Brewbean’s application needs a block that determines whether a customer is rated high,
--- mid, or low based on his or her total purchases. The block needs to determine the rating and
--- then display the results onscreen. The code rates the customer high if total purchases are
--- greater than $200, mid if greater than $100, and low if $100 or lower. Develop a flowchart to
--- outline the conditional processing steps needed for this block.
+-- Assignment 2-2: Creating a Flowchart 
+-- The Brewbean’s application needs a block that determines whether a customer is rated high, mid, or low based on his or her total purchases. The block needs to determine the rating and then display the results onscreen. The code rates the customer high if total purchases are greater than $200, mid if greater than $100, and low if $100 or lower. Develop a flowchart to outline the conditional processing steps needed for this block.
 
--- Assignment 2-3: Using IF Statements
--- Create a block using an IF statement to perform the actions described in Assignment 2-2. Use
--- a scalar variable for the total purchase amount, and initialize this variable to different values to
--- test your block.
+-- Assignment 2-3: Using IF Statements 
+-- Create a block using an IF statement to perform the actions described in Assignment 2-2. Use a scalar variable for the total purchase amount, and initialize this variable to different values to test your block.
 DECLARE
     LV_TOTAL_NUM NUMBER(6, 2) := 150;
 BEGIN
