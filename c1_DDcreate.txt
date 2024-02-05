@@ -1,3 +1,5 @@
+alter session set nls_date_format='DD-MON-YYYY';
+
 DROP TABLE dd_donor CASCADE CONSTRAINTS;
 DROP TABLE dd_project CASCADE CONSTRAINTS;
 DROP TABLE dd_status CASCADE CONSTRAINTS;
