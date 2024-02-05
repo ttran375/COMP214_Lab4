@@ -317,22 +317,23 @@ END;
 -- Create a block to accomplish the task outlined in Assignment 2-7. Include a variable containing
 -- a Y or N to indicate membership status and a variable to represent the number of items
 -- purchased. Test with a variety of values.
-CREATE OR REPLACE PROCEDURE calculate_shipping_cost(
-    p_quantity_of_items IN NUMBER,
-    p_is_member IN CHAR
-) AS
+DECLARE
     -- Declare shipping cost variables
     nonmember_cost NUMBER := 0.0;
     member_cost NUMBER := 0.0;
+
+    -- Input parameters
+    v_quantity_of_items NUMBER := 5;
+    v_is_member CHAR := 'Y';
 BEGIN
     -- Set shipping costs based on quantity of items
-    IF p_quantity_of_items <= 3 THEN
+    IF v_quantity_of_items <= 3 THEN
         nonmember_cost := 5.00;
         member_cost := 3.00;
-    ELSIF p_quantity_of_items <= 6 THEN
+    ELSIF v_quantity_of_items <= 6 THEN
         nonmember_cost := 7.50;
         member_cost := 5.00;
-    ELSIF p_quantity_of_items <= 10 THEN
+    ELSIF v_quantity_of_items <= 10 THEN
         nonmember_cost := 10.00;
         member_cost := 7.00;
     ELSE
@@ -341,22 +342,13 @@ BEGIN
     END IF;
 
     -- Display shipping cost based on membership status
-    IF UPPER(p_is_member) = 'Y' THEN
+    IF UPPER(v_is_member) = 'Y' THEN
         DBMS_OUTPUT.PUT_LINE('Member Shipping Cost: $' || TO_CHAR(member_cost, '999.99'));
     ELSE
         DBMS_OUTPUT.PUT_LINE('Nonmember Shipping Cost: $' || TO_CHAR(nonmember_cost, '999.99'));
     END IF;
-END calculate_shipping_cost;
-/
-
-DECLARE
-    v_quantity_of_items NUMBER := 5;
-    v_is_member CHAR := 'Y';
-BEGIN
-    calculate_shipping_cost(v_quantity_of_items, v_is_member);
 END;
 /
-
 
 -- Assignment 2-9: Using a FOR Loop
 -- Create a PL/SQL block using a FOR loop to generate a payment schedule for a donor’s pledge,
@@ -482,8 +474,8 @@ END;
 -- the payment plan codes 0 = 25%, 1 = 50%, 2 = 100%, and other = 0. Display the
 -- calculated amount.
 DECLARE
-    v_payment_plan_code NUMBER := &input_payment_plan_code; -- Input: Payment plan code
-    v_payment_amount NUMBER := &input_payment_amount; -- Input: Payment amount
+    v_payment_plan_code NUMBER := '&input_payment_plan_code'; -- Input: Payment plan code
+    v_payment_amount NUMBER := '&input_payment_amount'; -- Input: Payment amount
     v_matching_amount NUMBER; -- Calculated matching amount
 
 BEGIN
@@ -533,3 +525,45 @@ END;
 -- Create a flowchart and then a PL/SQL block to address the processing needed. The block
 -- should determine and then display the correct rental rating. Test the block, using a variety of
 -- rental amounts.
+DECLARE
+    v_donor_type CHAR(1) := '&input_donor_type'; -- Input: Donor type code
+    v_pledge_amount NUMBER := '&input_pledge_amount'; -- Input: Pledge amount
+    v_matching_percentage NUMBER; -- Calculated matching percentage
+
+BEGIN
+    -- Nested IF statements to determine matching percentage based on donor type and pledge amount
+    IF v_donor_type = 'I' THEN
+        IF v_pledge_amount >= 100 AND v_pledge_amount <= 249 THEN
+            v_matching_percentage := 0.50; -- Individual donor with $100-$249 pledge
+        ELSIF v_pledge_amount >= 250 AND v_pledge_amount <= 499 THEN
+            v_matching_percentage := 0.30; -- Individual donor with $250-$499 pledge
+        ELSIF v_pledge_amount >= 500 THEN
+            v_matching_percentage := 0.20; -- Individual donor with $500 or more pledge
+        ELSE
+            v_matching_percentage := 0; -- Default for other cases
+        END IF;
+    ELSIF v_donor_type = 'B' THEN
+        IF v_pledge_amount >= 100 AND v_pledge_amount <= 499 THEN
+            v_matching_percentage := 0.20; -- Business donor with $100-$499 pledge
+        ELSIF v_pledge_amount >= 500 AND v_pledge_amount <= 999 THEN
+            v_matching_percentage := 0.10; -- Business donor with $500-$999 pledge
+        ELSIF v_pledge_amount >= 1000 THEN
+            v_matching_percentage := 0.05; -- Business donor with $1,000 or more pledge
+        ELSE
+            v_matching_percentage := 0; -- Default for other cases
+        END IF;
+    ELSIF v_donor_type = 'G' THEN
+        IF v_pledge_amount >= 100 THEN
+            v_matching_percentage := 0.05; -- Grant donor with $100 or more pledge
+        ELSE
+            v_matching_percentage := 0; -- Default for other cases
+        END IF;
+    ELSE
+        v_matching_percentage := 0; -- Default for unknown donor types
+    END IF;
+
+    -- Display calculated matching percentage
+    DBMS_OUTPUT.PUT_LINE('Calculated Matching Percentage: ' || TO_CHAR(v_matching_percentage * 100) || '%');
+
+END;
+/
