@@ -151,6 +151,8 @@ BEGIN
     vAmountDue := FALSE; -- Set to FALSE if account is paid in full
   END IF;
 
+  DBMS_OUTPUT.PUT_LINE('Account Balance: ' || vAccountBalance);
+  DBMS_OUTPUT.PUT_LINE('Payment Received: ' || vPaymentReceived);
   -- Output statements to confirm the Boolean variable
   IF vAmountDue THEN
     DBMS_OUTPUT.PUT_LINE('Amount is still due on the account.');
@@ -176,6 +178,8 @@ BEGIN
   END LOOP;
 
   -- Display the results
+  DBMS_OUTPUT.PUT_LINE('Item Price: ' || vItemPrice);
+  DBMS_OUTPUT.PUT_LINE('Total Available: ' || vTotalAvailable);
   DBMS_OUTPUT.PUT_LINE('Total items purchased: ' || vItemsPurchased);
   DBMS_OUTPUT.PUT_LINE('Total amount spent: ' || (vItemsPurchased * vItemPrice));
 END;
