@@ -183,14 +183,15 @@ END;
 
 
 -- Assignment 2-7: Creating a Flowchart
--- Brewbean’s determines shipping costs based on the number of items ordered and club
--- membership status. The applicable rates are shown in the following chart. Develop a flowchart
--- to outline the condition-processing steps needed to handle this calculation.
--- Quantity of Items Nonmember Shipping Cost Member Shipping Cost
--- Up to 3 $5.00 $3.00
--- 4–6 $7.50 $5.00
--- 7–10 $10.00 $7.00
--- More than 10 $12.00 $9.00
+-- Brewbean’s determines shipping costs based on the number of items ordered and club membership status. The applicable rates are shown in the following chart. Develop a flowchart to outline the condition-processing steps needed to handle this calculation.
+-- |---------------------------------------------------------------|
+-- | Quantity of Items Nonmember Shipping Cost Member Shipping Cost|
+-- |---------------------------------------------------------------|
+-- | Up to 3 $5.00 $3.00                                           |
+-- | 4–6 $7.50 $5.00                                               |
+-- | 7–10 $10.00 $7.00                                             |
+-- | More than 10 $12.00 $9.00                                     |
+-- |---------------------------------------------------------------|
 -- Brewbean's Shipping Cost Calculation Flowchart
 -- Start
 -- |
