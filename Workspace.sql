@@ -402,8 +402,9 @@ DECLARE
     v_start_date DATE := TO_DATE('2024-01-01', 'YYYY-MM-DD'); -- Starting payment due date
     v_monthly_payment NUMBER := 1000; -- Monthly payment amount
     v_total_payments NUMBER := 12; -- Total number of monthly payments
-    v_payment_number NUMBER := 1; -- Initial payment number
+
     v_balance NUMBER := v_monthly_payment * v_total_payments; -- Initial balance
+    payment_number NUMBER := 1; -- Initialize payment number
 
 BEGIN
     -- Display header
@@ -411,33 +412,66 @@ BEGIN
 
     -- Generate payment schedule using basic loop
     LOOP
-        -- Exit the loop when all payments are processed
-        EXIT WHEN v_payment_number > v_total_payments;
+        EXIT WHEN payment_number > v_total_payments;
 
         -- Calculate next due date
-        v_start_date := v_start_date + 30; -- Assuming 30 days in a month
+        v_start_date := ADD_MONTHS(TO_DATE('2024-01-01', 'YYYY-MM-DD'), payment_number - 1);
 
         -- Display payment details
         DBMS_OUTPUT.PUT_LINE(
-            RPAD(v_payment_number, 9) ||
+            RPAD(payment_number, 9) ||
             ' | ' || TO_CHAR(v_start_date, 'YYYY-MM-DD') ||
-            ' | ' || RPAD(v_monthly_payment, 15) ||
-            ' | ' || RPAD(v_balance, 18)
+            ' | ' || v_monthly_payment ||
+            ' | ' || v_balance
         );
 
-        -- Update remaining balance and increment payment number
+        -- Update remaining balance
         v_balance := v_balance - v_monthly_payment;
-        v_payment_number := v_payment_number + 1;
+
+        -- Increment payment number
+        payment_number := payment_number + 1;
     END LOOP;
 END;
 /
-
 
 -- Assignment 2-11: Using a WHILE Loop
 -- Accomplish the task in Assignment 2-9 by using a WHILE loop structure. Instead of displaying
 -- the donation balance (remaining amount of pledge owed) on each line of output, display the
 -- total paid to date.
+DECLARE
+    v_start_date DATE := TO_DATE('2024-01-01', 'YYYY-MM-DD'); -- Starting payment due date
+    v_monthly_payment NUMBER := 1000; -- Monthly payment amount
+    v_total_payments NUMBER := 12; -- Total number of monthly payments
 
+    v_balance NUMBER := v_monthly_payment * v_total_payments; -- Initial balance
+    v_total_paid NUMBER := 0; -- Initialize total paid to date
+    payment_number NUMBER := 1; -- Initialize payment number
+
+BEGIN
+    -- Display header
+    DBMS_OUTPUT.PUT_LINE('Payment# | Due Date   | Payment Amount | Total Paid to Date');
+
+    -- Generate payment schedule using WHILE loop
+    WHILE payment_number <= v_total_payments LOOP
+        -- Calculate next due date
+        v_start_date := ADD_MONTHS(TO_DATE('2024-01-01', 'YYYY-MM-DD'), payment_number - 1);
+
+        -- Display payment details
+        DBMS_OUTPUT.PUT_LINE(
+            RPAD(payment_number, 9) ||
+            ' | ' || TO_CHAR(v_start_date, 'YYYY-MM-DD') ||
+            ' | ' || v_monthly_payment ||
+            ' | ' || v_total_paid
+        );
+
+        -- Update total paid to date
+        v_total_paid := v_total_paid + v_monthly_payment;
+
+        -- Increment payment number
+        payment_number := payment_number + 1;
+    END LOOP;
+END;
+/
 
 -- Assignment 2-12: Using a CASE Expression
 -- Donors can select one of three payment plans for a pledge indicated by the following codes:
@@ -447,6 +481,26 @@ END;
 -- and a payment amount. Use a CASE expression to calculate the matching amount, based on
 -- the payment plan codes 0 = 25%, 1 = 50%, 2 = 100%, and other = 0. Display the
 -- calculated amount.
+DECLARE
+    v_payment_plan_code NUMBER := &input_payment_plan_code; -- Input: Payment plan code
+    v_payment_amount NUMBER := &input_payment_amount; -- Input: Payment amount
+    v_matching_amount NUMBER; -- Calculated matching amount
+
+BEGIN
+    -- Calculate matching amount using CASE expression
+    v_matching_amount := 
+        CASE v_payment_plan_code
+            WHEN 0 THEN v_payment_amount * 0.25 -- 25% matching for one-time payment
+            WHEN 1 THEN v_payment_amount * 0.50 -- 50% matching for monthly payments over one year
+            WHEN 2 THEN v_payment_amount * 1.00 -- 100% matching for monthly payments over two years
+            ELSE 0 -- No matching for other payment plan codes
+        END;
+
+    -- Display calculated matching amount
+    DBMS_OUTPUT.PUT_LINE('Calculated Matching Amount: ' || v_matching_amount);
+
+END;
+/
 
 
 -- Assignment 2-13: Using Nested IF Statements
