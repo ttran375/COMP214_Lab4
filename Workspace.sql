@@ -340,11 +340,14 @@ BEGIN
         member_cost := 9.00;
     END IF;
 
+    DBMS_OUTPUT.PUT_LINE('Quantity of Items: ' || v_quantity_of_items);
+    DBMS_OUTPUT.PUT_LINE('Is Member: ' || v_is_member);
+
     -- Display shipping cost based on membership status
     IF UPPER(v_is_member) = 'Y' THEN
-        DBMS_OUTPUT.PUT_LINE('Member Shipping Cost: $' || TO_CHAR(member_cost, '999.99'));
+        DBMS_OUTPUT.PUT_LINE('Member Shipping Cost: $' || TO_CHAR(member_cost, '99.99'));
     ELSE
-        DBMS_OUTPUT.PUT_LINE('Nonmember Shipping Cost: $' || TO_CHAR(nonmember_cost, '999.99'));
+        DBMS_OUTPUT.PUT_LINE('Nonmember Shipping Cost: $' || TO_CHAR(nonmember_cost, '99.99'));
     END IF;
 END;
 /
