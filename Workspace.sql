@@ -460,8 +460,8 @@ END;
 -- Assignment 2-12: Using a CASE Expression
 -- Donors can select one of three payment plans for a pledge indicated by the following codes: 0 = one-time (lump sum) payment, 1 = monthly payments over one year, and 2 = monthly payments over two years. A local business has agreed to pay matching amounts on pledge payments during the current month. A PL/SQL block is needed to identify the matching amount for a pledge payment. Create a block using input values of a payment plan code and a payment amount. Use a CASE expression to calculate the matching amount, based on the payment plan codes 0 = 25%, 1 = 50%, 2 = 100%, and other = 0. Display the calculated amount.
 DECLARE
-    v_payment_plan_code NUMBER := '&input_payment_plan_code'; -- Input: Payment plan code
-    v_payment_amount NUMBER := '&input_payment_amount'; -- Input: Payment amount
+    v_payment_plan_code NUMBER := 1; -- Input: Payment plan code
+    v_payment_amount NUMBER := 1000; -- Input: Payment amount
     v_matching_amount NUMBER; -- Calculated matching amount
 
 BEGIN
@@ -495,6 +495,53 @@ END;
 -- |G          |$100 or more   |5%        |
 -- |--------------------------------------|
 -- Create a PL/SQL block using nested IF statements to accomplish the task. Input values for the block are the donor type code and the pledge amount.
+DECLARE
+    v_donor_type CHAR(1) := 'I'; -- Replace with the actual donor type code ('I', 'B', or 'G')
+    v_pledge_amount NUMBER := 300; -- Replace with the actual pledge amount
+
+    v_matching_percent NUMBER;
+    v_matching_amount NUMBER;
+
+BEGIN
+    IF v_donor_type = 'I' THEN
+        IF v_pledge_amount >= 100 AND v_pledge_amount <= 249 THEN
+            v_matching_percent := 0.5;
+        ELSIF v_pledge_amount >= 250 AND v_pledge_amount <= 499 THEN
+            v_matching_percent := 0.3;
+        ELSE
+            v_matching_percent := 0.2;
+        END IF;
+
+    ELSIF v_donor_type = 'B' THEN
+        IF v_pledge_amount >= 100 AND v_pledge_amount <= 499 THEN
+            v_matching_percent := 0.2;
+        ELSIF v_pledge_amount >= 500 AND v_pledge_amount <= 999 THEN
+            v_matching_percent := 0.1;
+        ELSE
+            v_matching_percent := 0.05;
+        END IF;
+
+    ELSIF v_donor_type = 'G' THEN
+        IF v_pledge_amount >= 100 THEN
+            v_matching_percent := 0.05;
+        END IF;
+
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Invalid donor type');
+        RETURN;
+    END IF;
+
+    v_matching_amount := v_pledge_amount * v_matching_percent;
+
+    DBMS_OUTPUT.PUT_LINE('Donor Type: ' || v_donor_type);
+    DBMS_OUTPUT.PUT_LINE('Pledge Amount: $' || v_pledge_amount);
+    DBMS_OUTPUT.PUT_LINE('Matching Percentage: ' || TO_CHAR(v_matching_percent*100) || '%');
+    DBMS_OUTPUT.PUT_LINE('Matching Amount: $' || v_matching_amount);
+
+END;
+/
+
+
 -- Case Projects
 -- Case 2-1: Flowcharting
 -- Find a Web site with basic information on flowcharting. Describe at least two interesting aspects
