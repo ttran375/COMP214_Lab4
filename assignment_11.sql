@@ -9,7 +9,6 @@ DECLARE
     lv_payment_number NUMBER := 1;
 BEGIN
     DBMS_OUTPUT.PUT_LINE('Payment# | Due Date   | Payment Amount | Total Paid to Date');
-
     WHILE lv_payment_number <= lv_total_payments LOOP
         lv_total_paid := lv_total_paid + lv_monthly_payment;
         lv_start_date := ADD_MONTHS(TO_DATE('2024-01-01', 'YYYY-MM-DD'), lv_payment_number - 1);

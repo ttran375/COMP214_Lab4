@@ -10,14 +10,12 @@ BEGIN
 
     LOOP
         EXIT WHEN lv_total_payments = 0;
-
         DBMS_OUTPUT.PUT_LINE(
             RPAD(lv_total_payments, 9) ||
             ' | ' || TO_CHAR(lv_start_date, 'YYYY-MM-DD') ||
             ' | ' || lv_monthly_payment ||
             ' | ' || lv_balance
         );
-
         lv_start_date := ADD_MONTHS(lv_start_date, 1);
         lv_balance := lv_balance - lv_monthly_payment;
         lv_total_payments := lv_total_payments - 1;
