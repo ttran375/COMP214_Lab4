@@ -474,8 +474,11 @@ BEGIN
             ELSE 0 -- No matching for other payment plan codes
         END;
 
-    -- Display calculated matching amount
+    DBMS_OUTPUT.PUT_LINE('Payment Plan Code: ' || v_payment_plan_code);
+    DBMS_OUTPUT.PUT_LINE('Payment Amount: ' || v_payment_amount);
     DBMS_OUTPUT.PUT_LINE('Calculated Matching Amount: ' || v_matching_amount);
+    
+    
 
 END;
 /
