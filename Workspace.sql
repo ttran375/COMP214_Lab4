@@ -13,6 +13,41 @@ END;
 /
 
 -- Assignment 2-2: Creating a Flowchart The Brewbean’s application needs a block that determines whether a customer is rated high, mid, or low based on his or her total purchases. The block needs to determine the rating and then display the results onscreen. The code rates the customer high if total purchases are greater than $200, mid if greater than $100, and low if $100 or lower. Develop a flowchart to outline the conditional processing steps needed for this block.
+--   +----------------------+
+--   |   Start of Flowchart  |
+--   +----------------------+
+--               |
+--               v
+--   +----------------------+
+--   |  Enter Total         |
+--   |  Purchases           |
+--   +----------------------+
+--               |
+--               v
+--   +----------------------+
+--   | Total Purchases >    |
+--   | $200?                |
+--   +----------|-----------+
+--              |
+--              v
+--   +----------------------+
+--   |   Customer Rated     |
+--   |   High               |
+--   +----------------------+
+--              |
+--              |
+--              v
+--   +----------------------+
+--   |   Display "High      |
+--   |   Rating"            |
+--   +----------------------+
+--              |
+--              |
+--              v
+--   +----------------------+
+--   |   End of Flowchart    |
+--   +----------------------+
+
 
 -- Assignment 2-3: Using IF Statements 
 -- Create a block using an IF statement to perform the actions described in Assignment 2-2. Use a scalar variable for the total purchase amount, and initialize this variable to different values to test your block.
