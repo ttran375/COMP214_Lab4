@@ -5,7 +5,7 @@ DECLARE
     lv_test_num CONSTANT NUMBER(3) := 10;
     lv_test_txt VARCHAR2(10);
 BEGIN
-    lv_test_txt := 'Copilot'; -- Assigning the last name
+    lv_test_txt := 'Copilot';
     DBMS_OUTPUT.PUT_LINE('Date: ' || TO_CHAR(lv_test_date, 'DD-MON-YYYY'));
     DBMS_OUTPUT.PUT_LINE('Number: ' || lv_test_num);
     DBMS_OUTPUT.PUT_LINE('Text: ' || lv_test_txt);
