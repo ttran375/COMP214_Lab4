@@ -138,12 +138,7 @@ END;
 /
 
 -- Assignment 2-5: Using a Boolean Variable
--- Brewbean’s needs program code to indicate whether an amount is still due on an account when
--- a payment is received. Create a PL/SQL block using a Boolean variable to indicate whether an
--- amount is still due. Declare and initialize two variables to provide input for the account balance
--- and the payment amount received. A TRUE Boolean value should indicate an amount is still
--- owed, and a FALSE value should indicate the account is paid in full. Use output statements to
--- confirm that the Boolean variable is working correctly.
+-- Brewbean’s needs program code to indicate whether an amount is still due on an account when a payment is received. Create a PL/SQL block using a Boolean variable to indicate whether an amount is still due. Declare and initialize two variables to provide input for the account balance and the payment amount received. A TRUE Boolean value should indicate an amount is still owed, and a FALSE value should indicate the account is paid in full. Use output statements to confirm that the Boolean variable is working correctly.
 DECLARE
   vAccountBalance NUMBER := 1000; -- Initialize with the account balance
   vPaymentReceived NUMBER := 500; -- Initialize with the payment amount received
@@ -167,11 +162,7 @@ END;
 
 
 -- Assignment 2-6: Using Looping Statements
--- Create a block using a loop that determines the number of items that can be purchased based
--- on the item prices and the total available to spend. Include one initialized variable to represent
--- the price and another to represent the total available to spend. (You could solve it with division,
--- but you need to practice using loop structures.) The block should include statements to display
--- the total number of items that can be purchased and the total amount spent.
+-- Create a block using a loop that determines the number of items that can be purchased based on the item prices and the total available to spend. Include one initialized variable to represent the price and another to represent the total available to spend. (You could solve it with division, but you need to practice using loop structures.) The block should include statements to display the total number of items that can be purchased and the total amount spent.
 DECLARE
   vItemPrice NUMBER := 50; -- Initialize with the price of one item
   vTotalAvailable NUMBER := 300; -- Initialize with the total amount available to spend
