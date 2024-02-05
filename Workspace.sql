@@ -371,16 +371,18 @@ BEGIN
 
     -- Generate payment schedule using FOR loop
     FOR payment_number IN 1..v_total_payments LOOP
-        -- Calculate next due date
-        v_start_date := ADD_MONTHS(v_start_date, payment_number - 1);
 
-        -- Display payment details
+    -- Display payment details
         DBMS_OUTPUT.PUT_LINE(
             RPAD(payment_number, 9) ||
             ' | ' || TO_CHAR(v_start_date, 'YYYY-MM-DD') ||
             ' | ' || v_monthly_payment ||
             ' | ' || v_balance
         );
+        -- Calculate next due date
+        v_start_date := ADD_MONTHS(v_start_date, 1);
+
+        
 
         -- Update remaining balance
         v_balance := v_balance - v_monthly_payment;
