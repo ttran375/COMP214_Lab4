@@ -555,59 +555,39 @@ END;
 
 -- Case Projects
 -- Case 2-1: Flowcharting
--- Find a Web site with basic information on flowcharting. Describe at least two interesting aspects
--- of flowcharting discussed on the Web site.
+-- Find a Web site with basic information on flowcharting. Describe at least two interesting aspects of flowcharting discussed on the Web site.
+-- 1. Flowcharting is a visual representation of a process or algorithm, using different shapes and symbols to represent different steps and decisions in the process.
+-- 2. Flowcharting is a useful tool for planning and documenting processes, as well as for communicating complex processes to others in a clear and understandable manner.
+
 -- Case 2-2: Working with More Movie Rentals
--- The More Movie Rentals Company wants to display a rating value for a movie based on the
--- number of times the movie has been rented. The rating assignments are outlined in the
--- following chart:
--- Number of Rentals Rental Rating
--- Up to 5 Dump
--- 5–20 Low
--- 21–35 Mid
--- More than 35 High
--- Create a flowchart and then a PL/SQL block to address the processing needed. The block
--- should determine and then display the correct rental rating. Test the block, using a variety of
--- rental amounts.
+-- The More Movie Rentals Company wants to display a rating value for a movie based on the number of times the movie has been rented. The rating assignments are outlined in the following chart:
+-- |------------------|--------------|
+-- |Number of Rentals |Rental Rating |
+-- |------------------|--------------|
+-- |Up to 5           |Dump          |
+-- |5–20              |Low           |
+-- |21–35             |Mid           |
+-- |More than 35      |High          |
+-- |------------------|--------------|
+-- Create a flowchart and then a PL/SQL block to address the processing needed. The block should determine and then display the correct rental rating. Test the block, using a variety of rental amounts.
 DECLARE
-    v_donor_type CHAR(1) := 'I'; -- Replace with the actual donor type code ('I', 'B', or 'G')
-    v_pledge_amount NUMBER := 300; -- Replace with the actual pledge amount
-    v_matching_percentage NUMBER; -- Calculated matching percentage
+    v_number_of_rentals NUMBER := 25; -- Replace with the actual number of rentals
+
+    v_rental_rating VARCHAR2(10);
 
 BEGIN
-    -- Nested IF statements to determine matching percentage based on donor type and pledge amount
-    IF v_donor_type = 'I' THEN
-        IF v_pledge_amount >= 100 AND v_pledge_amount <= 249 THEN
-            v_matching_percentage := 0.50; -- Individual donor with $100-$249 pledge
-        ELSIF v_pledge_amount >= 250 AND v_pledge_amount <= 499 THEN
-            v_matching_percentage := 0.30; -- Individual donor with $250-$499 pledge
-        ELSIF v_pledge_amount >= 500 THEN
-            v_matching_percentage := 0.20; -- Individual donor with $500 or more pledge
-        ELSE
-            v_matching_percentage := 0; -- Default for other cases
-        END IF;
-    ELSIF v_donor_type = 'B' THEN
-        IF v_pledge_amount >= 100 AND v_pledge_amount <= 499 THEN
-            v_matching_percentage := 0.20; -- Business donor with $100-$499 pledge
-        ELSIF v_pledge_amount >= 500 AND v_pledge_amount <= 999 THEN
-            v_matching_percentage := 0.10; -- Business donor with $500-$999 pledge
-        ELSIF v_pledge_amount >= 1000 THEN
-            v_matching_percentage := 0.05; -- Business donor with $1,000 or more pledge
-        ELSE
-            v_matching_percentage := 0; -- Default for other cases
-        END IF;
-    ELSIF v_donor_type = 'G' THEN
-        IF v_pledge_amount >= 100 THEN
-            v_matching_percentage := 0.05; -- Grant donor with $100 or more pledge
-        ELSE
-            v_matching_percentage := 0; -- Default for other cases
-        END IF;
+    IF v_number_of_rentals <= 5 THEN
+        v_rental_rating := 'Dump';
+    ELSIF v_number_of_rentals <= 20 THEN
+        v_rental_rating := 'Low';
+    ELSIF v_number_of_rentals <= 35 THEN
+        v_rental_rating := 'Mid';
     ELSE
-        v_matching_percentage := 0; -- Default for unknown donor types
+        v_rental_rating := 'High';
     END IF;
 
-    -- Display calculated matching percentage
-    DBMS_OUTPUT.PUT_LINE('Calculated Matching Percentage: ' || TO_CHAR(v_matching_percentage * 100) || '%');
+    DBMS_OUTPUT.PUT_LINE('Number of Rentals: ' || v_number_of_rentals);
+    DBMS_OUTPUT.PUT_LINE('Rental Rating: ' || v_rental_rating);
 
 END;
 /
