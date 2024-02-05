@@ -1,14 +1,17 @@
 -- Assignment 2-1: Using Scalar Variables
 -- Create a PL/SQL block containing the following variables: Name Data Type Option Initial Value lv_test_date DATE December 10, 2012 lv_test_num NUMBER(3) CONSTANT 10 lv_test_txt VARCHAR2(10) Assign your last name as the value of the text variable in the executable section of the block. Include statements in the block to display each variable’s value onscreen.
 DECLARE
-  lv_test_date DATE := TO_DATE('10-DEC-2012', 'DD-MON-YYYY');
-  lv_test_num CONSTANT NUMBER(3) := 10;
-  lv_test_txt VARCHAR2(10);
+    LV_TEST_DATE DATE := TO_DATE('10-DEC-2012', 'DD-MON-YYYY');
+    LV_TEST_NUM  CONSTANT NUMBER(3) := 10;
+    LV_TEST_TXT  VARCHAR2(10);
 BEGIN
-  lv_test_txt := 'Copilot'; -- Assigning the last name
-  DBMS_OUTPUT.PUT_LINE('Date: ' || TO_CHAR(lv_test_date, 'DD-MON-YYYY'));
-  DBMS_OUTPUT.PUT_LINE('Number: ' || lv_test_num);
-  DBMS_OUTPUT.PUT_LINE('Text: ' || lv_test_txt);
+    LV_TEST_TXT := 'Copilot'; -- Assigning the last name
+    DBMS_OUTPUT.PUT_LINE('Date: '
+                         || TO_CHAR(LV_TEST_DATE, 'DD-MON-YYYY'));
+    DBMS_OUTPUT.PUT_LINE('Number: '
+                         || LV_TEST_NUM);
+    DBMS_OUTPUT.PUT_LINE('Text: '
+                         || LV_TEST_TXT);
 END;
 /
 
@@ -49,19 +52,37 @@ END;
 --   +----------------------+
 
 
--- Assignment 2-3: Using IF Statements 
+-- Assignment 2-3: Using IF Statements
 -- Create a block using an IF statement to perform the actions described in Assignment 2-2. Use a scalar variable for the total purchase amount, and initialize this variable to different values to test your block.
 DECLARE
-    LV_TOTAL_NUM NUMBER(6, 2) := 150;
+    TOTAL_PURCHASES NUMBER := 150; -- Initialize total purchases to test the block
+    HIGH_LIMIT      NUMBER := 200;
+    MID_LIMIT       NUMBER := 100;
 BEGIN
-    IF LV_TOTAL_NUM > 200 THEN
-        DBMS_OUTPUT.PUT_LINE('HIGH');
-    ELSIF LV_TOTAL_NUM > 100 THEN
-        DBMS_OUTPUT.PUT_LINE('MID');
+ -- Enter Total Purchases
+    DBMS_OUTPUT.PUT_LINE('Enter Total Purchases: '
+                         || TOTAL_PURCHASES);
+ -- Check the rating based on total purchases
+    IF TOTAL_PURCHASES > HIGH_LIMIT THEN
+ -- Customer Rated High
+        DBMS_OUTPUT.PUT_LINE('Customer Rated High');
+ -- Display "High Rating"
+        DBMS_OUTPUT.PUT_LINE('Display "High Rating"');
+    ELSIF TOTAL_PURCHASES > MID_LIMIT THEN
+ -- Customer Rated Mid
+        DBMS_OUTPUT.PUT_LINE('Customer Rated Mid');
+ -- Display "Mid Rating"
+        DBMS_OUTPUT.PUT_LINE('Display "Mid Rating"');
     ELSE
-        DBMS_OUTPUT.PUT_LINE('LOW');
+ -- Customer Rated Low
+        DBMS_OUTPUT.PUT_LINE('Customer Rated Low');
+ -- Display "Low Rating"
+        DBMS_OUTPUT.PUT_LINE('Display "Low Rating"');
     END IF;
+ -- End of Flowchart
+    DBMS_OUTPUT.PUT_LINE('End of Flowchart');
 END;
+/
 
 -- Assignment 2-4: Using CASE Statements
 -- Create a block using a CASE statement to perform the actions described in Assignment 2-2. Use
