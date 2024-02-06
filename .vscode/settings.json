@@ -1,4 +1,10 @@
 {
+  "editor.formatOnSave": true,
+  "editor.tabSize": 4,
+  "editor.indentSize": 4,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "files.insertFinalNewline": true,
   "gitdoc.enabled": true,
   "git.autofetch": true,
   "gitdoc.autoCommitDelay": 60000,
@@ -7,7 +13,9 @@
     80,
     120
   ],
-  "editor.formatOnSave": true,
   "gitdoc.commitOnClose": true,
-  "files.insertFinalNewline": true
+  "oracledevtools.formatterSettings": {
+    "keywordCasing": "Uppercase",
+    "identifierCasing": "Titlecase"
+  }
 }
