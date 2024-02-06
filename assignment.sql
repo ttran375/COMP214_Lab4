@@ -144,6 +144,26 @@ GROUP BY
 -- AND orderplaced = 1
 -- GROUP BY idshopper;
 -- 5. Test other shoppers who have a completed order.
+DECLARE
+  lv_total_num NUMBER(6,2);
+  lv_rating_txt VARCHAR2(4);
+  lv_shop_num bb_basket.idshopper%TYPE := 22;
+BEGIN
+  SELECT SUM(total) INTO lv_total_num
+  FROM bb_basket
+  WHERE idShopper = lv_shop_num
+    AND orderplaced = 1
+  GROUP BY idshopper;
+
+  lv_rating_txt := 
+    CASE 
+      WHEN lv_total_num > 200 THEN 'HIGH'
+      WHEN lv_total_num > 100 THEN 'MID'
+      ELSE 'LOW'
+    END;
+
+  DBMS_OUTPUT.PUT_LINE('Shopper '||lv_shop_num||' is rated '||lv_rating_txt);
+END;
 
 -- Assignment 3-5: Using a WHILE Loop
 -- Brewbean’s wants to include a feature in its application that calculates the total amount (quantity)
