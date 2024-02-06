@@ -171,6 +171,23 @@ END;
 -- WHILE loop to increment the item’s cost until the dollar value is met. Test first with a total spending
 -- amount of $100 and product ID 4. Then test with an amount and a product of your choice. Use
 -- initialized variables to provide the total spending amount and product ID.
+DECLARE
+  lv_total_spend NUMBER(6,2) := 100; -- total spending amount
+  lv_prod_id bb_product.idproduct%TYPE := 4; -- product ID
+  lv_prod_price NUMBER(6,2);
+  lv_quantity NUMBER(6,2) := 0;
+BEGIN
+  SELECT price INTO lv_prod_price
+  FROM bb_product
+  WHERE idproduct = lv_prod_id;
+
+  WHILE lv_total_spend >= lv_prod_price LOOP
+    lv_total_spend := lv_total_spend - lv_prod_price;
+    lv_quantity := lv_quantity + 1;
+  END LOOP;
+
+  DBMS_OUTPUT.PUT_LINE('With $100, you can buy '||lv_quantity||' units of product ID '||lv_prod_id);
+END;
 
 -- Assignment 3-6: Working with IF Statements
 -- Brewbean’s calculates shipping cost based on the quantity of items in an order. Assume the
@@ -184,6 +201,27 @@ END;
 -- 4–6 $7.50
 -- 7–10 $10.00
 -- More than 10 $12.00
+DECLARE
+  lv_bask_id bb_basket.idbasket%TYPE := 5; -- change to 12 for the second test
+  lv_quantity NUMBER(6,2);
+  lv_shipping_cost NUMBER(6,2);
+BEGIN
+  SELECT quantity INTO lv_quantity
+  FROM bb_basket
+  WHERE idbasket = lv_bask_id;
+
+  IF lv_quantity <= 3 THEN
+    lv_shipping_cost := 5;
+  ELSIF lv_quantity <= 6 THEN
+    lv_shipping_cost := 7.5;
+  ELSIF lv_quantity <= 10 THEN
+    lv_shipping_cost := 10;
+  ELSE
+    lv_shipping_cost := 12;
+  END IF;
+
+  DBMS_OUTPUT.PUT_LINE('Shipping cost for basket ID '||lv_bask_id||' is $'||lv_shipping_cost);
+END;
 
 -- Assignment 3-7: Using Scalar Variables for Data Retrieval
 -- The Brewbean’s application contains a page displaying order summary information, including
