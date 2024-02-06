@@ -229,6 +229,32 @@ END;
 -- table. Create a PL/SQL block with scalar variables to retrieve this data and then display it
 -- onscreen. An initialized variable should provide the IDBASKET value. Test the block using the
 -- basket ID 12.
+DECLARE
+    lv_idbasket bb_basket.idbasket%TYPE := 12;
+    lv_subtotal bb_basket.subtotal%TYPE;
+    lv_shipping bb_basket.shipping%TYPE;
+    lv_tax bb_basket.tax%TYPE;
+    lv_total bb_basket.total%TYPE;
+BEGIN
+    SELECT
+        subtotal,
+        shipping,
+        tax,
+        total INTO lv_subtotal,
+        lv_shipping,
+        lv_tax,
+        lv_total
+    FROM
+        bb_basket
+    WHERE
+        idbasket = lv_idbasket;
+
+    DBMS_OUTPUT.PUT_LINE('IDBASKET: ' || lv_idbasket);
+    DBMS_OUTPUT.PUT_LINE('SUBTOTAL: ' || lv_subtotal);
+    DBMS_OUTPUT.PUT_LINE('SHIPPING: ' || lv_shipping);
+    DBMS_OUTPUT.PUT_LINE('TAX: ' || lv_tax);
+    DBMS_OUTPUT.PUT_LINE('TOTAL: ' || lv_total);
+END;
 
 -- Assignment 3-8: Using a Record Variable for Data Retrieval
 -- The Brewbean’s application contains a page displaying order summary information, including
@@ -269,7 +295,7 @@ END;
 -- display the following information for the project being modified: project name, start date,
 -- previous fundraising goal amount, and new fundraising goal amount.
 
-CASE PROJECTS
+-- CASE PROJECTS
 
 -- Case 3-1: Using Variable Types
 -- The Brewbean’s manager has just hired another programmer to help you develop application
