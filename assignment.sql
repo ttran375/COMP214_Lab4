@@ -296,6 +296,26 @@ END;
 -- Create a PL/SQL block that retrieves and displays information for a specific project based on
 -- Project ID. Display the following on a single row of output: project ID, project name, number of
 -- pledges made, total dollars pledged, and the average pledge amount.
+DECLARE
+    lv_project_id projects.project_id%TYPE := 1; -- replace with your project id
+    lv_project_name projects.project_name%TYPE;
+    lv_pledge_count NUMBER;
+    lv_total_pledged NUMBER;
+    lv_avg_pledge NUMBER;
+BEGIN
+    SELECT p.project_name, COUNT(pl.pledge_id), SUM(pl.pledge_amount), AVG(pl.pledge_amount)
+    INTO lv_project_name, lv_pledge_count, lv_total_pledged, lv_avg_pledge
+    FROM projects p
+    JOIN pledges pl ON p.project_id = pl.project_id
+    WHERE p.project_id = lv_project_id
+    GROUP BY p.project_name;
+
+    DBMS_OUTPUT.PUT_LINE('Project ID: ' || lv_project_id);
+    DBMS_OUTPUT.PUT_LINE('Project Name: ' || lv_project_name);
+    DBMS_OUTPUT.PUT_LINE('Number of Pledges: ' || lv_pledge_count);
+    DBMS_OUTPUT.PUT_LINE('Total Dollars Pledged: ' || lv_total_pledged);
+    DBMS_OUTPUT.PUT_LINE('Average Pledge Amount: ' || lv_avg_pledge);
+END;
 
 -- Assignment 3-10: Adding a Project
 -- Create a PL/SQL block to handle adding a new project. Create and use a sequence named
@@ -304,6 +324,32 @@ END;
 -- handle the data to be added. Data for the new row should be the following: project name = HK
 -- Animal Shelter Extension, start = 1/1/2013, end = 5/31/2013, and fundraising goal = $65,000.
 -- Any columns not addressed in the data list are currently unknown.
+CREATE SEQUENCE DD_PROJID_SEQ
+  START WITH 530
+  INCREMENT BY 1
+  NOCACHE;
+
+DECLARE
+  TYPE project_rec_type IS RECORD (
+    project_id NUMBER,
+    project_name VARCHAR2(100),
+    start_date DATE,
+    end_date DATE,
+    fundraising_goal NUMBER
+  );
+  project_rec project_rec_type;
+BEGIN
+  project_rec.project_id := DD_PROJID_SEQ.NEXTVAL;
+  project_rec.project_name := 'HK Animal Shelter Extension';
+  project_rec.start_date := TO_DATE('1/1/2013', 'MM/DD/YYYY');
+  project_rec.end_date := TO_DATE('5/31/2013', 'MM/DD/YYYY');
+  project_rec.fundraising_goal := 65000;
+
+  INSERT INTO projects (project_id, project_name, start_date, end_date, fundraising_goal)
+  VALUES (project_rec.project_id, project_rec.project_name, project_rec.start_date, project_rec.end_date, project_rec.fundraising_goal);
+
+  COMMIT;
+END;
 
 -- Assignment 3-11: Retrieving and Displaying Pledge Data
 -- Create a PL/SQL block to retrieve and display data for all pledges made in a specified month.
@@ -314,6 +360,34 @@ END;
 -- • If the pledge is being paid in monthly payments, display “Monthly - #” (with the #
 -- representing the number of months for payment).
 -- • The list should be sorted to display all lump sum pledges first.
+DECLARE
+    lv_month NUMBER := 1; -- replace with your month number
+    lv_year NUMBER := 2022; -- replace with your year
+    CURSOR pledge_cur IS
+        SELECT pledge_id, donor_id, pledge_amount, payment_type, payment_months
+        FROM pledges
+        WHERE EXTRACT(MONTH FROM pledge_date) = lv_month
+          AND EXTRACT(YEAR FROM pledge_date) = lv_year
+        ORDER BY CASE WHEN payment_type = 'Lump Sum' THEN 1 ELSE 2 END;
+    pledge_rec pledge_cur%ROWTYPE;
+BEGIN
+    OPEN pledge_cur;
+    LOOP
+        FETCH pledge_cur INTO pledge_rec;
+        EXIT WHEN pledge_cur%NOTFOUND;
+
+        DBMS_OUTPUT.PUT_LINE('Pledge ID: ' || pledge_rec.pledge_id);
+        DBMS_OUTPUT.PUT_LINE('Donor ID: ' || pledge_rec.donor_id);
+        DBMS_OUTPUT.PUT_LINE('Pledge Amount: ' || pledge_rec.pledge_amount);
+        IF pledge_rec.payment_type = 'Lump Sum' THEN
+            DBMS_OUTPUT.PUT_LINE('Payment Type: Lump Sum');
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('Payment Type: Monthly - ' || pledge_rec.payment_months);
+        END IF;
+        DBMS_OUTPUT.PUT_LINE('-----');
+    END LOOP;
+    CLOSE pledge_cur;
+END;
 
 -- Assignment 3-12: Retrieving a Specific Pledge
 -- Create a PL/SQL block to retrieve and display information for a specific pledge. Display the
