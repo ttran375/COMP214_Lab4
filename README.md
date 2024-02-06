@@ -1,16 +1,19 @@
-# Lab Exercises for Chapter 2 - Oracle 11g PLSQL Programming Text Book
+# Lab Exercises Chapter 3 - Oracle 11g PLSQL Programming Text Book
 
-Lab Exercises for Chapter 2
+Lab Exercises Chapter 3
 
-Questions 1 - 10 of the Hands-On Assignments in the Oracle 11g PLSQL Programming Text Book. Refer to your textbook for each assignments details.
+Questions 1 - 13 of the Hands-On Assignments in the Oracle 11g PLSQL Programming Text Book. Refer to your textbook for each assignments details.
 
-- Assignment 2-1: Using Scalar Variables
-- Assignment 2-2: Creating a Flowchart
-- Assignment 2-3: Using IF Statements
-- Assignment 2-4: Using CASE Statements
-- Assignment 2-5: Using a Boolean Variable
-- Assignment 2-6: Using Looping Statements
-- Assignment 2-7: Creating a Flowchart
-- Assignment 2-8: Using IF Statements
-- Assignment 2-9: Using a FOR Loop
-- Assignment 2-10: Using a Basic Loop
+- Assignment 3-1: Querying Data in a Block
+- Assignment 3-2: Using a Record Variable
+- Assignment 3-3: Processing Database Data with IF Statements
+- Assignment 3-4: Using Searched CASE Statements
+- Assignment 3-5: Using a WHILE Loop
+- Assignment 3-6: Working with IF Statements
+- Assignment 3-7: Using Scalar Variables for Data Retrieval
+- Assignment 3-8: Using a Record Variable for Data Retrieval
+- Assignment 3-9: Retrieving Pledge Totals
+- Assignment 3-10: Adding a Project
+- Assignment 3-11: Retrieving and Displaying Pledge Data
+- Assignment 3-12: Retrieving a Specific Pledge
+- Assignment 3-13: Modifying Data
