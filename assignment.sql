@@ -393,10 +393,80 @@ END;
 -- Create a PL/SQL block to retrieve and display information for a specific pledge. Display the
 -- pledge ID, donor ID, pledge amount, total paid so far, and the difference between the pledged
 -- amount and total paid amount.
+DECLARE
+    v_pledge_id NUMBER;
+    v_donor_id NUMBER;
+    v_pledge_amount NUMBER;
+    v_total_paid NUMBER;
+    v_difference NUMBER;
+BEGIN
+    -- Assuming you have the pledge ID, you can assign it to v_pledge_id variable.
+    -- For example:
+    v_pledge_id := 1;
+
+    -- Retrieve pledge information
+    SELECT idBasket, idShopper, SubTotal
+    INTO v_pledge_id, v_donor_id, v_pledge_amount
+    FROM bb_basket
+    WHERE idBasket = v_pledge_id;
+
+    -- Retrieve total paid for the pledge
+    SELECT SUM(SubTotal)
+    INTO v_total_paid
+    FROM bb_basket
+    WHERE idBasket = v_pledge_id;
+
+    -- Calculate the difference between pledge amount and total paid
+    v_difference := v_pledge_amount - NVL(v_total_paid, 0);
+
+    -- Display pledge information
+    DBMS_OUTPUT.PUT_LINE('Pledge ID: ' || v_pledge_id);
+    DBMS_OUTPUT.PUT_LINE('Donor ID: ' || v_donor_id);
+    DBMS_OUTPUT.PUT_LINE('Pledge Amount: $' || v_pledge_amount);
+    DBMS_OUTPUT.PUT_LINE('Total Paid So Far: $' || NVL(v_total_paid, 0));
+    DBMS_OUTPUT.PUT_LINE('Difference: $' || v_difference);
+END;
+
 -- Assignment 3-13: Modifying Data
 -- Create a PL/SQL block to modify the fundraising goal amount for a specific project. In addition,
 -- display the following information for the project being modified: project name, start date,
 -- previous fundraising goal amount, and new fundraising goal amount.
+SET SERVEROUTPUT ON;
+
+DECLARE
+    v_project_name bb_product.productname%TYPE;
+    v_start_date bb_product.salestart%TYPE;
+    v_previous_goal bb_product.saleprice%TYPE;
+    v_new_goal NUMBER := 1500; -- Modify this value as per your requirement
+BEGIN
+    -- Retrieve project information before modification
+    SELECT productname, salestart, saleprice
+    INTO v_project_name, v_start_date, v_previous_goal
+    FROM bb_product
+    WHERE idproduct = 1; -- Replace 1 with the specific project ID you want to modify
+
+    -- Display project information before modification
+    DBMS_OUTPUT.PUT_LINE('Project Name: ' || v_project_name);
+    DBMS_OUTPUT.PUT_LINE('Start Date: ' || TO_CHAR(v_start_date, 'DD-MON-YYYY'));
+    DBMS_OUTPUT.PUT_LINE('Previous Fundraising Goal Amount: $' || v_previous_goal);
+
+    -- Modify fundraising goal amount
+    UPDATE bb_product
+    SET saleprice = v_new_goal
+    WHERE idproduct = 1; -- Replace 1 with the specific project ID you want to modify
+
+    -- Display modified fundraising goal amount
+    DBMS_OUTPUT.PUT_LINE('New Fundraising Goal Amount: $' || v_new_goal);
+    
+    -- Commit the transaction
+    COMMIT;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Project not found.');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+        ROLLBACK; -- Rollback the transaction in case of error
+END;
 
 -- CASE PROJECTS
 
@@ -419,3 +489,49 @@ END;
 -- 5–20 Low
 -- 21–35 Mid
 -- More than 35 High
+DECLARE
+    v_movie_id NUMBER := 4; -- Initialize movie ID
+    v_movie_title VARCHAR2(100);
+    v_rental_count NUMBER;
+    v_rental_rating VARCHAR2(20);
+
+    -- Exception for anticipated errors
+    CURSOR rental_cursor IS
+        SELECT movie_title, COUNT(*) AS rental_count
+        FROM rental_history
+        WHERE movie_id = v_movie_id
+        GROUP BY movie_title;
+
+    -- Exception for unanticipated errors
+    v_custom_exception EXCEPTION;
+    PRAGMA EXCEPTION_INIT(v_custom_exception, -20001);
+
+BEGIN
+    -- Retrieve movie details
+    OPEN rental_cursor;
+    FETCH rental_cursor INTO v_movie_title, v_rental_count;
+    CLOSE rental_cursor;
+
+    -- Determine rental rating based on rental count
+    IF v_rental_count >= 10 THEN
+        v_rental_rating := 'High';
+    ELSIF v_rental_count >= 5 THEN
+        v_rental_rating := 'Moderate';
+    ELSE
+        v_rental_rating := 'Low';
+    END IF;
+
+    -- Display movie details
+    DBMS_OUTPUT.PUT_LINE('Movie Title: ' || v_movie_title);
+    DBMS_OUTPUT.PUT_LINE('Rental Count: ' || v_rental_count);
+    DBMS_OUTPUT.PUT_LINE('Rental Rating: ' || v_rental_rating);
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No rental history found for the specified movie ID.');
+    WHEN v_custom_exception THEN
+        DBMS_OUTPUT.PUT_LINE('An unanticipated error occurred: ' || SQLERRM);
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An unexpected error occurred: ' || SQLERRM);
+END;
+/
