@@ -8,7 +8,7 @@
 -- representing the number of months for payment).
 -- • The list should be sorted to display all lump sum pledges first.
 DECLARE
-  v_month VARCHAR2(20) := 'FEB-2013'; -- Specify the desired month here
+  lv_month VARCHAR2(20) := 'FEB-2013'; -- Specify the desired month here
 BEGIN
   FOR pledge_rec IN (
     SELECT
@@ -25,7 +25,7 @@ BEGIN
     FROM
       DD_Pledge p
     WHERE
-      TO_CHAR(TO_DATE(p.Pledgedate, 'DD-MON-YYYY'), 'MON-YYYY') = v_month
+      TO_CHAR(TO_DATE(p.Pledgedate, 'DD-MON-YYYY'), 'MON-YYYY') = lv_month
     ORDER BY
       payment_type,
       p.idPledge
