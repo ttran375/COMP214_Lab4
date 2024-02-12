@@ -15,27 +15,27 @@
 -- Edit the basket ID variable to be 7.
 -- 7. Run the block again, and review the error shown in Figure 3-30.
 DECLARE
-    lv_ship_date   bb_basketstatus.dtstage%TYPE := SYSDATE;
-    lv_shipper_txt bb_basketstatus.shipper%TYPE := 'Default Shipper';
-    lv_ship_num    bb_basketstatus.shippingnum%TYPE := 1;
-    lv_bask_num    bb_basketstatus.idbasket%TYPE := 3;
+  lv_ship_date   bb_basketstatus.dtstage%TYPE := SYSDATE;
+  lv_shipper_txt VARCHAR2(4000) := 'Default Shipper that is long enough to accommodate the data';
+  lv_ship_num    bb_basketstatus.shippingnum%TYPE := 1;
+  lv_bask_num    bb_basketstatus.idbasket%TYPE := 3;
  -- lv_bask_num    bb_basketstatus.idbasket%TYPE := 7;
 BEGIN
-    SELECT
-        dtstage,
-        shipper,
-        shippingnum INTO lv_ship_date,
-        lv_shipper_txt,
-        lv_ship_num
-    FROM
-        bb_basketstatus
-    WHERE
-        idbasket = lv_bask_num
-        AND idstage = 5;
-    DBMS_OUTPUT.PUT_LINE('Date Shipped: '
-                         ||lv_ship_date);
-    DBMS_OUTPUT.PUT_LINE('Shipper: '
-                         ||lv_shipper_txt);
-    DBMS_OUTPUT.PUT_LINE('Shipping #: '
-                         ||lv_ship_num);
+  SELECT
+    dtstage,
+    shipper,
+    shippingnum INTO lv_ship_date,
+    lv_shipper_txt,
+    lv_ship_num
+  FROM
+    bb_basketstatus
+  WHERE
+    idbasket = lv_bask_num
+    AND idstage = 5;
+  DBMS_OUTPUT.PUT_LINE('Date Shipped: '
+                       ||lv_ship_date);
+  DBMS_OUTPUT.PUT_LINE('Shipper: '
+                       ||lv_shipper_txt);
+  DBMS_OUTPUT.PUT_LINE('Shipping #: '
+                       ||lv_ship_num);
 END;
