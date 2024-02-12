@@ -8,47 +8,35 @@
 -- representing the number of months for payment).
 -- • The list should be sorted to display all lump sum pledges first.
 DECLARE
-  lv_month   NUMBER := 1; -- replace with your month number
-  lv_year    NUMBER := 2022; -- replace with your year
-  CURSOR pledge_cur IS
-  SELECT
-    pledge_id,
-    donor_id,
-    pledge_amount,
-    payment_type,
-    payment_months
-  FROM
-    pledges
-  WHERE
-    EXTRACT(MONTH FROM pledge_date) = lv_month
-    AND EXTRACT(YEAR FROM pledge_date) = lv_year
-  ORDER BY
-    CASE
-      WHEN payment_type = 'Lump Sum' THEN
-        1
-      ELSE
-        2 END;
-  pledge_rec pledge_cur%ROWTYPE;
+  v_month VARCHAR2(20) := 'FEB-2013'; -- Specify the desired month here
 BEGIN
-  OPEN pledge_cur;
-  LOOP
-    FETCH pledge_cur INTO pledge_rec;
-    EXIT WHEN pledge_cur%NOTFOUND;
+  FOR pledge_rec IN (
+    SELECT
+      p.idPledge,
+      p.idDonor,
+      p.Pledgeamt,
+      CASE
+        WHEN p.paymonths = 0 THEN
+          'Lump Sum'
+        ELSE
+          'Monthly - '
+          || TO_CHAR(p.paymonths)
+      END         AS payment_type
+    FROM
+      DD_Pledge p
+    WHERE
+      TO_CHAR(TO_DATE(p.Pledgedate, 'DD-MON-YYYY'), 'MON-YYYY') = v_month
+    ORDER BY
+      payment_type,
+      p.idPledge
+  ) LOOP
     DBMS_OUTPUT.PUT_LINE('Pledge ID: '
-                         || pledge_rec.pledge_id);
-    DBMS_OUTPUT.PUT_LINE('Donor ID: '
-                         || pledge_rec.donor_id);
-    DBMS_OUTPUT.PUT_LINE('Pledge Amount: '
-                         || pledge_rec.pledge_amount);
-    IF pledge_rec.payment_type = 'Lump Sum' THEN
-      DBMS_OUTPUT.PUT_LINE('Payment Type: Lump Sum');
-    ELSE
-      DBMS_OUTPUT.PUT_LINE('Payment Type: Monthly - '
-                           || pledge_rec.payment_months);
-    END IF;
-
-    DBMS_OUTPUT.PUT_LINE('-----');
+                         || pledge_rec.idPledge
+                         || ', Donor ID: '
+                         || pledge_rec.idDonor
+                         || ', Pledge Amount: '
+                         || pledge_rec.Pledgeamt
+                         || ', Payment Type: '
+                         || pledge_rec.payment_type);
   END LOOP;
-
-  CLOSE pledge_cur;
 END;

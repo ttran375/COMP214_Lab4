@@ -5,38 +5,30 @@
 -- handle the data to be added. Data for the new row should be the following: project name = HK
 -- Animal Shelter Extension, start = 1/1/2013, end = 5/31/2013, and fundraising goal = $65,000.
 -- Any columns not addressed in the data list are currently unknown.
-CREATE SEQUENCE DD_PROJID_SEQ
-  START WITH 530
-  INCREMENT BY 1
-  NOCACHE;
+
+CREATE SEQUENCE DD_PROJID_SEQ START WITH 530 NOCACHE;
 
 DECLARE
-  TYPE project_rec_type IS RECORD (
-    project_id NUMBER,
-    project_name VARCHAR2(100),
-    start_date DATE,
-    end_date DATE,
-    fundraising_goal NUMBER
+  TYPE PROJECT_INFO IS RECORD(
+    PROJECT_NAME DD_PROJECT.PROJNAME%TYPE := 'HK Animal Shelter Extension',
+    PROJECT_START DD_PROJECT.PROJSTARTDATE%TYPE := '01-JAN-13',
+    PROJECT_END DD_PROJECT.PROJENDDATE%TYPE := '31-MAY-13',
+    FUNDRAISING_GOAL DD_PROJECT.PROJFUNDGOAL%TYPE := '65000'
   );
-  project_rec project_rec_type;
+  NEW_PROJECT PROJECT_INFO;
 BEGIN
-  project_rec.project_id := DD_PROJID_SEQ.NEXTVAL;
-  project_rec.project_name := 'HK Animal Shelter Extension';
-  project_rec.start_date := TO_DATE('1/1/2013', 'MM/DD/YYYY');
-  project_rec.end_date := TO_DATE('5/31/2013', 'MM/DD/YYYY');
-  project_rec.fundraising_goal := 65000;
-  INSERT INTO projects (
-    project_id,
-    project_name,
-    start_date,
-    end_date,
-    fundraising_goal
-  ) VALUES (
-    project_rec.project_id,
-    project_rec.project_name,
-    project_rec.start_date,
-    project_rec.end_date,
-    project_rec.fundraising_goal
+  INSERT INTO DD_PROJECT(
+    IDPROJ,
+    PROJNAME,
+    PROJSTARTDATE,
+    PROJENDDATE,
+    PROJFUNDGOAL
+  ) VALUES(
+    DD_PROJID_SEQ.NEXTVAL,
+    NEW_PROJECT.PROJECT_NAME,
+    NEW_PROJECT. PROJECT_START,
+    NEW_PROJECT.PROJECT_END,
+    NEW_PROJECT.FUNDRAISING_GOAL
   );
   COMMIT;
 END;
