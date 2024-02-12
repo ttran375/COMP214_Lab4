@@ -42,3 +42,13 @@ BEGIN
                        ||' is rated '
                        ||lv_rating_txt);
 END;
+
+SELECT
+  SUM(total)
+FROM
+  bb_basket
+WHERE
+  idShopper = 22
+  AND orderplaced = 1
+GROUP BY
+  idshopper;
