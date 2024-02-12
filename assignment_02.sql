@@ -11,22 +11,22 @@
 -- in the DBMS_OUTPUT statements.
 -- 4. Run the block, and compare the results with Figure 3-31.
 DECLARE
-  rec_ship    bb_basketstatus%ROWTYPE;
+  lv_rec_ship bb_basketstatus%ROWTYPE;
   lv_bask_num bb_basketstatus.idbasket%TYPE := 3;
 BEGIN
   SELECT
-    * INTO rec_ship
+    * INTO lv_rec_ship
   FROM
     bb_basketstatus
   WHERE
     idbasket = lv_bask_num
     AND idstage = 5;
   DBMS_OUTPUT.PUT_LINE('Date Shipped: '
-                       ||rec_ship.dtstage);
+                       ||lv_rec_ship.dtstage);
   DBMS_OUTPUT.PUT_LINE('Shipper: '
-                       ||rec_ship.shipper);
+                       ||lv_rec_ship.shipper);
   DBMS_OUTPUT.PUT_LINE('Shipping #: '
-                       ||rec_ship.shippingnum);
+                       ||lv_rec_ship.shippingnum);
   DBMS_OUTPUT.PUT_LINE('Notes: '
-                       ||rec_ship.notes);
+                       ||lv_rec_ship.notes);
 END;

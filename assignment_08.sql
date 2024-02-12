@@ -12,27 +12,27 @@ DECLARE
     tax bb_basket.tax%TYPE,
     total bb_basket.total%TYPE
   );
-  basket_rec  basket_rec_type;
-  lv_idbasket bb_basket.idbasket%TYPE := 12;
+  lv_basket_rec basket_rec_type;
+  lv_idbasket   bb_basket.idbasket%TYPE := 12;
 BEGIN
   SELECT
     idbasket,
     subtotal,
     shipping,
     tax,
-    total INTO basket_rec
+    total INTO lv_basket_rec
   FROM
     bb_basket
   WHERE
     idbasket = lv_idbasket;
   DBMS_OUTPUT.PUT_LINE('IDBASKET: '
-                       || basket_rec.idbasket);
+                       || lv_basket_rec.idbasket);
   DBMS_OUTPUT.PUT_LINE('SUBTOTAL: '
-                       || basket_rec.subtotal);
+                       || lv_basket_rec.subtotal);
   DBMS_OUTPUT.PUT_LINE('SHIPPING: '
-                       || basket_rec.shipping);
+                       || lv_basket_rec.shipping);
   DBMS_OUTPUT.PUT_LINE('TAX: '
-                       || basket_rec.tax);
+                       || lv_basket_rec.tax);
   DBMS_OUTPUT.PUT_LINE('TOTAL: '
-                       || basket_rec.total);
+                       || lv_basket_rec.total);
 END;

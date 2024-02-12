@@ -3,40 +3,36 @@
 -- Project ID. Display the following on a single row of output: project ID, project name, number of
 -- pledges made, total dollars pledged, and the average pledge amount.
 DECLARE
-  v_project_id    NUMBER := 1; -- Replace <your_project_id> with the actual Project ID
-  v_project_name  bb_department.deptname%TYPE;
-  v_num_pledges   NUMBER;
-  v_total_pledged NUMBER;
-  v_avg_pledge    NUMBER;
+  lv_project_id    NUMBER := 1;
+  lv_project_name  bb_department.deptname%TYPE;
+  lv_num_pledges   NUMBER;
+  lv_total_pledged NUMBER;
+  lv_avg_pledge    NUMBER;
 BEGIN
- -- Retrieve project information
   SELECT
-    d.deptname INTO v_project_name
+    d.deptname INTO lv_project_name
   FROM
     bb_department d
   WHERE
-    d.idDepartment = v_project_id;
- -- Retrieve number of pledges, total dollars pledged, and average pledge amount
+    d.idDepartment = lv_project_id;
   SELECT
     COUNT(p.idRequest),
     SUM(p.cost),
-    AVG(p.cost) INTO v_num_pledges,
-    v_total_pledged,
-    v_avg_pledge
+    AVG(p.cost) INTO lv_num_pledges,
+    lv_total_pledged,
+    lv_avg_pledge
   FROM
     bb_product_request p
   WHERE
-    p.idproduct = v_project_id;
- -- Display the information
+    p.idproduct = lv_project_id;
   DBMS_OUTPUT.PUT_LINE('Project ID: '
-                       || v_project_id);
+                       || lv_project_id);
   DBMS_OUTPUT.PUT_LINE('Project Name: '
-                       || v_project_name);
+                       || lv_project_name);
   DBMS_OUTPUT.PUT_LINE('Number of Pledges: '
-                       || v_num_pledges);
+                       || lv_num_pledges);
   DBMS_OUTPUT.PUT_LINE('Total Dollars Pledged: $'
-                       || TO_CHAR(v_total_pledged, '99999.99'));
+                       || TO_CHAR(lv_total_pledged, '99999.99'));
   DBMS_OUTPUT.PUT_LINE('Average Pledge Amount: $'
-                       || TO_CHAR(v_avg_pledge, '99999.99'));
+                       || TO_CHAR(lv_avg_pledge, '99999.99'));
 END;
-/
