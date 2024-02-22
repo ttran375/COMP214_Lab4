@@ -1,44 +1,33 @@
 -- Step 1: Create the procedure
-CREATE OR REPLACE PROCEDURE BASKET_CONFIRM_SP (
+CREATE OR REPLACE PROCEDURE STATUS_SHIP_SP (
   p_basket_id IN NUMBER,
-  p_subtotal IN NUMBER,
-  p_shipping IN NUMBER,
-  p_tax IN NUMBER,
-  p_total IN NUMBER
+  p_date_shipped IN DATE,
+  p_shipper IN VARCHAR2,
+  p_tracking_number IN VARCHAR2
 ) AS
 BEGIN
-  UPDATE BB_BASKET
-  SET
-    SUBTOTAL = p_subtotal,
-    SHIPPING = p_shipping,
-    TAX = p_tax,
-    TOTAL = p_total,
-    ORDERPLACED = 1
-  WHERE
-    IDBASKET = p_basket_id;
+  INSERT INTO BB_BASKETSTATUS (
+    IDBASKETSTATUS,
+    IDBASKET,
+    IDSTAGE,
+    DTEVENT,
+    COMMENTS
+  ) VALUES (
+    BB_STATUS_SEQ.NEXTVAL,
+    p_basket_id,
+    3,
+    p_date_shipped,
+    'Shipped via '
+    || p_shipper
+    || ', Tracking Number: '
+    || p_tracking_number
+  );
   COMMIT;
 END;
 /
 
--- Step 2: Execute the provided INSERT statements to create a new basket and basket items
-
--- Step 3: Commit the transaction to save the data
-COMMIT;
-
--- Step 4: Call the procedure with the provided parameter values
+-- Step 2: Test the procedure with the provided information
 BEGIN
-  BASKET_CONFIRM_SP(17, 64.80, 8.00, 1.94, 74.74);
+  STATUS_SHIP_SP(3, TO_DATE('20-FEB-12', 'DD-MON-YY'), 'UPS', 'ZW2384YXK4957');
 END;
 /
-
--- Step 5: Query the BB_BASKET table to confirm the changes
-SELECT
-  subtotal,
-  shipping,
-  tax,
-  total,
-  orderplaced
-FROM
-  bb_basket
-WHERE
-  idbasket = 17;

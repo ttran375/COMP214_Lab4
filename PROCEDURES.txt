@@ -1,18 +1,4 @@
-Assignment 5-6: Returning Order Status Information
-Create a procedure that returns the most recent order status information for a specified basket.
-This procedure should determine the most recent ordering-stage entry in the BB_BASKETSTATUS
-table and return the data. Use an IF or CASE clause to return a stage description instead
-of an IDSTAGE number, which means little to shoppers. The IDSTAGE column of the
-BB_BASKETSTATUS table identifies each stage as follows:
-• 1—Submitted and received
-• 2—Confirmed, processed, sent to shipping
-• 3—Shipped
-• 4—Cancelled
-• 5—Back-ordered
-The procedure should accept a basket ID number and return the most recent status
-description and date the status was recorded. If no status is available for the specified basket
-ID, return a message stating that no status is available. Name the procedure STATUS_SP. Test
-the procedure twice with the basket ID 4 and then 6.
+
 Assignment 5-7: Identifying Customers
 Brewbean’s wants to offer an incentive of free shipping to customers who haven’t returned to
 the site since a specified date. Create a procedure named PROMO_SHIP_SP that determines
@@ -28,6 +14,7 @@ table to indicate which month free shipping is effective.
 The BB_PROMOLIST table also has a USED column, which contains the default value N
 and is updated to Y when the shopper uses the promotion. Test the procedure with the cutoff
 date 15-FEB-12. Assign free shipping for the month APR and the year 2012.
+
 Assignment 5-8: Adding Items to a Basket
 As a shopper selects products on the Brewbean’s site, a procedure is needed to add a newly
 selected item to the current shopper’s basket. Create a procedure named BASKET_ADD_SP that

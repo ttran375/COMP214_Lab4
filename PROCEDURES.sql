@@ -234,33 +234,106 @@ WHERE
 -- Shipper = UPS
 -- Tracking # = ZW2384YXK4957
 -- Step 1: Create the procedure
+-- Step 1: Create the procedure
 CREATE OR REPLACE PROCEDURE STATUS_SHIP_SP (
-    p_basket_id      IN NUMBER,
-    p_date_shipped  IN DATE,
-    p_shipper       IN VARCHAR2,
-    p_tracking_num  IN VARCHAR2
-)
-AS
-    v_stage_id   NUMBER;
+  p_basket_id IN NUMBER,
+  p_date_shipped IN DATE,
+  p_shipper IN VARCHAR2,
+  p_tracking_number IN VARCHAR2
+) AS
 BEGIN
-    -- Get the next value from the sequence for the primary key
-    SELECT BB_STATUS_SEQ.NEXTVAL INTO v_stage_id FROM DUAL;
-
-    -- Insert a new row into BB_BASKETSTATUS
-    INSERT INTO BB_BASKETSTATUS (IDBASKETSTATUS, IDBASKET, IDSTAGE, STATUSDATE, COMMENTS)
-    VALUES (v_stage_id, p_basket_id, 3, p_date_shipped, 'Shipped via ' || p_shipper || '. Tracking #: ' || p_tracking_num);
-
-    COMMIT;
-    
-    DBMS_OUTPUT.PUT_LINE('Order status updated successfully.');
-EXCEPTION
-    WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error updating order status: ' || SQLERRM);
+  INSERT INTO BB_BASKETSTATUS (
+    IDBASKETSTATUS,
+    IDBASKET,
+    IDSTAGE,
+    DTEVENT,
+    COMMENTS
+  ) VALUES (
+    BB_STATUS_SEQ.NEXTVAL,
+    p_basket_id,
+    3,
+    p_date_shipped,
+    'Shipped via '
+    || p_shipper
+    || ', Tracking Number: '
+    || p_tracking_number
+  );
+  COMMIT;
 END;
 /
 
--- Step 2: Test the procedure
+-- Step 2: Test the procedure with the provided information
 BEGIN
-    STATUS_SHIP_SP(3, TO_DATE('20-FEB-12', 'DD-MON-YY'), 'UPS', 'ZW2384YXK4957');
+  STATUS_SHIP_SP(3, TO_DATE('20-FEB-12', 'DD-MON-YY'), 'UPS', 'ZW2384YXK4957');
+END;
+/
+
+-- Assignment 5-6: Returning Order Status Information
+-- Create a procedure that returns the most recent order status information for a specified basket.
+-- This procedure should determine the most recent ordering-stage entry in the BB_BASKETSTATUS
+-- table and return the data. Use an IF or CASE clause to return a stage description instead
+-- of an IDSTAGE number, which means little to shoppers. The IDSTAGE column of the
+-- BB_BASKETSTATUS table identifies each stage as follows:
+-- • 1—Submitted and received
+-- • 2—Confirmed, processed, sent to shipping
+-- • 3—Shipped
+-- • 4—Cancelled
+-- • 5—Back-ordered
+-- The procedure should accept a basket ID number and return the most recent status
+-- description and date the status was recorded. If no status is available for the specified basket
+-- ID, return a message stating that no status is available. Name the procedure STATUS_SP. Test
+-- the procedure twice with the basket ID 4 and then 6.
+-- Step 1: Create the procedure
+CREATE OR REPLACE PROCEDURE STATUS_SP (
+    p_basket_id    IN NUMBER,
+    p_status_desc  OUT VARCHAR2,
+    p_status_date  OUT DATE
+)
+AS
+BEGIN
+    SELECT 
+        CASE 
+            WHEN bs.IDSTAGE = 1 THEN 'Submitted and received'
+            WHEN bs.IDSTAGE = 2 THEN 'Confirmed, processed, sent to shipping'
+            WHEN bs.IDSTAGE = 3 THEN 'Shipped'
+            WHEN bs.IDSTAGE = 4 THEN 'Cancelled'
+            WHEN bs.IDSTAGE = 5 THEN 'Back-ordered'
+            ELSE 'Unknown'
+        END,
+        bs.DTEVENT
+    INTO 
+        p_status_desc,
+        p_status_date
+    FROM 
+        BB_BASKETSTATUS bs
+    WHERE 
+        bs.IDBASKET = p_basket_id
+    ORDER BY 
+        bs.DTEVENT DESC;
+    
+    IF SQL%NOTFOUND THEN
+        p_status_desc := 'No status available';
+        p_status_date := NULL;
+    END IF;
+END;
+/
+
+-- Step 2: Test the procedure with basket ID 4
+DECLARE
+    v_status_desc VARCHAR2(100);
+    v_status_date DATE;
+BEGIN
+    STATUS_SP(4, v_status_desc, v_status_date);
+    DBMS_OUTPUT.PUT_LINE('Status for Basket ID 4: ' || v_status_desc || ', recorded on ' || TO_CHAR(v_status_date, 'DD-MON-YYYY'));
+END;
+/
+
+-- Test the procedure with basket ID 6
+DECLARE
+    v_status_desc VARCHAR2(100);
+    v_status_date DATE;
+BEGIN
+    STATUS_SP(6, v_status_desc, v_status_date);
+    DBMS_OUTPUT.PUT_LINE('Status for Basket ID 6: ' || v_status_desc || ', recorded on ' || TO_CHAR(v_status_date, 'DD-MON-YYYY'));
 END;
 /
