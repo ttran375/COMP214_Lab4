@@ -1,36 +1,44 @@
-CREATE OR REPLACE PROCEDURE prod_name_sp (
-  p_prodid IN bb_product.idProduct%TYPE,
-  p_descrip IN bb_product.Description%TYPE
-) IS
+-- Step 1: Create the procedure
+CREATE OR REPLACE PROCEDURE BASKET_CONFIRM_SP (
+  p_basket_id IN NUMBER,
+  p_subtotal IN NUMBER,
+  p_shipping IN NUMBER,
+  p_tax IN NUMBER,
+  p_total IN NUMBER
+) AS
 BEGIN
-  UPDATE bb_product
+  UPDATE BB_BASKET
   SET
-    Description = p_descrip
+    SUBTOTAL = p_subtotal,
+    SHIPPING = p_shipping,
+    TAX = p_tax,
+    TOTAL = p_total,
+    ORDERPLACED = 1
   WHERE
-    idProduct = p_prodid;
+    IDBASKET = p_basket_id;
   COMMIT;
 END;
 /
 
-SELECT
-  *
-FROM
-  bb_product
-WHERE
-  idProduct = 1;
+-- Step 2: Execute the provided INSERT statements to create a new basket and basket items
 
-/
+-- Step 3: Commit the transaction to save the data
+COMMIT;
 
+-- Step 4: Call the procedure with the provided parameter values
 BEGIN
-  prod_name_sp(1, 'CapressoBar Model #388');
+  BASKET_CONFIRM_SP(17, 64.80, 8.00, 1.94, 74.74);
 END;
 /
 
+-- Step 5: Query the BB_BASKET table to confirm the changes
 SELECT
-  *
+  subtotal,
+  shipping,
+  tax,
+  total,
+  orderplaced
 FROM
-  bb_product
+  bb_basket
 WHERE
-  idProduct = 1;
-
-/
+  idbasket = 17;
