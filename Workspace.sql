@@ -1,36 +1,56 @@
--- Assignment 5-2: Using a Procedure with IN Parameters
--- Follow these steps to create a procedure that allows a company employee to add a new
--- product to the database. This procedure needs only IN parameters.
--- 1. In SQL Developer, create a procedure named PROD_ADD_SP that adds a row for a new
--- product in the BB_PRODUCT table. Keep in mind that the user provides values for the
--- product name, description, image filename, price, and active status. Address the input
--- values or parameters in the same order as in the preceding sentence.
--- 2. Call the procedure with these parameter values: ('Roasted Blend', 'Well-balanced
--- mix of roasted beans, a medium body', 'roasted.jpg',9.50,1).
--- 3. Check whether the update was successful by querying the BB_PRODUCT table.
+-- Assignment 5-1: Creating a Procedure
+-- Use these steps to create a procedure that allows a company employee to make corrections to
+-- a product’s assigned name. Review the BB_PRODUCT table and identify the PRODUCT NAME
+-- and PRIMARY KEY columns. The procedure needs two IN parameters to identify the product
+-- ID and supply the new description. This procedure needs to perform only a DML action, so no
+-- OUT parameters are necessary.
+-- 1. In SQL Developer, create the following procedure:
+-- CREATE OR REPLACE PROCEDURE prod_name_sp
+-- (p_prodid IN bb_product.idproduct%TYPE,
+-- p_descrip IN bb_product.description%TYPE)
+-- IS
+-- BEGIN
+-- UPDATE bb_product
+-- SET description = p_descrip
+-- WHERE idproduct = p_prodid;
+-- COMMIT;
+-- END;
+-- 2. Before testing the procedure, verify the current description value for product ID 1 with
+-- SELECT * FROM bb_product;.
+-- 3. Call the procedure with parameter values of 1 for the product ID and CapressoBar Model
+-- #388 for the description.
+-- 4. Verify that the update was successful by querying the table with SELECT * FROM
+-- bb_product;.
 
-CREATE OR REPLACE PROCEDURE PROD_ADD_SP (
-    p_ProductName IN VARCHAR2,
-    p_Description IN VARCHAR2,
-    p_ProductImage IN VARCHAR2,
-    p_Price IN NUMBER,
-    p_Active IN NUMBER
-)
-IS
+CREATE OR REPLACE PROCEDURE prod_name_sp (
+  p_prodid IN bb_product.idProduct%TYPE,
+  p_descrip IN bb_product.Description%TYPE
+) IS
 BEGIN
-    INSERT INTO BB_Product (idProduct, ProductName, Description, ProductImage, Price, Active)
-    VALUES (bb_prodid_seq.NEXTVAL, p_ProductName, p_Description, p_ProductImage, p_Price, p_Active);
-    COMMIT;
-    DBMS_OUTPUT.PUT_LINE('New product added successfully.');
-EXCEPTION
-    WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
-END PROD_ADD_SP;
-/
-
-BEGIN
-    PROD_ADD_SP('Roasted Blend', 'Well-balanced mix of roasted beans, a medium body', 'roasted.jpg', 9.50, 1);
+  UPDATE bb_product
+  SET
+    Description = p_descrip
+  WHERE
+    idProduct = p_prodid;
+  COMMIT;
 END;
 /
 
-SELECT * FROM BB_Product;
+SELECT
+  *
+FROM
+  bb_product
+WHERE
+  idProduct = 1;
+
+BEGIN
+  prod_name_sp(1, 'CapressoBar Model #388');
+END;
+/
+
+SELECT
+  *
+FROM
+  bb_product
+WHERE
+  idProduct = 1;

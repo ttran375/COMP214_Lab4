@@ -21,6 +21,7 @@
 -- #388 for the description.
 -- 4. Verify that the update was successful by querying the table with SELECT * FROM
 -- bb_product;.
+
 CREATE OR REPLACE PROCEDURE prod_name_sp (
   p_prodid IN bb_product.idProduct%TYPE,
   p_descrip IN bb_product.Description%TYPE
@@ -41,7 +42,6 @@ FROM
   bb_product
 WHERE
   idProduct = 1;
-/
 
 BEGIN
   prod_name_sp(1, 'CapressoBar Model #388');
@@ -65,6 +65,7 @@ WHERE
 -- 2. Call the procedure with these parameter values: ('Roasted Blend', 'Well-balanced
 -- mix of roasted beans, a medium body', 'roasted.jpg',9.50,1).
 -- 3. Check whether the update was successful by querying the BB_PRODUCT table.
+
 -- Step 1: Create the procedure
 CREATE OR REPLACE PROCEDURE PROD_ADD_SP (
   p_product_name IN VARCHAR2,
@@ -103,46 +104,58 @@ SELECT
 FROM
   BB_PRODUCT;
 
--- Assignment 5-3: Calculating the Tax on an Order
--- Follow these steps to create a procedure for calculating the tax on an order. The BB_TAX table
--- contains states that require submitting taxes for Internet sales. If the state isn’t listed in the
--- table, no tax should be assessed on the order. The shopper’s state and basket subtotal are the
--- inputs to the procedure, and the tax amount should be returned.
--- 1. In SQL Developer, create a procedure named TAX_COST_SP. Remember that the state
--- and subtotal values are inputs to the procedure, which should return the tax amount.
--- Review the BB_TAX table, which contains the tax rate for each applicable state.
--- 2. Call the procedure with the values VA for the state and $100 for the subtotal. Display the
--- tax amount the procedure returns. (It should be $4.50.)
--- Step 1: Create the procedure
--- Step 1: Create the procedure
-CREATE OR REPLACE PROCEDURE TAX_COST_SP (
-  p_state IN VARCHAR2,
-  p_subtotal IN NUMBER,
-  p_tax_amount OUT NUMBER
-) AS
+-- Assignment 5-2: Using a Procedure with IN Parameters
+-- Follow these steps to create a procedure that allows a company employee to add a new
+-- product to the database. This procedure needs only IN parameters.
+-- 1. In SQL Developer, create a procedure named PROD_ADD_SP that adds a row for a new
+-- product in the BB_PRODUCT table. Keep in mind that the user provides values for the
+-- product name, description, image filename, price, and active status. Address the input
+-- values or parameters in the same order as in the preceding sentence.
+-- 2. Call the procedure with these parameter values: ('Roasted Blend', 'Well-balanced
+-- mix of roasted beans, a medium body', 'roasted.jpg',9.50,1).
+-- 3. Check whether the update was successful by querying the BB_PRODUCT table.
+
+CREATE OR REPLACE PROCEDURE PROD_ADD_SP (
+  p_ProductName IN VARCHAR2,
+  p_Description IN VARCHAR2,
+  p_ProductImage IN VARCHAR2,
+  p_Price IN NUMBER,
+  p_Active IN NUMBER
+) IS
 BEGIN
-  SELECT
-    NVL(SUM(tax_rate), 0) * p_subtotal / 100 INTO p_tax_amount
-  FROM
-    BB_TAX
-  WHERE
-    state = p_state;
- -- If state not found, set tax amount to 0
-  IF p_tax_amount IS NULL THEN
-    p_tax_amount := 0;
-  END IF;
+  INSERT INTO BB_Product (
+    idProduct,
+    ProductName,
+    Description,
+    ProductImage,
+    Price,
+    Active
+  ) VALUES (
+    bb_prodid_seq.NEXTVAL,
+    p_ProductName,
+    p_Description,
+    p_ProductImage,
+    p_Price,
+    p_Active
+  );
+  COMMIT;
+  DBMS_OUTPUT.PUT_LINE('New product added successfully.');
+EXCEPTION
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('Error: '
+                         || SQLERRM);
+END PROD_ADD_SP;
+/
+
+BEGIN
+  PROD_ADD_SP('Roasted Blend', 'Well-balanced mix of roasted beans, a medium body', 'roasted.jpg', 9.50, 1);
 END;
 /
 
--- Step 2: Call the procedure with the specified parameter values
-DECLARE
-  v_tax_amount NUMBER;
-BEGIN
-  TAX_COST_SP('VA', 100, v_tax_amount);
-  DBMS_OUTPUT.PUT_LINE('Tax Amount: $'
-                       || TO_CHAR(v_tax_amount, '999.99'));
-END;
-/
+SELECT
+  *
+FROM
+  BB_Product;
 
 -- Assignment 5-4: Updating Columns in a Table
 -- After a shopper completes an order, a procedure is called to update the following columns in the
