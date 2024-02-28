@@ -1,56 +1,43 @@
--- Assignment 5-1: Creating a Procedure
--- Use these steps to create a procedure that allows a company employee to make corrections to
--- a product’s assigned name. Review the BB_PRODUCT table and identify the PRODUCT NAME
--- and PRIMARY KEY columns. The procedure needs two IN parameters to identify the product
--- ID and supply the new description. This procedure needs to perform only a DML action, so no
--- OUT parameters are necessary.
--- 1. In SQL Developer, create the following procedure:
--- CREATE OR REPLACE PROCEDURE prod_name_sp
--- (p_prodid IN bb_product.idproduct%TYPE,
--- p_descrip IN bb_product.description%TYPE)
--- IS
--- BEGIN
--- UPDATE bb_product
--- SET description = p_descrip
--- WHERE idproduct = p_prodid;
--- COMMIT;
--- END;
--- 2. Before testing the procedure, verify the current description value for product ID 1 with
--- SELECT * FROM bb_product;.
--- 3. Call the procedure with parameter values of 1 for the product ID and CapressoBar Model
--- #388 for the description.
--- 4. Verify that the update was successful by querying the table with SELECT * FROM
--- bb_product;.
+-- Assignment 5-3: Calculating the Tax on an Order
+-- Follow these steps to create a procedure for calculating the tax on an order. The BB_TAX table
+-- contains states that require submitting taxes for Internet sales. If the state isn’t listed in the
+-- table, no tax should be assessed on the order. The shopper’s state and basket subtotal are the
+-- inputs to the procedure, and the tax amount should be returned.
+-- 1. In SQL Developer, create a procedure named TAX_COST_SP. Remember that the state
+-- and subtotal values are inputs to the procedure, which should return the tax amount.
+-- Review the BB_TAX table, which contains the tax rate for each applicable state.
+-- 2. Call the procedure with the values VA for the state and $100 for the subtotal. Display the
+-- tax amount the procedure returns. (It should be $4.50.)
 
-CREATE OR REPLACE PROCEDURE prod_name_sp (
-  p_prodid IN bb_product.idProduct%TYPE,
-  p_descrip IN bb_product.Description%TYPE
-) IS
+-- Step 1: Create the procedure
+CREATE OR REPLACE PROCEDURE TAX_COST_SP (
+  p_state IN VARCHAR2,
+  p_subtotal IN NUMBER,
+  p_tax OUT NUMBER
+) AS
 BEGIN
-  UPDATE bb_product
-  SET
-    Description = p_descrip
+  SELECT
+    TaxRate INTO p_tax
+  FROM
+    bb_tax
   WHERE
-    idProduct = p_prodid;
-  COMMIT;
-END;
+    State = p_state;
+  IF p_tax IS NULL THEN
+    p_tax := 0;
+  ELSE
+    p_tax := p_subtotal * p_tax;
+  END IF;
+END TAX_COST_SP;
 /
 
-SELECT
-  *
-FROM
-  bb_product
-WHERE
-  idProduct = 1;
-
+-- Step 2: Call the procedure with the specified parameter values
+DECLARE
+  lv_state    VARCHAR2(2) := 'VA';
+  lv_subtotal NUMBER := 100;
+  lv_tax      NUMBER;
 BEGIN
-  prod_name_sp(1, 'CapressoBar Model #388');
+  TAX_COST_SP(lv_state, lv_subtotal, lv_tax);
+  DBMS_OUTPUT.PUT_LINE('Tax Amount: $'
+                       || TO_CHAR(lv_tax, '999.99'));
 END;
 /
-
-SELECT
-  *
-FROM
-  bb_product
-WHERE
-  idProduct = 1;

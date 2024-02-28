@@ -104,58 +104,49 @@ SELECT
 FROM
   BB_PRODUCT;
 
--- Assignment 5-2: Using a Procedure with IN Parameters
--- Follow these steps to create a procedure that allows a company employee to add a new
--- product to the database. This procedure needs only IN parameters.
--- 1. In SQL Developer, create a procedure named PROD_ADD_SP that adds a row for a new
--- product in the BB_PRODUCT table. Keep in mind that the user provides values for the
--- product name, description, image filename, price, and active status. Address the input
--- values or parameters in the same order as in the preceding sentence.
--- 2. Call the procedure with these parameter values: ('Roasted Blend', 'Well-balanced
--- mix of roasted beans, a medium body', 'roasted.jpg',9.50,1).
--- 3. Check whether the update was successful by querying the BB_PRODUCT table.
+-- Assignment 5-3: Calculating the Tax on an Order
+-- Follow these steps to create a procedure for calculating the tax on an order. The BB_TAX table
+-- contains states that require submitting taxes for Internet sales. If the state isn’t listed in the
+-- table, no tax should be assessed on the order. The shopper’s state and basket subtotal are the
+-- inputs to the procedure, and the tax amount should be returned.
+-- 1. In SQL Developer, create a procedure named TAX_COST_SP. Remember that the state
+-- and subtotal values are inputs to the procedure, which should return the tax amount.
+-- Review the BB_TAX table, which contains the tax rate for each applicable state.
+-- 2. Call the procedure with the values VA for the state and $100 for the subtotal. Display the
+-- tax amount the procedure returns. (It should be $4.50.)
 
-CREATE OR REPLACE PROCEDURE PROD_ADD_SP (
-  p_ProductName IN VARCHAR2,
-  p_Description IN VARCHAR2,
-  p_ProductImage IN VARCHAR2,
-  p_Price IN NUMBER,
-  p_Active IN NUMBER
-) IS
+-- Step 1: Create the procedure
+CREATE OR REPLACE PROCEDURE TAX_COST_SP (
+  p_state IN VARCHAR2,
+  p_subtotal IN NUMBER,
+  p_tax OUT NUMBER
+) AS
 BEGIN
-  INSERT INTO BB_Product (
-    idProduct,
-    ProductName,
-    Description,
-    ProductImage,
-    Price,
-    Active
-  ) VALUES (
-    bb_prodid_seq.NEXTVAL,
-    p_ProductName,
-    p_Description,
-    p_ProductImage,
-    p_Price,
-    p_Active
-  );
-  COMMIT;
-  DBMS_OUTPUT.PUT_LINE('New product added successfully.');
-EXCEPTION
-  WHEN OTHERS THEN
-    DBMS_OUTPUT.PUT_LINE('Error: '
-                         || SQLERRM);
-END PROD_ADD_SP;
+  SELECT
+    TaxRate INTO p_tax
+  FROM
+    bb_tax
+  WHERE
+    State = p_state;
+  IF p_tax IS NULL THEN
+    p_tax := 0;
+  ELSE
+    p_tax := p_subtotal * p_tax;
+  END IF;
+END TAX_COST_SP;
 /
 
+-- Step 2: Call the procedure with the specified parameter values
+DECLARE
+  lv_state    VARCHAR2(2) := 'VA';
+  lv_subtotal NUMBER := 100;
+  lv_tax      NUMBER;
 BEGIN
-  PROD_ADD_SP('Roasted Blend', 'Well-balanced mix of roasted beans, a medium body', 'roasted.jpg', 9.50, 1);
+  TAX_COST_SP(lv_state, lv_subtotal, lv_tax);
+  DBMS_OUTPUT.PUT_LINE('Tax Amount: $'
+                       || TO_CHAR(lv_tax, '999.99'));
 END;
 /
-
-SELECT
-  *
-FROM
-  BB_Product;
 
 -- Assignment 5-4: Updating Columns in a Table
 -- After a shopper completes an order, a procedure is called to update the following columns in the
@@ -548,3 +539,4 @@ BEGIN
                        || v_password); -- Placeholder for cookie value
 END;
 /
+
