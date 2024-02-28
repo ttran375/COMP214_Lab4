@@ -300,40 +300,61 @@ WHERE
 -- Date shipped = 20-FEB-12
 -- Shipper = UPS
 -- Tracking # = ZW2384YXK4957
--- Step 1: Create the procedure
+
 -- Step 1: Create the procedure
 CREATE OR REPLACE PROCEDURE STATUS_SHIP_SP (
-  p_basket_id IN NUMBER,
+  p_basket_id IN bb_basket.idBasket%TYPE,
   p_date_shipped IN DATE,
-  p_shipper IN VARCHAR2,
-  p_tracking_number IN VARCHAR2
+  p_tracking_number IN VARCHAR2,
+  p_shipper IN VARCHAR2
 ) AS
+  v_status_id bb_basketstatus.idStatus%TYPE;
 BEGIN
-  INSERT INTO BB_BASKETSTATUS (
-    IDBASKETSTATUS,
-    IDBASKET,
-    IDSTAGE,
-    DTEVENT,
-    COMMENTS
+ -- Get the next sequence value for the status ID
+  SELECT
+    bb_status_seq.NEXTVAL INTO v_status_id
+  FROM
+    dual;
+ -- Insert the shipping information into bb_basketstatus table
+  INSERT INTO bb_basketstatus (
+    idStatus,
+    idBasket,
+    idStage,
+    dtStage,
+    shipper,
+    ShippingNum
   ) VALUES (
-    BB_STATUS_SEQ.NEXTVAL,
+    v_status_id,
     p_basket_id,
     3,
     p_date_shipped,
-    'Shipped via '
-    || p_shipper
-    || ', Tracking Number: '
-    || p_tracking_number
+    p_shipper,
+    p_tracking_number
   );
+ -- Update the shipflag in bb_basket table
+  UPDATE bb_basket
+  SET
+    shipflag = 'Y'
+  WHERE
+    idBasket = p_basket_id;
+ -- Commit the transaction
   COMMIT;
-END;
+ -- Display success message
+  DBMS_OUTPUT.PUT_LINE('Order status updated successfully.');
+EXCEPTION
+  WHEN OTHERS THEN
+ -- Rollback the transaction if an error occurs
+    ROLLBACK;
+ -- Display error message
+    DBMS_OUTPUT.PUT_LINE('Error updating order status: '
+                         || SQLERRM);
+END STATUS_SHIP_SP;
 /
 
 -- Step 2: Test the procedure with the provided information
 BEGIN
   STATUS_SHIP_SP(3, TO_DATE('20-FEB-12', 'DD-MON-YY'), 'UPS', 'ZW2384YXK4957');
 END;
-/
 
 -- Assignment 5-6: Returning Order Status Information
 -- Create a procedure that returns the most recent order status information for a specified basket.
@@ -350,58 +371,76 @@ END;
 -- description and date the status was recorded. If no status is available for the specified basket
 -- ID, return a message stating that no status is available. Name the procedure STATUS_SP. Test
 -- the procedure twice with the basket ID 4 and then 6.
--- Step 1: Create the procedure
+
 CREATE OR REPLACE PROCEDURE STATUS_SP (
-    p_basket_id    IN NUMBER,
-    p_status_desc  OUT VARCHAR2,
-    p_status_date  OUT DATE
-)
-AS
+  basket_id_param IN bb_basket.idBasket%TYPE,
+  status_desc OUT VARCHAR2,
+  status_date OUT DATE
+) AS
+  v_status_id bb_basketstatus.idStatus%TYPE;
+  v_stage_id  bb_basketstatus.idStage%TYPE;
 BEGIN
-    SELECT 
-        CASE 
-            WHEN bs.IDSTAGE = 1 THEN 'Submitted and received'
-            WHEN bs.IDSTAGE = 2 THEN 'Confirmed, processed, sent to shipping'
-            WHEN bs.IDSTAGE = 3 THEN 'Shipped'
-            WHEN bs.IDSTAGE = 4 THEN 'Cancelled'
-            WHEN bs.IDSTAGE = 5 THEN 'Back-ordered'
-            ELSE 'Unknown'
-        END,
-        bs.DTEVENT
-    INTO 
-        p_status_desc,
-        p_status_date
-    FROM 
-        BB_BASKETSTATUS bs
-    WHERE 
-        bs.IDBASKET = p_basket_id
-    ORDER BY 
-        bs.DTEVENT DESC;
-    
-    IF SQL%NOTFOUND THEN
-        p_status_desc := 'No status available';
-        p_status_date := NULL;
-    END IF;
-END;
+ -- Get the most recent status ID for the specified basket ID
+  SELECT
+    MAX(idStatus) INTO v_status_id
+  FROM
+    bb_basketstatus
+  WHERE
+    idBasket = basket_id_param;
+ -- Check if there is a status available for the specified basket ID
+  IF v_status_id IS NOT NULL THEN
+ -- Get the stage ID and status date for the most recent status
+    SELECT
+      idStage,
+      dtStage INTO v_stage_id,
+      status_date
+    FROM
+      bb_basketstatus
+    WHERE
+      idStatus = v_status_id;
+ -- Return the stage description based on the stage ID
+    CASE v_stage_id
+      WHEN 1 THEN
+        status_desc := 'Submitted and received';
+      WHEN 2 THEN
+        status_desc := 'Confirmed, processed, sent to shipping';
+      WHEN 3 THEN
+        status_desc := 'Shipped';
+      WHEN 4 THEN
+        status_desc := 'Cancelled';
+      WHEN 5 THEN
+        status_desc := 'Back-ordered';
+    END CASE;
+  ELSE
+ -- If no status is available for the specified basket ID, return a message
+    status_desc := 'No status available';
+    status_date := NULL;
+  END IF;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    status_desc := 'No status available';
+    status_date := NULL;
+END STATUS_SP;
 /
 
--- Step 2: Test the procedure with basket ID 4
 DECLARE
-    v_status_desc VARCHAR2(100);
-    v_status_date DATE;
+  v_status_desc VARCHAR2(100);
+  v_status_date DATE;
 BEGIN
-    STATUS_SP(4, v_status_desc, v_status_date);
-    DBMS_OUTPUT.PUT_LINE('Status for Basket ID 4: ' || v_status_desc || ', recorded on ' || TO_CHAR(v_status_date, 'DD-MON-YYYY'));
-END;
-/
-
--- Test the procedure with basket ID 6
-DECLARE
-    v_status_desc VARCHAR2(100);
-    v_status_date DATE;
-BEGIN
-    STATUS_SP(6, v_status_desc, v_status_date);
-    DBMS_OUTPUT.PUT_LINE('Status for Basket ID 6: ' || v_status_desc || ', recorded on ' || TO_CHAR(v_status_date, 'DD-MON-YYYY'));
+ -- Test with basket ID 4
+  STATUS_SP(4, v_status_desc, v_status_date);
+  DBMS_OUTPUT.PUT_LINE('Basket 4 Status: '
+                       || v_status_desc
+                       || ' (Date: '
+                       || TO_CHAR(v_status_date, 'DD-MON-YYYY')
+                          || ')');
+ -- Test with basket ID 6
+  STATUS_SP(6, v_status_desc, v_status_date);
+  DBMS_OUTPUT.PUT_LINE('Basket 6 Status: '
+                       || v_status_desc
+                       || ' (Date: '
+                       || TO_CHAR(v_status_date, 'DD-MON-YYYY')
+                          || ')');
 END;
 /
 
@@ -605,4 +644,3 @@ BEGIN
                        || v_password); -- Placeholder for cookie value
 END;
 /
-

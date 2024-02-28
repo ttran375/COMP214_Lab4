@@ -1,132 +1,87 @@
--- Assignment 5-4: Updating Columns in a Table
--- After a shopper completes an order, a procedure is called to update the following columns in the
--- BASKET table: ORDERPLACED, SUBTOTAL, SHIPPING, TAX, and TOTAL. The value 1
--- entered in the ORDERPLACED column indicates that the shopper has completed an order.
--- Inputs to the procedure are the basket ID and amounts for the subtotal, shipping, tax, and total.
--- 1. In SQL Developer, create a procedure named BASKET_CONFIRM_SP that accepts the input
--- values specified in the preceding description. Keep in mind that you’re modifying an existing
--- row of the BB_BASKET table in this procedure.
--- 2. Enter the following statements to create a new basket containing two items:
--- INSERT INTO BB_BASKET (IDBASKET, QUANTITY, IDSHOPPER,
--- ORDERPLACED, SUBTOTAL, TOTAL,
--- SHIPPING, TAX, DTCREATED, PROMO)
--- VALUES (17, 2, 22, 0, 0, 0, 0, 0, '28-FEB-12', 0);
--- INSERT INTO BB_BASKETITEM (IDBASKETITEM, IDPRODUCT, PRICE,
--- QUANTITY, IDBASKET, OPTION1, OPTION2)
--- VALUES (44, 7, 10.8, 3, 17, 2, 3);
--- INSERT INTO BB_BASKETITEM (IDBASKETITEM, IDPRODUCT, PRICE,
--- QUANTITY, IDBASKET, OPTION1, OPTION2)
--- VALUES (45, 8, 10.8, 3, 17, 2, 3);
--- 3. Type and run COMMIT; to save the data from these statements.
--- 4. Call the procedure with the following parameter values: 17, 64.80, 8.00, 1.94, 74.74.
--- As mentioned, these values represent the basket ID and the amounts for the subtotal,
--- shipping, tax, and total.
--- 5. Query the BB_BASKET table to confirm that the procedure was successful:
--- SELECT subtotal, shipping, tax, total, orderplaced
--- FROM bb_basket
--- WHERE idbasket = 17;.
--- Step 1: Create the procedure
-CREATE OR REPLACE PROCEDURE BASKET_CONFIRM_SP (
-  p_idbasket IN BB_BASKET.IDBASKET%TYPE,
-  p_subtotal IN BB_BASKET.SUBTOTAL%TYPE,
-  p_shipping IN BB_BASKET.SHIPPING%TYPE,
-  p_tax IN BB_BASKET.TAX%TYPE,
-  p_total IN BB_BASKET.TOTAL%TYPE
-) IS
+-- Assignment 5-6: Returning Order Status Information
+-- Create a procedure that returns the most recent order status information for a specified basket.
+-- This procedure should determine the most recent ordering-stage entry in the BB_BASKETSTATUS
+-- table and return the data. Use an IF or CASE clause to return a stage description instead
+-- of an IDSTAGE number, which means little to shoppers. The IDSTAGE column of the
+-- BB_BASKETSTATUS table identifies each stage as follows:
+-- • 1—Submitted and received
+-- • 2—Confirmed, processed, sent to shipping
+-- • 3—Shipped
+-- • 4—Cancelled
+-- • 5—Back-ordered
+-- The procedure should accept a basket ID number and return the most recent status
+-- description and date the status was recorded. If no status is available for the specified basket
+-- ID, return a message stating that no status is available. Name the procedure STATUS_SP. Test
+-- the procedure twice with the basket ID 4 and then 6.
+
+CREATE OR REPLACE PROCEDURE STATUS_SP (
+  basket_id_param IN bb_basket.idBasket%TYPE,
+  status_desc OUT VARCHAR2,
+  status_date OUT DATE
+) AS
+  v_status_id bb_basketstatus.idStatus%TYPE;
+  v_stage_id  bb_basketstatus.idStage%TYPE;
 BEGIN
-  UPDATE BB_BASKET
-  SET
-    ORDERPLACED = 1,
-    SUBTOTAL = p_subtotal,
-    SHIPPING = p_shipping,
-    TAX = p_tax,
-    TOTAL = p_total
+ -- Get the most recent status ID for the specified basket ID
+  SELECT
+    MAX(idStatus) INTO v_status_id
+  FROM
+    bb_basketstatus
   WHERE
-    IDBASKET = p_idbasket;
-  COMMIT;
-END;
+    idBasket = basket_id_param;
+ -- Check if there is a status available for the specified basket ID
+  IF v_status_id IS NOT NULL THEN
+ -- Get the stage ID and status date for the most recent status
+    SELECT
+      idStage,
+      dtStage INTO v_stage_id,
+      status_date
+    FROM
+      bb_basketstatus
+    WHERE
+      idStatus = v_status_id;
+ -- Return the stage description based on the stage ID
+    CASE v_stage_id
+      WHEN 1 THEN
+        status_desc := 'Submitted and received';
+      WHEN 2 THEN
+        status_desc := 'Confirmed, processed, sent to shipping';
+      WHEN 3 THEN
+        status_desc := 'Shipped';
+      WHEN 4 THEN
+        status_desc := 'Cancelled';
+      WHEN 5 THEN
+        status_desc := 'Back-ordered';
+    END CASE;
+  ELSE
+ -- If no status is available for the specified basket ID, return a message
+    status_desc := 'No status available';
+    status_date := NULL;
+  END IF;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    status_desc := 'No status available';
+    status_date := NULL;
+END STATUS_SP;
 /
 
--- Step 2: Execute the provided INSERT statements to create a new basket and basket items
-INSERT INTO BB_BASKET (
-  IDBASKET,
-  QUANTITY,
-  IDSHOPPER,
-  ORDERPLACED,
-  SUBTOTAL,
-  TOTAL,
-  SHIPPING,
-  TAX,
-  DTCREATED,
-  PROMO
-) VALUES (
-  17,
-  2,
-  22,
-  0,
-  0,
-  0,
-  0,
-  0,
-  TO_DATE('28-FEB-12', 'DD-MON-YY'),
-  0
-);
-
-INSERT INTO BB_BASKETITEM (
-  IDBASKETITEM,
-  IDPRODUCT,
-  PRICE,
-  QUANTITY,
-  IDBASKET,
-  OPTION1,
-  OPTION2
-) VALUES (
-  44,
-  7,
-  10.8,
-  3,
-  17,
-  2,
-  3
-);
-
-INSERT INTO BB_BASKETITEM (
-  IDBASKETITEM,
-  IDPRODUCT,
-  PRICE,
-  QUANTITY,
-  IDBASKET,
-  OPTION1,
-  OPTION2
-) VALUES (
-  45,
-  8,
-  10.8,
-  3,
-  17,
-  2,
-  3
-);
-
-COMMIT;
-
--- Step 3: Commit the transaction to save the data
-COMMIT;
-
--- Step 4: Call the procedure with the provided parameter values
+DECLARE
+  v_status_desc VARCHAR2(100);
+  v_status_date DATE;
 BEGIN
-  BASKET_CONFIRM_SP(17, 64.80, 8.00, 1.94, 74.74);
+ -- Test with basket ID 4
+  STATUS_SP(4, v_status_desc, v_status_date);
+  DBMS_OUTPUT.PUT_LINE('Basket 4 Status: '
+                       || v_status_desc
+                       || ' (Date: '
+                       || TO_CHAR(v_status_date, 'DD-MON-YYYY')
+                          || ')');
+ -- Test with basket ID 6
+  STATUS_SP(6, v_status_desc, v_status_date);
+  DBMS_OUTPUT.PUT_LINE('Basket 6 Status: '
+                       || v_status_desc
+                       || ' (Date: '
+                       || TO_CHAR(v_status_date, 'DD-MON-YYYY')
+                          || ')');
 END;
 /
-
--- Step 5: Query the BB_BASKET table to confirm the changes
-SELECT
-  subtotal,
-  shipping,
-  tax,
-  total,
-  orderplaced
-FROM
-  bb_basket
-WHERE
-  idbasket = 17;
