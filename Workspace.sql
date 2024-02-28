@@ -1,68 +1,57 @@
-CREATE OR REPLACE PROCEDURE MEMBER_CK_SP (
-  p_username IN VARCHAR2,
-  p_password IN OUT VARCHAR2,
-  p_name OUT VARCHAR2,
-  p_check OUT VARCHAR2
-) AS
-  v_member_name VARCHAR2(100);
+-- Assignment 5-1: Creating a Procedure
+-- Use these steps to create a procedure that allows a company employee to make corrections to
+-- a product’s assigned name. Review the BB_PRODUCT table and identify the PRODUCT NAME
+-- and PRIMARY KEY columns. The procedure needs two IN parameters to identify the product
+-- ID and supply the new description. This procedure needs to perform only a DML action, so no
+-- OUT parameters are necessary.
+-- 1. In SQL Developer, create the following procedure:
+-- CREATE OR REPLACE PROCEDURE prod_name_sp
+-- (p_prodid IN bb_product.idproduct%TYPE,
+-- p_descrip IN bb_product.description%TYPE)
+-- IS
+-- BEGIN
+-- UPDATE bb_product
+-- SET description = p_descrip
+-- WHERE idproduct = p_prodid;
+-- COMMIT;
+-- END;
+-- 2. Before testing the procedure, verify the current description value for product ID 1 with
+-- SELECT * FROM bb_product;.
+-- 3. Call the procedure with parameter values of 1 for the product ID and CapressoBar Model
+-- #388 for the description.
+-- 4. Verify that the update was successful by querying the table with SELECT * FROM
+-- bb_product;.
+CREATE OR REPLACE PROCEDURE prod_name_sp (
+  p_prodid IN bb_product.idProduct%TYPE,
+  p_descrip IN bb_product.Description%TYPE
+) IS
 BEGIN
- -- Check if the username and password are valid
-  SELECT
-    first_name
-    || ' '
-    || last_name INTO v_member_name
-  FROM
-    BB_MEMBER
+  UPDATE bb_product
+  SET
+    Description = p_descrip
   WHERE
-    username = p_username
-    AND password = p_password;
- -- If a record is found, the username and password are valid
-  IF v_member_name IS NOT NULL THEN
-    p_name := v_member_name;
-    p_check := 'VALID';
- -- Generate and return the cookie value (for simplicity, a placeholder is used here)
-    p_password := 'cookie_value_placeholder';
-  ELSE
- -- If no record is found, the username and password are invalid
-    p_check := 'INVALID';
-  END IF;
-EXCEPTION
-  WHEN NO_DATA_FOUND THEN
- -- If no record is found, the username and password are invalid
-    p_check := 'INVALID';
-  WHEN OTHERS THEN
- -- Handle other exceptions
-    p_check := 'ERROR: '
-               || SQLERRM;
+    idProduct = p_prodid;
+  COMMIT;
 END;
 /
 
-DECLARE
-  v_password VARCHAR2(100) := 'kile'; -- Valid password
-  v_name     VARCHAR2(100);
-  v_check    VARCHAR2(100);
+SELECT
+  *
+FROM
+  bb_product
+WHERE
+  idProduct = 1;
+/
+
 BEGIN
-  MEMBER_CK_SP('rat55', v_password, v_name, v_check);
-  DBMS_OUTPUT.PUT_LINE('Name: '
-                       || v_name);
-  DBMS_OUTPUT.PUT_LINE('Check: '
-                       || v_check);
-  DBMS_OUTPUT.PUT_LINE('Cookie Value: '
-                       || v_password); -- Placeholder for cookie value
+  prod_name_sp(1, 'CapressoBar Model #388');
 END;
 /
 
-DECLARE
-  v_password VARCHAR2(100) := 'invalid_password'; -- Invalid password
-  v_name     VARCHAR2(100);
-  v_check    VARCHAR2(100);
-BEGIN
-  MEMBER_CK_SP('rat', v_password, v_name, v_check); -- Invalid username
-  DBMS_OUTPUT.PUT_LINE('Name: '
-                       || v_name);
-  DBMS_OUTPUT.PUT_LINE('Check: '
-                       || v_check);
-  DBMS_OUTPUT.PUT_LINE('Cookie Value: '
-                       || v_password); -- Placeholder for cookie value
-END;
+SELECT
+  *
+FROM
+  bb_product
+WHERE
+  idProduct = 1;
 /

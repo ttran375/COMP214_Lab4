@@ -41,7 +41,6 @@ FROM
   bb_product
 WHERE
   idProduct = 1;
-
 /
 
 BEGIN
@@ -55,7 +54,6 @@ FROM
   bb_product
 WHERE
   idProduct = 1;
-
 /
 
 -- Assignment 5-2: Using a Procedure with IN Parameters
