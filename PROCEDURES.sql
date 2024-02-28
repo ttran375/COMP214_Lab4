@@ -179,29 +179,91 @@ END;
 -- SELECT subtotal, shipping, tax, total, orderplaced
 -- FROM bb_basket
 -- WHERE idbasket = 17;.
+
 -- Step 1: Create the procedure
 CREATE OR REPLACE PROCEDURE BASKET_CONFIRM_SP (
-  p_basket_id IN NUMBER,
-  p_subtotal IN NUMBER,
-  p_shipping IN NUMBER,
-  p_tax IN NUMBER,
-  p_total IN NUMBER
-) AS
+  p_idbasket IN BB_BASKET.IDBASKET%TYPE,
+  p_subtotal IN BB_BASKET.SUBTOTAL%TYPE,
+  p_shipping IN BB_BASKET.SHIPPING%TYPE,
+  p_tax IN BB_BASKET.TAX%TYPE,
+  p_total IN BB_BASKET.TOTAL%TYPE
+) IS
 BEGIN
   UPDATE BB_BASKET
   SET
+    ORDERPLACED = 1,
     SUBTOTAL = p_subtotal,
     SHIPPING = p_shipping,
     TAX = p_tax,
-    TOTAL = p_total,
-    ORDERPLACED = 1
+    TOTAL = p_total
   WHERE
-    IDBASKET = p_basket_id;
+    IDBASKET = p_idbasket;
   COMMIT;
 END;
 /
 
 -- Step 2: Execute the provided INSERT statements to create a new basket and basket items
+INSERT INTO BB_BASKET (
+  IDBASKET,
+  QUANTITY,
+  IDSHOPPER,
+  ORDERPLACED,
+  SUBTOTAL,
+  TOTAL,
+  SHIPPING,
+  TAX,
+  DTCREATED,
+  PROMO
+) VALUES (
+  17,
+  2,
+  22,
+  0,
+  0,
+  0,
+  0,
+  0,
+  TO_DATE('28-FEB-12', 'DD-MON-YY'),
+  0
+);
+
+INSERT INTO BB_BASKETITEM (
+  IDBASKETITEM,
+  IDPRODUCT,
+  PRICE,
+  QUANTITY,
+  IDBASKET,
+  OPTION1,
+  OPTION2
+) VALUES (
+  44,
+  7,
+  10.8,
+  3,
+  17,
+  2,
+  3
+);
+
+INSERT INTO BB_BASKETITEM (
+  IDBASKETITEM,
+  IDPRODUCT,
+  PRICE,
+  QUANTITY,
+  IDBASKET,
+  OPTION1,
+  OPTION2
+) VALUES (
+  45,
+  8,
+  10.8,
+  3,
+  17,
+  2,
+  3
+);
+
+COMMIT;
 
 -- Step 3: Commit the transaction to save the data
 COMMIT;
