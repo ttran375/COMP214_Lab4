@@ -22,7 +22,7 @@
 -- 4. Verify that the update was successful by querying the table with SELECT * FROM
 -- bb_product;.
 
--- Create the procedure
+-- Step 1: Create the procedure
 CREATE OR REPLACE PROCEDURE prod_name_sp (
   p_prodid IN bb_product.idProduct%TYPE,
   p_descrip IN bb_product.Description%TYPE
@@ -37,7 +37,7 @@ BEGIN
 END;
 /
 
--- Verify the current description value
+-- Step 2: Verify the current description value
 SELECT
   *
 FROM
@@ -45,13 +45,13 @@ FROM
 WHERE
   idProduct = 1;
 
--- Call the procedure
+-- Step 3: Call the procedure
 BEGIN
   prod_name_sp(1, 'CapressoBar Model #388');
 END;
 /
 
--- Verify that the update was successful
+-- Step 4: Verify that the update was successful
 SELECT
   *
 FROM
