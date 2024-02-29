@@ -41,9 +41,7 @@ END;
 SELECT
   *
 FROM
-  bb_product
-WHERE
-  idProduct = 1;
+  bb_product;
 
 -- Step 3: Call the procedure
 BEGIN
@@ -55,6 +53,4 @@ END;
 SELECT
   *
 FROM
-  bb_product
-WHERE
-  idProduct = 1;
+  bb_product;

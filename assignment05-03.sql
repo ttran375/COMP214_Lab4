@@ -40,4 +40,3 @@ BEGIN
   DBMS_OUTPUT.PUT_LINE('Tax Amount: $'
                        || TO_CHAR(lv_tax, '999.99'));
 END;
-/
