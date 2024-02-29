@@ -458,6 +458,7 @@ END;
 -- The BB_PROMOLIST table also has a USED column, which contains the default value N
 -- and is updated to Y when the shopper uses the promotion. Test the procedure with the cutoff
 -- date 15-FEB-12. Assign free shipping for the month APR and the year 2012.
+
 CREATE OR REPLACE PROCEDURE PROMO_SHIP_SP (
   p_cutoff_date IN DATE,
   p_month IN VARCHAR2,
@@ -510,7 +511,6 @@ END;
 BEGIN
   PROMO_SHIP_SP(TO_DATE('15-FEB-12', 'DD-MON-YYYY'), 'APR', 2012);
 END;
-/
 
 -- Assignment 5-8: Adding Items to a Basket
 -- As a shopper selects products on the Brewbean’s site, a procedure is needed to add a newly
@@ -525,6 +525,7 @@ END;
 -- • Quantity—1
 -- • Size code—2
 -- • Form code—4
+
 CREATE OR REPLACE PROCEDURE BASKET_ADD_SP (
   p_basket_id IN NUMBER,
   p_product_id IN NUMBER,
@@ -563,7 +564,6 @@ END;
 BEGIN
   BASKET_ADD_SP(14, 8, 10.80, 1, 2, 4);
 END;
-/
 
 -- Assignment 5-9: Creating a Logon Procedure
 -- The home page of the Brewbean’s Web site has an option for members to log on with their IDs
@@ -575,71 +575,61 @@ END;
 -- enter a valid username and password, return the value INVALID in a parameter named
 -- p_check. Test the procedure using a valid logon first, with the username rat55 and password
 -- kile. Then try it with an invalid logon by changing the username to rat.
+
 CREATE OR REPLACE PROCEDURE MEMBER_CK_SP (
   p_username IN VARCHAR2,
-  p_password IN OUT VARCHAR2,
-  p_name OUT VARCHAR2,
-  p_check OUT VARCHAR2
-) AS
-  v_member_name VARCHAR2(100);
+  p_password IN VARCHAR2,
+  p_check OUT VARCHAR2,
+  p_member_name OUT VARCHAR2,
+  p_cookie OUT NUMBER
+) IS
+  v_member_name VARCHAR2(50);
 BEGIN
  -- Check if the username and password are valid
   SELECT
-    first_name
+    FirstName
     || ' '
-    || last_name INTO v_member_name
+    || LastName INTO v_member_name
   FROM
-    BB_MEMBER
+    bb_shopper
   WHERE
-    username = p_username
-    AND password = p_password;
- -- If a record is found, the username and password are valid
-  IF v_member_name IS NOT NULL THEN
-    p_name := v_member_name;
-    p_check := 'VALID';
- -- Generate and return the cookie value (for simplicity, a placeholder is used here)
-    p_password := 'cookie_value_placeholder';
-  ELSE
- -- If no record is found, the username and password are invalid
-    p_check := 'INVALID';
-  END IF;
+    UserName = p_username
+    AND Password = p_password;
+ -- If a member with the provided username and password is found
+ -- Set p_check to 'VALID', return member name and cookie value
+  p_check := 'VALID';
+  p_member_name := v_member_name;
+  p_cookie := dbms_random.value(1, 9999); -- Generating a random cookie value
 EXCEPTION
+ -- If no member is found or an exception occurs, set p_check to 'INVALID'
   WHEN NO_DATA_FOUND THEN
- -- If no record is found, the username and password are invalid
     p_check := 'INVALID';
+    p_member_name := NULL;
+    p_cookie := NULL;
   WHEN OTHERS THEN
- -- Handle other exceptions
-    p_check := 'ERROR: '
-               || SQLERRM;
-END;
+    p_check := 'INVALID';
+    p_member_name := NULL;
+    p_cookie := NULL;
+END MEMBER_CK_SP;
 /
 
 DECLARE
-  v_password VARCHAR2(100) := 'kile'; -- Valid password
-  v_name     VARCHAR2(100);
-  v_check    VARCHAR2(100);
+  v_check       VARCHAR2(10);
+  v_member_name VARCHAR2(50);
+  v_cookie      NUMBER;
 BEGIN
-  MEMBER_CK_SP('rat55', v_password, v_name, v_check);
-  DBMS_OUTPUT.PUT_LINE('Name: '
-                       || v_name);
+ -- Testing with valid logon credentials
+  MEMBER_CK_SP('rat55', 'kile', v_check, v_member_name, v_cookie);
   DBMS_OUTPUT.PUT_LINE('Check: '
                        || v_check);
-  DBMS_OUTPUT.PUT_LINE('Cookie Value: '
-                       || v_password); -- Placeholder for cookie value
-END;
-/
-
-DECLARE
-  v_password VARCHAR2(100) := 'invalid_password'; -- Invalid password
-  v_name     VARCHAR2(100);
-  v_check    VARCHAR2(100);
-BEGIN
-  MEMBER_CK_SP('rat', v_password, v_name, v_check); -- Invalid username
-  DBMS_OUTPUT.PUT_LINE('Name: '
-                       || v_name);
+  IF v_check = 'VALID' THEN
+    DBMS_OUTPUT.PUT_LINE('Member Name: '
+                         || v_member_name);
+    DBMS_OUTPUT.PUT_LINE('Cookie: '
+                         || v_cookie);
+  END IF;
+ -- Testing with invalid logon credentials
+  MEMBER_CK_SP('rat', 'password', v_check, v_member_name, v_cookie);
   DBMS_OUTPUT.PUT_LINE('Check: '
                        || v_check);
-  DBMS_OUTPUT.PUT_LINE('Cookie Value: '
-                       || v_password); -- Placeholder for cookie value
 END;
-/
