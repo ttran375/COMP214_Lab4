@@ -442,7 +442,6 @@ BEGIN
                        || TO_CHAR(v_status_date, 'DD-MON-YYYY')
                           || ')');
 END;
-/
 
 -- Assignment 5-7: Identifying Customers
 -- Brewbean’s wants to offer an incentive of free shipping to customers who haven’t returned to

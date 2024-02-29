@@ -84,4 +84,3 @@ BEGIN
                        || TO_CHAR(v_status_date, 'DD-MON-YYYY')
                           || ')');
 END;
-/
