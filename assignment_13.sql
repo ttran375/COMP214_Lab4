@@ -1,17 +1,18 @@
 -- Assignment 2-13: Using Nested IF Statements
--- An organization has committed to matching pledge amounts based on the donor type and pledge amount. Donor types include I = Individual, B = Business organization, and G = Grant funds. The matching percents are to be applied as follows:
--- |--------------------------------------|
--- |Donor Type |Pledge Amount  |Matching %|
--- |--------------------------------------|
--- |I          |$100–$249      |50%       |                  
--- |I          |$250–$499      |30%       |
--- |I          |$500 or more   |20%       |
--- |B          |$100–$499      |20%       |
--- |B          |$500–$999      |10%       |
--- |B          |$1,000 or more |5%        |
--- |G          |$100 or more   |5%        |
--- |--------------------------------------|
--- Create a PL/SQL block using nested IF statements to accomplish the task. Input values for the block are the donor type code and the pledge amount.
+-- An organization has committed to matching pledge amounts based on the donor type and
+-- pledge amount. Donor types include I = Individual, B = Business organization, and G = Grant
+-- funds. The matching percents are to be applied as follows:
+-- Donor Type Pledge Amount Matching %
+-- I $100–$249 50%
+-- I $250–$499 30%
+-- I $500 or more 20%
+-- B $100–$499 20%
+-- B $500–$999 10%
+-- B $1,000 or more 5%
+-- G $100 or more 5%
+-- Create a PL/SQL block using nested IF statements to accomplish the task. Input values for
+-- the block are the donor type code and the pledge amount.
+
 DECLARE
     lv_donor_type CHAR(1) := 'I';
     lv_pledge_amount NUMBER := 300;
@@ -51,4 +52,3 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('Matching Percentage: ' || TO_CHAR(lv_matching_percent * 100) || '%');
     DBMS_OUTPUT.PUT_LINE('Matching Amount: $' || lv_matching_amount);
 END;
-/

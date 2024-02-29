@@ -1,5 +1,8 @@
 -- Assignment 2-4: Using CASE Statements
--- Create a block using a CASE statement to perform the actions described in Assignment 2-2. Use a scalar variable for the total purchase amount, and initialize this variable to different values to test your block.
+-- Create a block using a CASE statement to perform the actions described in Assignment 2-2. Use
+-- a scalar variable for the total purchase amount, and initialize this variable to different values to
+-- test your block.
+
 DECLARE
     lv_total_purchases NUMBER := 150;
 BEGIN
@@ -19,4 +22,3 @@ BEGIN
 
     DBMS_OUTPUT.PUT_LINE('End of Flowchart');
 END;
-/

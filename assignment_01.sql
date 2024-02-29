@@ -1,12 +1,11 @@
 -- Assignment 2-1: Using Scalar Variables
 -- Create a PL/SQL block containing the following variables:
--- Name Data Type Option Initial Value 
+-- Name Data Type Option Initial Value
 -- lv_test_date DATE December 10, 2012
 -- lv_test_num NUMBER(3) CONSTANT 10
--- lv_test_txt VARCHAR2(10) 
--- Assign your last name as the value of the text variable in the executable 
--- section of the block. Include statements in the block to display each 
--- variable’s value onscreen.
+-- lv_test_txt VARCHAR2(10)
+-- Assign your last name as the value of the text variable in the executable section of the
+-- block. Include statements in the block to display each variable’s value onscreen.
 
 DECLARE
     -- Declare a DATE variable and initialize it with a specific date

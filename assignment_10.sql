@@ -1,5 +1,6 @@
 -- Assignment 2-10: Using a Basic Loop
 -- Accomplish the task in Assignment 2-9 by using a basic loop structure.
+
 DECLARE
     lv_start_date DATE := TO_DATE('2024-01-01', 'YYYY-MM-DD');
     lv_monthly_payment NUMBER := 1000;
@@ -21,4 +22,3 @@ BEGIN
         lv_total_payments := lv_total_payments - 1;
     END LOOP;
 END;
-/
