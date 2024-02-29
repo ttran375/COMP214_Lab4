@@ -1,86 +1,68 @@
--- Assignment 5-6: Returning Order Status Information
--- Create a procedure that returns the most recent order status information for a specified basket.
--- This procedure should determine the most recent ordering-stage entry in the BB_BASKETSTATUS
--- table and return the data. Use an IF or CASE clause to return a stage description instead
--- of an IDSTAGE number, which means little to shoppers. The IDSTAGE column of the
--- BB_BASKETSTATUS table identifies each stage as follows:
--- • 1—Submitted and received
--- • 2—Confirmed, processed, sent to shipping
--- • 3—Shipped
--- • 4—Cancelled
--- • 5—Back-ordered
--- The procedure should accept a basket ID number and return the most recent status
--- description and date the status was recorded. If no status is available for the specified basket
--- ID, return a message stating that no status is available. Name the procedure STATUS_SP. Test
--- the procedure twice with the basket ID 4 and then 6.
+-- Assignment 5-7: Identifying Customers
+-- Brewbean’s wants to offer an incentive of free shipping to customers who haven’t returned to
+-- the site since a specified date. Create a procedure named PROMO_SHIP_SP that determines
+-- who these customers are and then updates the BB_PROMOLIST table accordingly. The
+-- procedure uses the following information:
+-- • Date cutoff—Any customers who haven’t shopped on the site since this date
+-- should be included as incentive participants. Use the basket creation date to
+-- reflect shopper activity dates.
+-- • Month—A three-character month (such as APR) should be added to the promotion
+-- table to indicate which month free shipping is effective.
+-- • Year—A four-digit year indicates the year the promotion is effective.
+-- • promo_flag—1 represents free shipping.
+-- The BB_PROMOLIST table also has a USED column, which contains the default value N
+-- and is updated to Y when the shopper uses the promotion. Test the procedure with the cutoff
+-- date 15-FEB-12. Assign free shipping for the month APR and the year 2012.
 
-CREATE OR REPLACE PROCEDURE STATUS_SP (
-  basket_id_param IN bb_basket.idBasket%TYPE,
-  status_desc OUT VARCHAR2,
-  status_date OUT DATE
+CREATE OR REPLACE PROCEDURE PROMO_SHIP_SP (
+  p_cutoff_date IN DATE,
+  p_month IN VARCHAR2,
+  p_year IN NUMBER
 ) AS
-  v_status_id bb_basketstatus.idStatus%TYPE;
-  v_stage_id  bb_basketstatus.idStage%TYPE;
 BEGIN
- -- Get the most recent status ID for the specified basket ID
-  SELECT
-    MAX(idStatus) INTO v_status_id
-  FROM
-    bb_basketstatus
-  WHERE
-    idBasket = basket_id_param;
- -- Check if there is a status available for the specified basket ID
-  IF v_status_id IS NOT NULL THEN
- -- Get the stage ID and status date for the most recent status
+ -- Identify customers who haven't shopped since the cutoff date
+  FOR customer IN (
     SELECT
-      idStage,
-      dtStage INTO v_stage_id,
-      status_date
+      DISTINCT bs.IDSHOPPER
     FROM
-      bb_basketstatus
+      BB_BASKET bs
     WHERE
-      idStatus = v_status_id;
- -- Return the stage description based on the stage ID
-    CASE v_stage_id
-      WHEN 1 THEN
-        status_desc := 'Submitted and received';
-      WHEN 2 THEN
-        status_desc := 'Confirmed, processed, sent to shipping';
-      WHEN 3 THEN
-        status_desc := 'Shipped';
-      WHEN 4 THEN
-        status_desc := 'Cancelled';
-      WHEN 5 THEN
-        status_desc := 'Back-ordered';
-    END CASE;
-  ELSE
- -- If no status is available for the specified basket ID, return a message
-    status_desc := 'No status available';
-    status_date := NULL;
-  END IF;
+      bs.DTCREATED < p_cutoff_date
+      AND NOT EXISTS (
+        SELECT
+          1
+        FROM
+          BB_BASKET bs2
+        WHERE
+          bs2.IDSHOPPER = bs.IDSHOPPER
+          AND bs2.DTCREATED > p_cutoff_date
+      )
+  ) LOOP
+ -- Update BB_PROMOLIST for each eligible customer
+    INSERT INTO BB_PROMOLIST (
+      IDSHOPPER,
+      MONTH,
+      YEAR,
+      PROMO_FLAG,
+      USED
+    ) VALUES (
+      customer.IDSHOPPER,
+      p_month,
+      p_year,
+      1,
+      'N'
+    );
+  END LOOP;
+
+  COMMIT;
+  DBMS_OUTPUT.PUT_LINE('Promotion records updated successfully.');
 EXCEPTION
-  WHEN NO_DATA_FOUND THEN
-    status_desc := 'No status available';
-    status_date := NULL;
-END STATUS_SP;
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('An error occurred: '
+                         || SQLERRM);
+END;
 /
 
-DECLARE
-  v_status_desc VARCHAR2(100);
-  v_status_date DATE;
 BEGIN
- -- Test with basket ID 4
-  STATUS_SP(4, v_status_desc, v_status_date);
-  DBMS_OUTPUT.PUT_LINE('Basket 4 Status: '
-                       || v_status_desc
-                       || ' (Date: '
-                       || TO_CHAR(v_status_date, 'DD-MON-YYYY')
-                          || ')');
- -- Test with basket ID 6
-  STATUS_SP(6, v_status_desc, v_status_date);
-  DBMS_OUTPUT.PUT_LINE('Basket 6 Status: '
-                       || v_status_desc
-                       || ' (Date: '
-                       || TO_CHAR(v_status_date, 'DD-MON-YYYY')
-                          || ')');
+  PROMO_SHIP_SP(TO_DATE('15-FEB-12', 'DD-MON-YYYY'), 'APR', 2012);
 END;
