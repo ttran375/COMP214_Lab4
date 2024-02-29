@@ -16,13 +16,13 @@ CREATE OR REPLACE PROCEDURE MEMBER_CK_SP (
   p_member_name OUT VARCHAR2,
   p_cookie OUT NUMBER
 ) IS
-  v_member_name VARCHAR2(50);
+  lv_member_name VARCHAR2(50);
 BEGIN
  -- Check if the username and password are valid
   SELECT
     FirstName
     || ' '
-    || LastName INTO v_member_name
+    || LastName INTO lv_member_name
   FROM
     bb_shopper
   WHERE
@@ -31,7 +31,7 @@ BEGIN
  -- If a member with the provided username and password is found
  -- Set p_check to 'VALID', return member name and cookie value
   p_check := 'VALID';
-  p_member_name := v_member_name;
+  p_member_name := lv_member_name;
   p_cookie := dbms_random.value(1, 9999); -- Generating a random cookie value
 EXCEPTION
  -- If no member is found or an exception occurs, set p_check to 'INVALID'
@@ -47,22 +47,22 @@ END MEMBER_CK_SP;
 /
 
 DECLARE
-  v_check       VARCHAR2(10);
-  v_member_name VARCHAR2(50);
-  v_cookie      NUMBER;
+  lv_check       VARCHAR2(10);
+  lv_member_name VARCHAR2(50);
+  lv_cookie      NUMBER;
 BEGIN
  -- Testing with valid logon credentials
-  MEMBER_CK_SP('rat55', 'kile', v_check, v_member_name, v_cookie);
+  MEMBER_CK_SP('rat55', 'kile', lv_check, lv_member_name, lv_cookie);
   DBMS_OUTPUT.PUT_LINE('Check: '
-                       || v_check);
-  IF v_check = 'VALID' THEN
+                       || lv_check);
+  IF lv_check = 'VALID' THEN
     DBMS_OUTPUT.PUT_LINE('Member Name: '
-                         || v_member_name);
+                         || lv_member_name);
     DBMS_OUTPUT.PUT_LINE('Cookie: '
-                         || v_cookie);
+                         || lv_cookie);
   END IF;
  -- Testing with invalid logon credentials
-  MEMBER_CK_SP('rat', 'password', v_check, v_member_name, v_cookie);
+  MEMBER_CK_SP('rat', 'password', lv_check, lv_member_name, lv_cookie);
   DBMS_OUTPUT.PUT_LINE('Check: '
-                       || v_check);
+                       || lv_check);
 END;

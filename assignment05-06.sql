@@ -19,29 +19,29 @@ CREATE OR REPLACE PROCEDURE STATUS_SP (
   status_desc OUT VARCHAR2,
   status_date OUT DATE
 ) AS
-  v_status_id bb_basketstatus.idStatus%TYPE;
-  v_stage_id  bb_basketstatus.idStage%TYPE;
+  lv_status_id bb_basketstatus.idStatus%TYPE;
+  lv_stage_id  bb_basketstatus.idStage%TYPE;
 BEGIN
  -- Get the most recent status ID for the specified basket ID
   SELECT
-    MAX(idStatus) INTO v_status_id
+    MAX(idStatus) INTO lv_status_id
   FROM
     bb_basketstatus
   WHERE
     idBasket = basket_id_param;
  -- Check if there is a status available for the specified basket ID
-  IF v_status_id IS NOT NULL THEN
+  IF lv_status_id IS NOT NULL THEN
  -- Get the stage ID and status date for the most recent status
     SELECT
       idStage,
-      dtStage INTO v_stage_id,
+      dtStage INTO lv_stage_id,
       status_date
     FROM
       bb_basketstatus
     WHERE
-      idStatus = v_status_id;
+      idStatus = lv_status_id;
  -- Return the stage description based on the stage ID
-    CASE v_stage_id
+    CASE lv_stage_id
       WHEN 1 THEN
         status_desc := 'Submitted and received';
       WHEN 2 THEN
@@ -66,20 +66,20 @@ END STATUS_SP;
 /
 
 DECLARE
-  v_status_desc VARCHAR2(100);
-  v_status_date DATE;
+  lv_status_desc VARCHAR2(100);
+  lv_status_date DATE;
 BEGIN
  -- Test with basket ID 4
-  STATUS_SP(4, v_status_desc, v_status_date);
+  STATUS_SP(4, lv_status_desc, lv_status_date);
   DBMS_OUTPUT.PUT_LINE('Basket 4 Status: '
-                       || v_status_desc
+                       || lv_status_desc
                        || ' (Date: '
                        || TO_CHAR(v_status_date, 'DD-MON-YYYY')
                           || ')');
  -- Test with basket ID 6
-  STATUS_SP(6, v_status_desc, v_status_date);
+  STATUS_SP(6, lv_status_desc, lv_status_date);
   DBMS_OUTPUT.PUT_LINE('Basket 6 Status: '
-                       || v_status_desc
+                       || lv_status_desc
                        || ' (Date: '
                        || TO_CHAR(v_status_date, 'DD-MON-YYYY')
                           || ')');
