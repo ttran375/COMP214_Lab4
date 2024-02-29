@@ -10,4 +10,3 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('Number: ' || lv_test_num);
     DBMS_OUTPUT.PUT_LINE('Text: ' || lv_test_txt);
 END;
-/
