@@ -241,6 +241,39 @@ END;
 -- that accepts a stage ID and returns the status description. The descriptions for stage IDs
 -- are listed in Table 6-3. Test the function in a SELECT statement that retrieves all rows in the
 -- BB_BASKETSTATUS table for basket 4 and displays the stage ID and its description.
+-- Create the function STATUS_DESC_SF
+CREATE OR REPLACE FUNCTION STATUS_DESC_SF(
+  stage_id IN NUMBER
+) RETURN VARCHAR2 IS
+  status_desc VARCHAR2(100);
+BEGIN
+  CASE stage_id
+    WHEN 1 THEN
+      status_desc := 'Order submitted';
+    WHEN 2 THEN
+      status_desc := 'Accepted, sent to shipping';
+    WHEN 3 THEN
+      status_desc := 'Back-ordered';
+    WHEN 4 THEN
+      status_desc := 'Cancelled';
+    WHEN 5 THEN
+      status_desc := 'Shipped';
+    ELSE
+      status_desc := 'Unknown';
+  END CASE;
+
+  RETURN status_desc;
+END STATUS_DESC_SF;
+/
+
+-- Test the function using a SELECT statement
+SELECT
+  bs.idStage,
+  STATUS_DESC_SF(bs.idStage) AS Status_Description
+FROM
+  bb_basketstatus bs
+WHERE
+  bs.idBasket = 4;
 
 -- Assignment 6-7: Calculating an Order’s Tax Amount
 -- Create a function named TAX_CALC_SF that accepts a basket ID, calculates the tax amount
@@ -250,6 +283,43 @@ END;
 -- in the tax table or no shipping state is assigned to the basket, a tax amount of zero should be
 -- applied to the order. Use the function in a SELECT statement that displays the shipping costs for
 -- a basket that has tax applied and a basket with no shipping state.
+-- TABLE 6-3 Basket Stage Descriptions
+-- Stage ID Description
+-- 1 Order submitted
+-- 2 Accepted, sent to shipping
+-- 3 Back-ordered
+-- 4 Cancelled
+-- 5 Shipped
+-- Step 1: Define the function TAX_CALC_SF
+CREATE OR REPLACE FUNCTION TAX_CALC_SF(
+  basket_id IN NUMBER
+) RETURN NUMBER AS
+  tax_amount NUMBER(5, 2);
+BEGIN
+ -- Step 2: Calculate the tax based on the shipping state
+  SELECT
+    COALESCE(SUM(b.SubTotal * t.TaxRate), 0) INTO tax_amount
+  FROM
+    bb_basket b
+    LEFT JOIN bb_tax t
+    ON b.ShipState = t.State
+  WHERE
+    b.idBasket = basket_id;
+  RETURN tax_amount;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    RETURN 0;
+END TAX_CALC_SF;
+/
+
+-- Step 3: Use the function in a SELECT statement
+SELECT
+  idBasket,
+  SubTotal,
+  TAX_CALC_SF(idBasket) AS TaxAmount,
+  Shipping
+FROM
+  bb_basket;
 
 -- Assignment 6-8: Identifying Sale Products
 -- When a product is placed on sale, Brewbean’s records the sale’s start and end dates in
@@ -260,8 +330,43 @@ END;
 -- product ID as arguments, checks whether the date falls within the product’s sale period, and returns
 -- the corresponding string value. Test the function with the product ID 6 and two dates: 10-JUN-12
 -- and 19-JUN-12. Verify your results by reviewing the product sales information.
+CREATE OR REPLACE FUNCTION CK_SALE_SF(
+  p_date DATE,
+  p_product_id NUMBER
+) RETURN VARCHAR2 IS
+  v_sale_start DATE;
+  v_sale_end   DATE;
+  v_sale_price NUMBER(6, 2);
+BEGIN
+ -- Retrieve sale start date, end date, and sale price for the given product ID
+  SELECT
+    SaleStart,
+    SaleEnd,
+    SalePrice INTO v_sale_start,
+    v_sale_end,
+    v_sale_price
+  FROM
+    bb_product
+  WHERE
+    idProduct = p_product_id;
+ -- Check if the provided date falls within the sale period
+  IF p_date BETWEEN v_sale_start AND v_sale_end THEN
+    RETURN 'ON SALE!';
+  ELSE
+    RETURN 'Great Deal!';
+  END IF;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    RETURN 'Product not found';
+END CK_SALE_SF;
+/
 
--- Hands-On Assignments Part II
+-- Test the function with the provided product ID (6) and two dates
+SELECT
+  CK_SALE_SF('10-JUN-2012', 6) AS Sale_Info_1,
+  CK_SALE_SF('19-JUN-2012', 6) AS Sale_Info_2
+FROM
+  dual;
 
 -- Assignment 6-9: Determining the Monthly Payment Amount
 -- Create a function named DD_MTHPAY_SF that calculates and returns the monthly payment
@@ -296,44 +401,3 @@ END;
 -- based on pledge ID. Use the function created in Assignment 6-12 in this new function to help
 -- with the task. If the donation pledge indicates a lump sum payment, the final payment date is
 -- the same as the first payment date. Use the function in an anonymous block.
-
--- Case Projects
-
--- Case 6-1: Updating Basket Data at Order Completion
--- A number of functions created in this chapter assume that the basket amounts, including
--- shipping, tax, and total, are already posted to the BB_BASKET table. However, the program
--- units for updating these columns when a shopper checks out haven’t been developed yet.
--- A procedure is needed to update the following columns in the BB_BASKET table when an order
--- is completed: ORDERPLACED, SUBTOTAL, SHIPPING, TAX, and TOTAL.
--- Construct three functions to perform the following tasks: calculating the subtotal by using
--- the BB_BASKETITEM table based on basket ID as input, calculating shipping costs based on
--- basket ID as input, and calculating the tax based on basket ID and subtotal as input. Use these
--- functions in a procedure.
--- A value of 1 entered in the ORDERPLACED column indicates that the shopper has
--- completed the order. The subtotal is determined by totaling the item lines of the BB_BASKETITEM
--- table for the applicable basket number. The shipping cost is based on the number of items in the
--- basket: 1 to 4 = $5, 5 to 9 = $8, and more than 10 = $11.
--- The tax is based on the rate applied by referencing the SHIPSTATE column of the
--- BB_BASKET table with the STATE column of the BB_TAX table. This rate should be multiplied
--- by the basket subtotal, which should be an INPUT parameter to the tax calculation because
--- the subtotal is being calculated in this same procedure. The total tallies all these amounts.
--- The only INPUT parameter for the procedure is a basket ID. The procedure needs to
--- update the correct row in the BB_BASKET table with all these amounts. To test, first set
--- all column values to NULL for basket 3 with the following UPDATE statement. Then call the
--- procedure for basket 3 and check the INSERT results.
--- UPDATE bb_basket
--- SET orderplaced = NULL,
--- Subtotal = NULL,
--- Tax = NULL,
--- Shipping = NULL,
--- Total = NULL
--- WHERE idBasket = 3;
--- COMMIT;
-
--- Case 6-2: Working with More Movies Rentals
--- More Movies receives numerous requests to check whether movies are in stock. The company
--- needs a function that retrieves movie stock information and formats a clear message to display
--- to users requesting information. The display should resemble the following: “Star Wars is
--- Available: 11 on the shelf.”
--- Use movie ID as the input value for this function. Assume the MOVIE_QTY column in the
--- MM_MOVIES table indicates the number of movies currently available for checkout.

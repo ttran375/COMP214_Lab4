@@ -1,59 +1,37 @@
-CREATE OR REPLACE FUNCTION ORD_SHIP_SF(
-  p_basket_id IN NUMBER
-) RETURN VARCHAR2 AS
-  v_ship_date  DATE;
-  v_order_date DATE;
-  v_days_diff  NUMBER;
-  v_status_id  NUMBER;
+CREATE OR REPLACE FUNCTION CK_SALE_SF(
+  p_date DATE,
+  p_product_id NUMBER
+) RETURN VARCHAR2 IS
+  v_sale_start DATE;
+  v_sale_end   DATE;
+  v_sale_price NUMBER(6, 2);
 BEGIN
- -- Retrieve shipping date and order date
+ -- Retrieve sale start date, end date, and sale price for the given product ID
   SELECT
-    bs.dtstage,
-    b.dtordered,
-    bs.idstage INTO v_ship_date,
-    v_order_date,
-    v_status_id
+    SaleStart,
+    SaleEnd,
+    SalePrice INTO v_sale_start,
+    v_sale_end,
+    v_sale_price
   FROM
-    bb_basketstatus bs
-    JOIN bb_basket b
-    ON bs.idbasket = b.idbasket
+    bb_product
   WHERE
-    b.idbasket = p_basket_id
-    AND bs.idstage = 5; -- Assuming IDSTAGE 5 indicates shipped status
- -- If the order hasn't been shipped, return 'Not shipped'
-  IF v_ship_date IS NULL THEN
-    RETURN 'Not shipped';
+    idProduct = p_product_id;
+ -- Check if the provided date falls within the sale period
+  IF p_date BETWEEN v_sale_start AND v_sale_end THEN
+    RETURN 'ON SALE!';
   ELSE
- -- Calculate days difference
-    v_days_diff := v_ship_date - v_order_date;
- -- If shipped within a day, return 'OK'
-    IF v_days_diff <= 1 THEN
-      RETURN 'OK';
-    ELSE
-      RETURN 'CHECK';
-    END IF;
+    RETURN 'Great Deal!';
   END IF;
 EXCEPTION
   WHEN NO_DATA_FOUND THEN
-    RETURN 'No such basket found';
-END;
+    RETURN 'Product not found';
+END CK_SALE_SF;
 /
 
--- Anonymous block to test the function
-DECLARE
-  v_result VARCHAR2(20);
-BEGIN
- -- Test case 1: Order shipped within a day
-  v_result := ORD_SHIP_SF(3); -- Assuming basket ID 3
-  DBMS_OUTPUT.PUT_LINE('Result for Basket 3: '
-                       || v_result);
- -- Test case 2: Order shipped after a day
-  v_result := ORD_SHIP_SF(4); -- Assuming basket ID 4
-  DBMS_OUTPUT.PUT_LINE('Result for Basket 4: '
-                       || v_result);
- -- Test case 3: Order not yet shipped
-  v_result := ORD_SHIP_SF(7); -- Assuming basket ID 7
-  DBMS_OUTPUT.PUT_LINE('Result for Basket 7: '
-                       || v_result);
-END;
-/
+-- Test the function with the provided product ID (6) and two dates
+SELECT
+  CK_SALE_SF('10-JUN-2012', 6) AS Sale_Info_1,
+  CK_SALE_SF('19-JUN-2012', 6) AS Sale_Info_2
+FROM
+  dual;
