@@ -1,5 +1,3 @@
--- Hands-On Assignments Part I
-
 -- Assignment 6-1: Formatting Numbers as Currency
 -- Many of the Brewbean’s application pages and reports generated from the database display
 -- dollar amounts. Follow these steps to create a function that formats the number provided as
@@ -448,6 +446,45 @@ FROM
 -- based on the status ID value. Create this function and name it DD_PLSTAT_SF. Use the function
 -- in an SQL statement that displays the pledge ID, pledge date, and pledge status for all pledges.
 -- Also, use it in an SQL statement that displays the same values but for only a specified pledge.
+CREATE OR REPLACE FUNCTION DD_PLSTAT_SF(
+  v_status_id IN NUMBER
+) RETURN VARCHAR2 IS
+  v_status_desc VARCHAR2(15);
+BEGIN
+  CASE v_status_id
+    WHEN 10 THEN
+      v_status_desc := 'Open';
+    WHEN 20 THEN
+      v_status_desc := 'Complete';
+    WHEN 30 THEN
+      v_status_desc := 'Overdue';
+    WHEN 40 THEN
+      v_status_desc := 'Closed';
+    WHEN 50 THEN
+      v_status_desc := 'Hold';
+    ELSE
+      v_status_desc := 'Unknown';
+  END CASE;
+
+  RETURN v_status_desc;
+END DD_PLSTAT_SF;
+/
+
+SELECT
+  idPledge,
+  Pledgedate,
+  DD_PLSTAT_SF(idStatus) AS Pledge_Status
+FROM
+  dd_pledge;
+
+SELECT
+  idPledge,
+  Pledgedate,
+  DD_PLSTAT_SF(idStatus) AS Pledge_Status
+FROM
+  dd_pledge
+WHERE
+  idPledge = :specified_pledge_id;
 
 -- Assignment 6-12: Determining a Pledge’s First Payment Date
 -- Create a function named DD_PAYDATE1_SF that determines the first payment due date for a
@@ -455,9 +492,82 @@ FROM
 -- after the date the pledge was made, even if a pledge is made on the first of a month. Keep in
 -- mind that a pledge made in December should reflect a first payment date with the following
 -- year. Use the function in an anonymous block.
+CREATE OR REPLACE FUNCTION DD_PAYDATE1_SF(
+  v_pledge_id IN NUMBER
+) RETURN DATE IS
+  v_pledge_date        DATE;
+  v_first_payment_date DATE;
+BEGIN
+ -- Get the pledge date for the given pledge ID
+  SELECT
+    Pledgedate INTO v_pledge_date
+  FROM
+    dd_pledge
+  WHERE
+    idPledge = v_pledge_id;
+ -- Calculate the first payment date
+  IF EXTRACT(MONTH FROM v_pledge_date) = 12 THEN
+ -- If pledge made in December, first payment is in January of next year
+    v_first_payment_date := ADD_MONTHS(TRUNC(v_pledge_date, 'YYYY'), 1);
+  ELSE
+ -- Otherwise, first payment is in the next month
+    v_first_payment_date := ADD_MONTHS(v_pledge_date, 1);
+  END IF;
+
+  RETURN v_first_payment_date;
+END DD_PAYDATE1_SF;
+/
+
+DECLARE
+  v_pledge_id          NUMBER := 104; -- Replace with the desired pledge ID
+  v_first_payment_date DATE;
+BEGIN
+  v_first_payment_date := DD_PAYDATE1_SF(v_pledge_id);
+  DBMS_OUTPUT.PUT_LINE('First payment due date for pledge '
+                       || v_pledge_id
+                       || ': '
+                       || TO_CHAR(v_first_payment_date, 'DD-MON-YYYY'));
+END;
+/
 
 -- Assignment 6-13: Determining a Pledge’s Final Payment Date
 -- Create a function named DD_PAYEND_SF that determines the final payment date for a pledge
 -- based on pledge ID. Use the function created in Assignment 6-12 in this new function to help
 -- with the task. If the donation pledge indicates a lump sum payment, the final payment date is
 -- the same as the first payment date. Use the function in an anonymous block.
+CREATE OR REPLACE FUNCTION DD_PAYEND_SF(
+  v_pledge_id IN NUMBER
+) RETURN DATE IS
+  v_final_payment_date DATE;
+  v_paymonths          NUMBER;
+BEGIN
+ -- Get the number of payment months for the given pledge ID
+  SELECT
+    paymonths INTO v_paymonths
+  FROM
+    dd_pledge
+  WHERE
+    idPledge = v_pledge_id;
+  IF v_paymonths IS NULL OR v_paymonths = 0 THEN
+ -- If lump sum payment, final payment date is the same as the first payment date
+    v_final_payment_date := DD_PAYDATE1_SF(v_pledge_id);
+  ELSE
+ -- Calculate final payment date based on the first payment date and payment months
+    v_final_payment_date := ADD_MONTHS(DD_PAYDATE1_SF(v_pledge_id), v_paymonths);
+  END IF;
+
+  RETURN v_final_payment_date;
+END DD_PAYEND_SF;
+/
+
+DECLARE
+  v_pledge_id          NUMBER := 104; -- Replace with the desired pledge ID
+  v_final_payment_date DATE;
+BEGIN
+  v_final_payment_date := DD_PAYEND_SF(v_pledge_id);
+  DBMS_OUTPUT.PUT_LINE('Final payment date for pledge '
+                       || v_pledge_id
+                       || ': '
+                       || TO_CHAR(v_final_payment_date, 'DD-MON-YYYY'));
+END;
+/
