@@ -101,17 +101,17 @@ FROM
 CREATE OR REPLACE FUNCTION NUM_PURCH_SF(
   p_shopper_id IN NUMBER
 ) RETURN NUMBER AS
-  v_total_orders NUMBER;
+  lv_total_orders NUMBER;
 BEGIN
  -- Count the total number of orders for the specified shopper
   SELECT
-    COUNT(*) INTO v_total_orders
+    COUNT(*) INTO lv_total_orders
   FROM
     bb_basket
   WHERE
     idShopper = p_shopper_id
     AND orderplaced = 1; -- considering 'orderplaced' column contains 1 for placed orders
-  RETURN v_total_orders;
+  RETURN lv_total_orders;
 END;
 /
 
@@ -175,18 +175,18 @@ ORDER BY
 CREATE OR REPLACE FUNCTION ORD_SHIP_SF(
   p_basket_id IN NUMBER
 ) RETURN VARCHAR2 AS
-  v_ship_date  DATE;
-  v_order_date DATE;
-  v_days_diff  NUMBER;
-  v_status_id  NUMBER;
+  lv_ship_date  DATE;
+  lv_order_date DATE;
+  lv_days_diff  NUMBER;
+  lv_status_id  NUMBER;
 BEGIN
  -- Retrieve shipping date and order date
   SELECT
     bs.dtstage,
     b.dtordered,
-    bs.idstage INTO v_ship_date,
-    v_order_date,
-    v_status_id
+    bs.idstage INTO lv_ship_date,
+    lv_order_date,
+    lv_status_id
   FROM
     bb_basketstatus bs
     JOIN bb_basket b
@@ -195,13 +195,13 @@ BEGIN
     b.idbasket = p_basket_id
     AND bs.idstage = 5; -- Assuming IDSTAGE 5 indicates shipped status
  -- If the order hasn't been shipped, return 'Not shipped'
-  IF v_ship_date IS NULL THEN
+  IF lv_ship_date IS NULL THEN
     RETURN 'Not shipped';
   ELSE
  -- Calculate days difference
-    v_days_diff := v_ship_date - v_order_date;
+    lv_days_diff := lv_ship_date - lv_order_date;
  -- If shipped within a day, return 'OK'
-    IF v_days_diff <= 1 THEN
+    IF lv_days_diff <= 1 THEN
       RETURN 'OK';
     ELSE
       RETURN 'CHECK';
@@ -215,20 +215,20 @@ END;
 
 -- Anonymous block to test the function
 DECLARE
-  v_result VARCHAR2(20);
+  lv_result VARCHAR2(20);
 BEGIN
  -- Test case 1: Order shipped within a day
-  v_result := ORD_SHIP_SF(3); -- Assuming basket ID 3
+  lv_result := ORD_SHIP_SF(3); -- Assuming basket ID 3
   DBMS_OUTPUT.PUT_LINE('Result for Basket 3: '
-                       || v_result);
+                       || lv_result);
  -- Test case 2: Order shipped after a day
-  v_result := ORD_SHIP_SF(4); -- Assuming basket ID 4
+  lv_result := ORD_SHIP_SF(4); -- Assuming basket ID 4
   DBMS_OUTPUT.PUT_LINE('Result for Basket 4: '
-                       || v_result);
+                       || lv_result);
  -- Test case 3: Order not yet shipped
-  v_result := ORD_SHIP_SF(7); -- Assuming basket ID 7
+  lv_result := ORD_SHIP_SF(7); -- Assuming basket ID 7
   DBMS_OUTPUT.PUT_LINE('Result for Basket 7: '
-                       || v_result);
+                       || lv_result);
 END;
 /
 
@@ -332,23 +332,23 @@ CREATE OR REPLACE FUNCTION CK_SALE_SF(
   p_date DATE,
   p_product_id NUMBER
 ) RETURN VARCHAR2 IS
-  v_sale_start DATE;
-  v_sale_end   DATE;
-  v_sale_price NUMBER(6, 2);
+  lv_sale_start DATE;
+  lv_sale_end   DATE;
+  lv_sale_price NUMBER(6, 2);
 BEGIN
  -- Retrieve sale start date, end date, and sale price for the given product ID
   SELECT
     SaleStart,
     SaleEnd,
-    SalePrice INTO v_sale_start,
-    v_sale_end,
-    v_sale_price
+    SalePrice INTO lv_sale_start,
+    lv_sale_end,
+    lv_sale_price
   FROM
     bb_product
   WHERE
     idProduct = p_product_id;
  -- Check if the provided date falls within the sale period
-  IF p_date BETWEEN v_sale_start AND v_sale_end THEN
+  IF p_date BETWEEN lv_sale_start AND lv_sale_end THEN
     RETURN 'ON SALE!';
   ELSE
     RETURN 'Great Deal!';
@@ -374,25 +374,25 @@ FROM
 -- payments = 12. Also, use the function in an SQL statement that displays information for all
 -- donor pledges in the database on a monthly payment plan.
 CREATE OR REPLACE FUNCTION DD_MTHPAY_SF(
-  v_paymonths IN NUMBER,
-  v_pledgeamt IN NUMBER
+  lv_paymonths IN NUMBER,
+  lv_pledgeamt IN NUMBER
 ) RETURN NUMBER IS
-  v_monthly_payment NUMBER;
+  lv_monthly_payment NUMBER;
 BEGIN
-  v_monthly_payment := v_pledgeamt / v_paymonths;
-  RETURN v_monthly_payment;
+  lv_monthly_payment := lv_pledgeamt / lv_paymonths;
+  RETURN lv_monthly_payment;
 END DD_MTHPAY_SF;
 /
 
 -- Anonymous PL/SQL block demonstrating the use of the function
 DECLARE
-  v_pledge_amount          NUMBER := 240;
-  v_monthly_payments       NUMBER := 12;
-  v_monthly_payment_amount NUMBER;
+  lv_pledge_amount          NUMBER := 240;
+  lv_monthly_payments       NUMBER := 12;
+  lv_monthly_payment_amount NUMBER;
 BEGIN
-  v_monthly_payment_amount := DD_MTHPAY_SF(v_monthly_payments, v_pledge_amount);
+  lv_monthly_payment_amount := DD_MTHPAY_SF(lv_monthly_payments, lv_pledge_amount);
   DBMS_OUTPUT.PUT_LINE('Monthly payment amount for the pledge: $'
-                       || v_monthly_payment_amount);
+                       || lv_monthly_payment_amount);
 END;
 /
 
@@ -419,17 +419,17 @@ WHERE
 -- and project pledge total amount. Format the pledge total to display zero if no pledges have been
 -- made so far, and have it show a dollar sign, comma, and two decimal places for dollar values.
 CREATE OR REPLACE FUNCTION DD_PROJTOT_SF(
-  v_project_id IN NUMBER
+  lv_project_id IN NUMBER
 ) RETURN NUMBER IS
-  v_total_pledge_amount NUMBER;
+  lv_total_pledge_amount NUMBER;
 BEGIN
   SELECT
-    NVL(SUM(Pledgeamt), 0) INTO v_total_pledge_amount
+    NVL(SUM(Pledgeamt), 0) INTO lv_total_pledge_amount
   FROM
     dd_pledge
   WHERE
-    idProj = v_project_id;
-  RETURN v_total_pledge_amount;
+    idProj = lv_project_id;
+  RETURN lv_total_pledge_amount;
 END DD_PROJTOT_SF;
 /
 
@@ -447,26 +447,26 @@ FROM
 -- in an SQL statement that displays the pledge ID, pledge date, and pledge status for all pledges.
 -- Also, use it in an SQL statement that displays the same values but for only a specified pledge.
 CREATE OR REPLACE FUNCTION DD_PLSTAT_SF(
-  v_status_id IN NUMBER
+  lv_status_id IN NUMBER
 ) RETURN VARCHAR2 IS
-  v_status_desc VARCHAR2(15);
+  lv_status_desc VARCHAR2(15);
 BEGIN
-  CASE v_status_id
+  CASE lv_status_id
     WHEN 10 THEN
-      v_status_desc := 'Open';
+      lv_status_desc := 'Open';
     WHEN 20 THEN
-      v_status_desc := 'Complete';
+      lv_status_desc := 'Complete';
     WHEN 30 THEN
-      v_status_desc := 'Overdue';
+      lv_status_desc := 'Overdue';
     WHEN 40 THEN
-      v_status_desc := 'Closed';
+      lv_status_desc := 'Closed';
     WHEN 50 THEN
-      v_status_desc := 'Hold';
+      lv_status_desc := 'Hold';
     ELSE
-      v_status_desc := 'Unknown';
+      lv_status_desc := 'Unknown';
   END CASE;
 
-  RETURN v_status_desc;
+  RETURN lv_status_desc;
 END DD_PLSTAT_SF;
 /
 
@@ -493,40 +493,40 @@ WHERE
 -- mind that a pledge made in December should reflect a first payment date with the following
 -- year. Use the function in an anonymous block.
 CREATE OR REPLACE FUNCTION DD_PAYDATE1_SF(
-  v_pledge_id IN NUMBER
+  lv_pledge_id IN NUMBER
 ) RETURN DATE IS
-  v_pledge_date        DATE;
-  v_first_payment_date DATE;
+  lv_pledge_date        DATE;
+  lv_first_payment_date DATE;
 BEGIN
  -- Get the pledge date for the given pledge ID
   SELECT
-    Pledgedate INTO v_pledge_date
+    Pledgedate INTO lv_pledge_date
   FROM
     dd_pledge
   WHERE
-    idPledge = v_pledge_id;
+    idPledge = lv_pledge_id;
  -- Calculate the first payment date
-  IF EXTRACT(MONTH FROM v_pledge_date) = 12 THEN
+  IF EXTRACT(MONTH FROM lv_pledge_date) = 12 THEN
  -- If pledge made in December, first payment is in January of next year
-    v_first_payment_date := ADD_MONTHS(TRUNC(v_pledge_date, 'YYYY'), 1);
+    lv_first_payment_date := ADD_MONTHS(TRUNC(lv_pledge_date, 'YYYY'), 1);
   ELSE
  -- Otherwise, first payment is in the next month
-    v_first_payment_date := ADD_MONTHS(v_pledge_date, 1);
+    lv_first_payment_date := ADD_MONTHS(lv_pledge_date, 1);
   END IF;
 
-  RETURN v_first_payment_date;
+  RETURN lv_first_payment_date;
 END DD_PAYDATE1_SF;
 /
 
 DECLARE
-  v_pledge_id          NUMBER := 104; -- Replace with the desired pledge ID
-  v_first_payment_date DATE;
+  lv_pledge_id          NUMBER := 104; -- Replace with the desired pledge ID
+  lv_first_payment_date DATE;
 BEGIN
-  v_first_payment_date := DD_PAYDATE1_SF(v_pledge_id);
+  lv_first_payment_date := DD_PAYDATE1_SF(lv_pledge_id);
   DBMS_OUTPUT.PUT_LINE('First payment due date for pledge '
-                       || v_pledge_id
+                       || lv_pledge_id
                        || ': '
-                       || TO_CHAR(v_first_payment_date, 'DD-MON-YYYY'));
+                       || TO_CHAR(lv_first_payment_date, 'DD-MON-YYYY'));
 END;
 /
 
@@ -536,38 +536,38 @@ END;
 -- with the task. If the donation pledge indicates a lump sum payment, the final payment date is
 -- the same as the first payment date. Use the function in an anonymous block.
 CREATE OR REPLACE FUNCTION DD_PAYEND_SF(
-  v_pledge_id IN NUMBER
+  lv_pledge_id IN NUMBER
 ) RETURN DATE IS
-  v_final_payment_date DATE;
-  v_paymonths          NUMBER;
+  lv_final_payment_date DATE;
+  lv_paymonths          NUMBER;
 BEGIN
  -- Get the number of payment months for the given pledge ID
   SELECT
-    paymonths INTO v_paymonths
+    paymonths INTO lv_paymonths
   FROM
     dd_pledge
   WHERE
-    idPledge = v_pledge_id;
-  IF v_paymonths IS NULL OR v_paymonths = 0 THEN
+    idPledge = lv_pledge_id;
+  IF lv_paymonths IS NULL OR lv_paymonths = 0 THEN
  -- If lump sum payment, final payment date is the same as the first payment date
-    v_final_payment_date := DD_PAYDATE1_SF(v_pledge_id);
+    lv_final_payment_date := DD_PAYDATE1_SF(lv_pledge_id);
   ELSE
  -- Calculate final payment date based on the first payment date and payment months
-    v_final_payment_date := ADD_MONTHS(DD_PAYDATE1_SF(v_pledge_id), v_paymonths);
+    lv_final_payment_date := ADD_MONTHS(DD_PAYDATE1_SF(lv_pledge_id), lv_paymonths);
   END IF;
 
-  RETURN v_final_payment_date;
+  RETURN lv_final_payment_date;
 END DD_PAYEND_SF;
 /
 
 DECLARE
-  v_pledge_id          NUMBER := 104; -- Replace with the desired pledge ID
-  v_final_payment_date DATE;
+  lv_pledge_id          NUMBER := 104; -- Replace with the desired pledge ID
+  lv_final_payment_date DATE;
 BEGIN
-  v_final_payment_date := DD_PAYEND_SF(v_pledge_id);
+  lv_final_payment_date := DD_PAYEND_SF(lv_pledge_id);
   DBMS_OUTPUT.PUT_LINE('Final payment date for pledge '
-                       || v_pledge_id
+                       || lv_pledge_id
                        || ': '
-                       || TO_CHAR(v_final_payment_date, 'DD-MON-YYYY'));
+                       || TO_CHAR(lv_final_payment_date, 'DD-MON-YYYY'));
 END;
 /
