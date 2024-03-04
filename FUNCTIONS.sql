@@ -61,6 +61,32 @@ WHERE
 -- column of the BB_BASKET table.
 -- 2. Develop a SELECT statement, using the BB_SHOPPER table, to produce a list of each
 -- shopper in the database and his or her total purchases.
+-- Step 1: Create the function TOT_PURCH_SF
+CREATE OR REPLACE FUNCTION TOT_PURCH_SF(
+  shopper_id IN NUMBER
+) RETURN NUMBER IS
+  total_spent NUMBER(7, 2);
+BEGIN
+ -- Calculate the total dollars spent by the shopper
+  SELECT
+    SUM(b.Total) INTO total_spent
+  FROM
+    bb_basket b
+  WHERE
+    b.idShopper = shopper_id;
+  RETURN total_spent;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    RETURN 0; -- Return 0 if no data found
+END;
+/
+
+-- Step 2: Use the function in a SELECT statement
+SELECT
+  idShopper,
+  TOT_PURCH_SF(idShopper) AS Total_Purchases
+FROM
+  bb_shopper;
 
 -- Assignment 6-3: Calculating a Shopper’s Total Number of Orders
 -- Another commonly used statistic in reports is the total number of orders a shopper has placed.
@@ -73,6 +99,29 @@ WHERE
 -- been placed.
 -- 2. Create a SELECT query by using the NUM_PURCH_SF function on the IDSHOPPER column
 -- of the BB_SHOPPER table. Be sure to select only shopper 23.
+-- Step 1: Create the function NUM_PURCH_SF
+CREATE OR REPLACE FUNCTION NUM_PURCH_SF(
+  p_shopper_id IN NUMBER
+) RETURN NUMBER AS
+  v_total_orders NUMBER;
+BEGIN
+ -- Count the total number of orders for the specified shopper
+  SELECT
+    COUNT(*) INTO v_total_orders
+  FROM
+    bb_basket
+  WHERE
+    idShopper = p_shopper_id
+    AND orderplaced = 1; -- considering 'orderplaced' column contains 1 for placed orders
+  RETURN v_total_orders;
+END;
+/
+
+-- Step 2: Use the function to display the number of orders for shopper 23
+SELECT
+  NUM_PURCH_SF(23) AS Total_Orders
+FROM
+  dual;
 
 -- Assignment 6-4: Identifying the Weekday for an Order Date
 -- The day of the week that baskets are created is often analyzed to determine consumershopping patterns. Create a function named DAY_ORD_SF that accepts an order date and
@@ -86,6 +135,33 @@ WHERE
 -- 2. Create a SELECT statement that lists the basket ID and weekday for every basket.
 -- 3. Create a SELECT statement, using a GROUP BY clause to list the total number of baskets
 -- per weekday. Based on the results, what’s the most popular shopping day?
+-- 1. Create the DAY_ORD_SF function
+CREATE OR REPLACE FUNCTION DAY_ORD_SF(
+  order_date IN DATE
+) RETURN VARCHAR2 IS
+BEGIN
+  RETURN TO_CHAR(order_date, 'Day');
+END;
+/
+
+-- 2. Use the function to display each basket ID and the weekday
+SELECT
+  idBasket,
+  DAY_ORD_SF(dtCreated) AS weekday
+FROM
+  bb_basket;
+
+-- 3. Use the function in another SELECT statement with a GROUP BY clause
+--    to list the total number of baskets per weekday
+SELECT
+  DAY_ORD_SF(dtCreated) AS weekday,
+  COUNT(*)              AS total_orders
+FROM
+  bb_basket
+GROUP BY
+  DAY_ORD_SF(dtCreated)
+ORDER BY
+  total_orders DESC;
 
 -- Assignment 6-5: Calculating Days Between Ordering and Shipping
 -- An analyst in the quality assurance office reviews the time elapsed between receiving an order
