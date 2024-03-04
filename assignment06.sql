@@ -23,6 +23,7 @@
 -- SELECT dollar_fmt_sf(shipping), dollar_fmt_sf(total)
 -- FROM bb_basket
 -- WHERE idBasket = 3;
+
 CREATE OR REPLACE FUNCTION dollar_fmt_sf (
   p_num NUMBER
 ) RETURN VARCHAR2 IS
