@@ -24,6 +24,7 @@
 -- FROM bb_basket
 -- WHERE idBasket = 3;
 
+-- Step 1: Create a function named DOLLAR_FMT_SF
 CREATE OR REPLACE FUNCTION dollar_fmt_sf (
   p_num NUMBER
 ) RETURN VARCHAR2 IS
@@ -34,6 +35,7 @@ BEGIN
 END;
 /
 
+-- Step 2: Test the function by running the following anonymous PL/SQL block
 DECLARE
   lv_amt_num NUMBER(8, 2) := 9999.55;
 BEGIN
@@ -41,6 +43,7 @@ BEGIN
 END;
 /
 
+-- Step 3: Test the function with the following SQL statement
 SELECT
   dollar_fmt_sf(shipping),
   dollar_fmt_sf(total)
