@@ -230,7 +230,6 @@ BEGIN
   DBMS_OUTPUT.PUT_LINE('Result for Basket 7: '
                        || lv_result);
 END;
-/
 
 -- Assignment 6-6: Adding Descriptions for Order Status Codes
 -- When a shopper returns to the Web site to check an order’s status, information from the
@@ -528,7 +527,6 @@ BEGIN
                        || ': '
                        || TO_CHAR(lv_first_payment_date, 'DD-MON-YYYY'));
 END;
-/
 
 -- Assignment 6-13: Determining a Pledge’s Final Payment Date
 -- Create a function named DD_PAYEND_SF that determines the final payment date for a pledge
@@ -570,4 +568,3 @@ BEGIN
                        || ': '
                        || TO_CHAR(lv_final_payment_date, 'DD-MON-YYYY'));
 END;
-/
