@@ -1,68 +1,59 @@
-SET SERVEROUTPUT ON;
-
--- Create the ORD_SHIP_SF function
 CREATE OR REPLACE FUNCTION ORD_SHIP_SF(
   p_basket_id IN NUMBER
-) RETURN VARCHAR2 IS
-  v_order_date DATE;
+) RETURN VARCHAR2 AS
   v_ship_date  DATE;
-  v_status_id  NUMBER;
+  v_order_date DATE;
   v_days_diff  NUMBER;
+  v_status_id  NUMBER;
 BEGIN
- -- Get the order date
+ -- Retrieve shipping date and order date
   SELECT
-    DTORDERED INTO v_order_date
-  FROM
-    BB_BASKET
-  WHERE
-    BASKET_ID = p_basket_id;
- -- Get the shipping date and status
-  SELECT
-    DTSTAGE,
-    IDSTAGE INTO v_ship_date,
+    bs.dtstage,
+    b.dtordered,
+    bs.idstage INTO v_ship_date,
+    v_order_date,
     v_status_id
   FROM
-    BB_BASKETSTATUS
+    bb_basketstatus bs
+    JOIN bb_basket b
+    ON bs.idbasket = b.idbasket
   WHERE
-    BASKET_ID = p_basket_id
-    AND ROWNUM = 1
-  ORDER BY
-    DTSTAGE DESC;
- -- Calculate the days difference
-  v_days_diff := v_ship_date - v_order_date;
- -- Check if shipped within a day
-  IF v_status_id = 5 THEN
+    b.idbasket = p_basket_id
+    AND bs.idstage = 5; -- Assuming IDSTAGE 5 indicates shipped status
+ -- If the order hasn't been shipped, return 'Not shipped'
+  IF v_ship_date IS NULL THEN
+    RETURN 'Not shipped';
+  ELSE
+ -- Calculate days difference
+    v_days_diff := v_ship_date - v_order_date;
+ -- If shipped within a day, return 'OK'
     IF v_days_diff <= 1 THEN
       RETURN 'OK';
     ELSE
       RETURN 'CHECK';
     END IF;
-  ELSE
-    RETURN 'Not shipped';
   END IF;
-END ORD_SHIP_SF;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    RETURN 'No such basket found';
+END;
 /
 
--- Test the function with different scenarios
+-- Anonymous block to test the function
 DECLARE
-  v_basket_id1 NUMBER := 1; -- Shipped within a day
-  v_basket_id2 NUMBER := 2; -- Shipped after a day
-  v_basket_id3 NUMBER := 3; -- Not shipped
-  v_result1    VARCHAR2(20);
-  v_result2    VARCHAR2(20);
-  v_result3    VARCHAR2(20);
+  v_result VARCHAR2(20);
 BEGIN
- -- Test case 1: Shipped within a day
-  v_result1 := ORD_SHIP_SF(v_basket_id1);
-  DBMS_OUTPUT.PUT_LINE('Test Case 1 Result: '
-                       || v_result1);
- -- Test case 2: Shipped after a day
-  v_result2 := ORD_SHIP_SF(v_basket_id2);
-  DBMS_OUTPUT.PUT_LINE('Test Case 2 Result: '
-                       || v_result2);
- -- Test case 3: Not shipped
-  v_result3 := ORD_SHIP_SF(v_basket_id3);
-  DBMS_OUTPUT.PUT_LINE('Test Case 3 Result: '
-                       || v_result3);
+ -- Test case 1: Order shipped within a day
+  v_result := ORD_SHIP_SF(3); -- Assuming basket ID 3
+  DBMS_OUTPUT.PUT_LINE('Result for Basket 3: '
+                       || v_result);
+ -- Test case 2: Order shipped after a day
+  v_result := ORD_SHIP_SF(4); -- Assuming basket ID 4
+  DBMS_OUTPUT.PUT_LINE('Result for Basket 4: '
+                       || v_result);
+ -- Test case 3: Order not yet shipped
+  v_result := ORD_SHIP_SF(7); -- Assuming basket ID 7
+  DBMS_OUTPUT.PUT_LINE('Result for Basket 7: '
+                       || v_result);
 END;
 /
