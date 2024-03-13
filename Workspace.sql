@@ -1,52 +1,58 @@
--- Assignment 7-1: Creating a Package
--- Follow the steps to create a package containing a procedure and a function pertaining to basket
--- information. (Note: The first time you compile the package body doesn’t give you practice with
--- compilation error messages.)
--- 1. Start Notepad, and open the Assignment07-01.txt file in the Chapter07 folder.
--- 2. Review the package code, and then copy it.
--- 3. In SQL Developer, paste the copied code to build the package.
--- 4. Review the compilation errors and identify the related coding error.
--- 5. Edit the package to correct the error and compile the package.
-CREATE OR REPLACE PACKAGE order_info_pkg IS
- FUNCTION ship_name_pf  
-   (p_basket IN NUMBER)
-   RETURN VARCHAR2;
- PROCEDURE basket_info_pp
-  (p_basket IN NUMBER,
-   p_shop OUT NUMBER,
-   p_date OUT DATE);
+-- Assignment 7-2: Using Program Units in a Package
+-- In this assignment, you use program units in a package created to store basket information. The
+-- package contains a function that returns the recipient’s name and a procedure that retrieves the
+-- shopper ID and order date for a basket.
+-- 1. In SQL Developer, create the ORDER_INFO_PKG package, using the
+-- Assignment07-02.txt file in the Chapter07 folder. Review the code to become familiar
+-- with the two program units in the package.
+-- 2. Create an anonymous block that calls both the packaged procedure and function with
+-- basket ID 12 to test these program units. Use DBMS_OUTPUT statements to display values
+-- returned from the program units to verify the data.
+-- 3. Also, test the packaged function by using it in a SELECT clause on the BB_BASKET table.
+-- Use a WHERE clause to select only the basket 12 row.
+-- Step 2: Anonymous block to test the package procedures and function
+CREATE OR REPLACE PACKAGE order_info_pkg AS
+
+  FUNCTION ship_name_pf(
+    p_id IN NUMBER
+  ) RETURN VARCHAR2;
+
+  FUNCTION basket_info_pp(
+    p_id IN NUMBER
+  ) RETURN VARCHAR2;
+END order_info_pkg;
+/
+
+CREATE OR REPLACE PACKAGE BODY order_info_pkg AS
+
+  FUNCTION ship_name_pf(
+    p_id IN NUMBER
+  ) RETURN VARCHAR2 IS
+  BEGIN
+ -- Your implementation to fetch ship name based on p_id
+    RETURN 'Sample Ship Name';
+  END ship_name_pf;
+
+  FUNCTION basket_info_pp(
+    p_id IN NUMBER
+  ) RETURN VARCHAR2 IS
+  BEGIN
+ -- Your implementation to fetch basket info based on p_id
+    RETURN 'Sample Basket Info';
+  END basket_info_pp;
+END order_info_pkg;
+/
+
+DECLARE
+  v_ship_name VARCHAR2(100);
+BEGIN
+  v_ship_name := order_info_pkg.ship_name_pf(12);
+ -- Use v_ship_name as needed
+  DBMS_OUTPUT.PUT_LINE('Ship Name: '
+                       || v_ship_name);
+EXCEPTION
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('Error: '
+                         || SQLERRM);
 END;
-
-CREATE OR REPLACE PACKAGE BODY order_info_pkg IS
- FUNCTION ship_name_pf  
-   (p_basket IN NUMBER)
-   RETURN VARCHAR2
-  IS
-   lv_name_txt VARCHAR2(25);
- BEGIN
-  SELECT shipfirstname||' '||shiplastname
-   INTO lv_name_txt
-   FROM bb_basket
-   WHERE idBasket = p_basket;
-  RETURN lv_name_txt;
- EXCEPTION
-   WHEN NO_DATA_FOUND THEN
-     DBMS_OUTPUT.PUT_LINE('Invalid basket id');
- END ship_name_pf;
- PROCEDURE basket_inf_pp
-  (p_basket IN NUMBER,
-   p_shop OUT NUMBER,
-   p_date OUT DATE)
-  IS
- BEGIN
-   SELECT idshopper, dtordered
-    INTO p_shop, p_date
-    FROM bb_basket
-    WHERE idbasket = p_basket;
- EXCEPTION
-   WHEN NO_DATA_FOUND THEN
-     DBMS_OUTPUT.PUT_LINE('Invalid basket id');
- END basket_inf_pp;
-END;
-
-
+/
