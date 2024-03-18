@@ -217,6 +217,86 @@ END;
 -- the password goofy to verify that the procedure works correctly.
 -- 5. Use DBMS_OUTPUT statements in an anonymous block to display the values stored in the
 -- packaged variables.
+-- create the function
+CREATE OR REPLACE FUNCTION verify_user (
+  usernm IN VARCHAR2,
+  passwd IN VARCHAR2
+) RETURN CHAR IS
+  temp_user bb_shopper.username%type;
+  confirm   CHAR(1) := 'N';
+BEGIN -- if this select succeed, we can return Y
+  SELECT
+    username INTO temp_user
+  FROM
+    bb_shopper
+  WHERE
+    password = passwd;
+  confirm := 'Y';
+  RETURN confirm;
+EXCEPTION -- if it fails, return N
+  WHEN NO_DATA_FOUND THEN
+    DBMS_OUTPUT.PUT_LINE('logon values are invalid');
+END;
+/
+
+-- test w/ host variables
+variable g_ck char(1);
+
+BEGIN
+  :g_ck := verify_user('gma1', 'goofy');
+END;
+/
+
+-- it worked!
+print g_ck
+
+/
+
+-- make it a package this time
+CREATE OR REPLACE PACKAGE login_pckg IS
+
+  FUNCTION verify_user (
+    usernm IN VARCHAR2,
+    passwd IN VARCHAR2
+  ) RETURN CHAR;
+END;
+/
+
+-- body of the package
+CREATE OR REPLACE PACKAGE BODY login_pckg IS
+
+  FUNCTION verify_user (
+    usernm IN VARCHAR2, -- everything in the function is the same
+    passwd IN VARCHAR2
+  ) RETURN CHAR IS
+    temp_user bb_shopper.username%type;
+    confirm   CHAR(1) := 'N';
+  BEGIN
+    SELECT
+      username INTO temp_user
+    FROM
+      bb_shopper
+    WHERE
+      password = passwd;
+    confirm := 'Y';
+    RETURN confirm;
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      DBMS_OUTPUT.PUT_LINE('logon values are invalid');
+  END verify_user;
+END;
+/
+
+-- host variable
+variable g_ck char(1);
+
+-- test, asignment and output in one block for convenience
+BEGIN
+  :g_ck := login_pckg.verify_user('gma1', 'goofy');
+  dbms_output.put_line(:g_ck); -- it worked!
+END;
+/
+
 -- Assignment 7-5: Overloading Packaged Procedures
 -- In this assignment, you create packaged procedures to retrieve shopper information.
 -- Brewbean’s is adding an application page where customer service agents can retrieve shopper

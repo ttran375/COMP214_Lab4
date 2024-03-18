@@ -1,89 +1,109 @@
--- Assignment 7-3: Creating a Package with Private Program Units
--- In this assignment, you modify a package to make program units private. The Brewbean’s
--- programming group decided that the SHIP_NAME_PF function in the ORDER_INFO_PKG
--- package should be used only from inside the package. Follow these steps to make this
--- modification:
--- 1. In Notepad, open the Assignment07-03.txt file in the Chapter07 folder, and review the
--- package code.
--- 2. Modify the package code to add to the BASKET_INFO_PP procedure so that it also returns
--- the name an order is shipped by using the SHIP_NAME_PF function. Make the necessary
--- changes to make the SHIP_NAME_PF function private.
--- 3. Create the package by using the modified code.
--- 4. Create and run an anonymous block that calls the BASKET_INFO_PP procedure and
--- displays the shopper ID, order date, and shipped-to name to check the values returned.
--- Use DBMS_OUTPUT statements to display the values.
-CREATE OR REPLACE PACKAGE order_info_pkg IS
- -- deleted function
-  PROCEDURE basket_info_pp (
-    p_basket IN NUMBER,
-    p_shop OUT NUMBER,
-    p_date OUT DATE,
-    p_ship OUT VARCHAR
-  ); -- added out variable
+-- Assignment 7-5: Overloading Packaged Procedures
+-- In this assignment, you create packaged procedures to retrieve shopper information.
+-- Brewbean’s is adding an application page where customer service agents can retrieve shopper
+-- information by using shopper ID or last name. Create a package named SHOP_QUERY_PKG
+-- containing overloaded procedures to perform these lookups. They should return the shopper’s
+-- name, city, state, phone number, and e-mail address. Test the package twice. First, call the
+-- procedure with shopper ID 23, and then call it with the last name Ratman. Both test values refer
+-- to the same shopper, so they should return the same shopper information.
+CREATE OR REPLACE PACKAGE shop_query_pkg IS
+ -- first overloaded procedure, takes id
+  PROCEDURE retrieve_shopper (
+    lv_id IN bb_shopper.idshopper%type,
+    lv_name OUT VARCHAR,
+    lv_city OUT bb_shopper.city%type,
+    lv_state OUT bb_shopper.state%type,
+    lv_phone OUT bb_shopper.phone%type
+  );
+ -- second overloaded procedure, takes last name
+  PROCEDURE retrieve_shopper (
+    lv_last IN bb_shopper.lastname%type,
+    lv_name OUT VARCHAR,
+    lv_city OUT bb_shopper.city%type,
+    lv_state OUT bb_shopper.state%type,
+    lv_phone OUT bb_shopper.phone%type
+  );
 END;
 /
 
-CREATE OR REPLACE PACKAGE BODY order_info_pkg IS
-
-  FUNCTION ship_name_pf (
-    p_basket IN NUMBER
-  ) RETURN VARCHAR2 IS
-    lv_name_txt VARCHAR2(25);
-  BEGIN
+CREATE OR REPLACE PACKAGE BODY shop_query_pkg IS
+ -- first overloaded procedure, takes id
+  PROCEDURE retrieve_shopper (
+    lv_id IN bb_shopper.idshopper%type,
+    lv_name OUT VARCHAR,
+    lv_city OUT bb_shopper.city%type,
+    lv_state OUT bb_shopper.state%type,
+    lv_phone OUT bb_shopper.phone%type
+  ) IS
+  BEGIN -- this is almost the same as 7-1
     SELECT
-      shipfirstname
+      firstname
       ||' '
-      ||shiplastname INTO lv_name_txt
+      ||lastname,
+      city,
+      state,
+      phone INTO lv_name,
+      lv_city,
+      lv_state,
+      lv_phone
     FROM
-      bb_basket
+      bb_shopper
     WHERE
-      idBasket = p_basket;
-    RETURN lv_name_txt;
-  EXCEPTION
-    WHEN NO_DATA_FOUND THEN
-      DBMS_OUTPUT.PUT_LINE('Invalid basket id');
-  END ship_name_pf;
-
-  PROCEDURE basket_info_pp (
-    p_basket IN NUMBER,
-    p_shop OUT NUMBER,
-    p_date OUT DATE,
-    p_ship OUT VARCHAR
-  ) -- added out variable
-  IS
-  BEGIN
+      idshopper = lv_id;
+  END retrieve_shopper;
+ -- second overloaded procedure, takes last name
+  PROCEDURE retrieve_shopper (
+    lv_last IN bb_shopper.lastname%type,
+    lv_name OUT VARCHAR,
+    lv_city OUT bb_shopper.city%type,
+    lv_state OUT bb_shopper.state%type,
+    lv_phone OUT bb_shopper.phone%type
+  ) IS
+  BEGIN -- again same as 7-1
     SELECT
-      idshopper,
-      dtordered INTO p_shop,
-      p_date
+      firstname
+      ||' '
+      ||lastname,
+      city,
+      state,
+      phone INTO lv_name,
+      lv_city,
+      lv_state,
+      lv_phone
     FROM
-      bb_basket
+      bb_shopper
     WHERE
-      idbasket = p_basket;
-    p_ship := ship_name_pf(p_basket); -- out variable used here
-  EXCEPTION
-    WHEN NO_DATA_FOUND THEN
-      DBMS_OUTPUT.PUT_LINE('Invalid basket id');
-  END basket_info_pp;
+      lastname = lv_last;
+  END retrieve_shopper;
 END;
 /
 
--- test procedure in block, this time I used basket
--- id 6, so we could actually see a name
+-- test procedure in block shopper id 23, Ratman
 DECLARE
-  lv_id      NUMBER := 6;
-  lv_name    VARCHAR2(25);
-  lv_shopper bb_basket.idshopper%type;
-  lv_date    bb_basket.dtcreated%type;
+  lv_id    NUMBER := 23;
+  lv_last  bb_shopper.lastname%type := 'Ratman';
+  lv_name  VARCHAR2(25);
+  lv_city  bb_shopper.city%type;
+  lv_state bb_shopper.state%type;
+  lv_phone bb_shopper.phone%type;
 BEGIN
- -- test procedure
-  order_info_pkg.basket_info_pp(lv_id, lv_shopper, lv_date, lv_name);
-  dbms_output.put_line(lv_id
+ -- test procedure w/ id
+  shop_query_pkg.retrieve_shopper(lv_id, lv_name, lv_city, lv_state, lv_phone);
+  dbms_output.put_line(lv_name
                        ||' '
-                       ||lv_shopper
+                       ||lv_city
                        ||' '
-                       ||lv_date
+                       ||lv_state
                        ||' '
-                       ||lv_name);
+                       ||lv_phone);
+ -- test procedure w/ last name
+  shop_query_pkg.retrieve_shopper(lv_last, lv_name, lv_city, lv_state, lv_phone);
+  dbms_output.put_line(lv_name
+                       ||' '
+                       ||lv_city
+                       ||' '
+                       ||lv_state
+                       ||' '
+                       ||lv_phone);
 END;
 /
