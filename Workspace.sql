@@ -1,22 +1,53 @@
--- Assignment 7-6: Creating a Package with Only a Specification
--- In this assignment, you create a package consisting of only a specification. The Brewbean’s
--- lead programmer has noticed that only a few states require Internet sales tax, and the rates
--- don’t change often. Create a package named TAX_RATE_PKG to hold the following tax rates in
--- packaged variables for reference: pv_tax_nc = .035, pv_tax_tx = .05, and pv_tax_tn = .02.
--- Code the variables to prevent the rates from being modified. Use an anonymous block with
--- DBMS_OUTPUT statements to display the value of each packaged variable.
--- create a reference package w/ no body
+-- Assignment 7-7: Using a Cursor in a Package
+-- In this assignment, you work with the sales tax computation because the Brewbean’s lead
+-- programmer expects the rates and states applying the tax to undergo some changes. The tax
+-- rates are currently stored in packaged variables but need to be more dynamic to handle the
+-- expected changes. The lead programmer has asked you to develop a package that holds the
+-- tax rates by state in a packaged cursor. The BB_TAX table is updated as needed to reflect
+-- which states are applying sales tax and at what rates. This package should contain a function
+-- that can receive a two-character state abbreviation (the shopper’s state) as an argument, and it
+-- must be able to find a match in the cursor and return the correct tax rate. Use an anonymous
+-- block to test the function with the state value NC.
+-- create a tax package
 CREATE OR REPLACE PACKAGE tax_rate_pkg IS
-  pv_tax_nc CONSTANT NUMBER := .035; -- all variables are constants
-  pv_tax_tx CONSTANT NUMBER := .05;
-  pv_tax_tn CONSTANT NUMBER := .02;
+ -- spec a cursor to hold state and tax rate
+  CURSOR cur_tax IS
+  SELECT
+    taxrate,
+    state
+  FROM
+    bb_tax;
+ -- spec a functionto get tax rate
+  FUNCTION get_tax (
+    pv_state IN bb_tax.state%type
+  ) RETURN bb_tax.taxrate%type;
 END;
 /
 
--- test our body-less package by printing the variables
+-- create a tax package body
+CREATE OR REPLACE PACKAGE BODY tax_rate_pkg IS
+ -- define our function
+  FUNCTION get_tax (
+    pv_state IN bb_tax.state%type
+  ) RETURN bb_tax.taxrate%type IS
+ -- we need a holding variable for the tax rate
+    pv_tax bb_tax.taxrate%type := 0.00;
+  BEGIN -- use cursor for loop to find state and rate
+    FOR rec_tax IN cur_tax LOOP
+      IF rec_tax.state = pv_state THEN
+        pv_tax := rec_tax.taxrate;
+      END IF;
+    END LOOP;
+ -- return the rate
+    RETURN pv_tax;
+  END get_tax;
+END;
+/
+
+-- test our package with NC
 BEGIN
-  dbms_output.put_line(tax_rate_pkg.pv_tax_nc);
-  dbms_output.put_line(tax_rate_pkg.pv_tax_tx);
-  dbms_output.put_line(tax_rate_pkg.pv_tax_tn);
+  dbms_output.put_line('NC'
+                       ||' '
+                       ||tax_rate_pkg.get_tax('NC'));
 END;
 /

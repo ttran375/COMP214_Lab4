@@ -414,6 +414,22 @@ END;
 -- packaged variables for reference: pv_tax_nc = .035, pv_tax_tx = .05, and pv_tax_tn = .02.
 -- Code the variables to prevent the rates from being modified. Use an anonymous block with
 -- DBMS_OUTPUT statements to display the value of each packaged variable.
+-- create a reference package w/ no body
+CREATE OR REPLACE PACKAGE tax_rate_pkg IS
+  pv_tax_nc CONSTANT NUMBER := .035; -- all variables are constants
+  pv_tax_tx CONSTANT NUMBER := .05;
+  pv_tax_tn CONSTANT NUMBER := .02;
+END;
+/
+
+-- test our body-less package by printing the variables
+BEGIN
+  dbms_output.put_line(tax_rate_pkg.pv_tax_nc);
+  dbms_output.put_line(tax_rate_pkg.pv_tax_tx);
+  dbms_output.put_line(tax_rate_pkg.pv_tax_tn);
+END;
+/
+
 -- Assignment 7-7: Using a Cursor in a Package
 -- In this assignment, you work with the sales tax computation because the Brewbean’s lead
 -- programmer expects the rates and states applying the tax to undergo some changes. The tax
