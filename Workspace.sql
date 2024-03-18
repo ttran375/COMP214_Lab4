@@ -1,53 +1,67 @@
--- Assignment 7-7: Using a Cursor in a Package
--- In this assignment, you work with the sales tax computation because the Brewbean’s lead
--- programmer expects the rates and states applying the tax to undergo some changes. The tax
--- rates are currently stored in packaged variables but need to be more dynamic to handle the
--- expected changes. The lead programmer has asked you to develop a package that holds the
--- tax rates by state in a packaged cursor. The BB_TAX table is updated as needed to reflect
--- which states are applying sales tax and at what rates. This package should contain a function
--- that can receive a two-character state abbreviation (the shopper’s state) as an argument, and it
--- must be able to find a match in the cursor and return the correct tax rate. Use an anonymous
--- block to test the function with the state value NC.
--- create a tax package
-CREATE OR REPLACE PACKAGE tax_rate_pkg IS
- -- spec a cursor to hold state and tax rate
-  CURSOR cur_tax IS
-  SELECT
-    taxrate,
-    state
-  FROM
-    bb_tax;
- -- spec a functionto get tax rate
-  FUNCTION get_tax (
-    pv_state IN bb_tax.state%type
-  ) RETURN bb_tax.taxrate%type;
+-- Assignment 7-8: Using a One-Time-Only Procedure in a Package
+-- The Brewbean’s application currently contains a package used in the shopper logon process.
+-- However, one of the developers wants to be able to reference the time users log on to
+-- determine when the session should be timed out and entries rolled back. Modify the
+-- LOGIN_PKG package (in the Assignment07-08.txt file in the Chapter07 folder). Use a
+-- one-time-only procedure to populate a packaged variable with the date and time of user
+-- logons. Use an anonymous block to verify that the one-time-only procedure works and
+-- populates the packaged variable.
+-- Hands-On Assignments Part II
+CREATE OR REPLACE PACKAGE login_pkg IS
+  pv_login_time timestamp; -- declare variable to hold timestamp
+  pv_id_num     NUMBER(3);
+
+  FUNCTION login_ck_pf (
+    p_user IN VARCHAR2,
+    p_pass IN VARCHAR2
+  ) RETURN CHAR;
 END;
 /
 
--- create a tax package body
-CREATE OR REPLACE PACKAGE BODY tax_rate_pkg IS
- -- define our function
-  FUNCTION get_tax (
-    pv_state IN bb_tax.state%type
-  ) RETURN bb_tax.taxrate%type IS
- -- we need a holding variable for the tax rate
-    pv_tax bb_tax.taxrate%type := 0.00;
-  BEGIN -- use cursor for loop to find state and rate
-    FOR rec_tax IN cur_tax LOOP
-      IF rec_tax.state = pv_state THEN
-        pv_tax := rec_tax.taxrate;
-      END IF;
-    END LOOP;
- -- return the rate
-    RETURN pv_tax;
-  END get_tax;
-END;
-/
+CREATE OR REPLACE PACKAGE BODY login_pkg IS
 
--- test our package with NC
+  FUNCTION login_ck_pf (
+    p_user IN VARCHAR2,
+    p_pass IN VARCHAR2
+  ) RETURN CHAR IS
+    lv_ck_txt CHAR(1) := 'N';
+    lv_id_num NUMBER(5);
+  BEGIN
+    SELECT
+      idShopper INTO lv_id_num
+    FROM
+      bb_shopper
+    WHERE
+      username = p_user
+      AND password = p_pass;
+    lv_ck_txt := 'Y';
+    pv_id_num := lv_id_num;
+    RETURN lv_ck_txt;
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      RETURN lv_ck_txt;
+  END login_ck_pf;
+ -- get the timestamp when login is called
 BEGIN
-  dbms_output.put_line('NC'
-                       ||' '
-                       ||tax_rate_pkg.get_tax('NC'));
+  SELECT
+    systimestamp INTO pv_login_time
+  FROM
+    dual;
+END;
+/
+
+-- anonymous block for testing
+DECLARE
+ -- a few local variables to hold needed data
+  lv_user   bb_shopper.username%type := 'Crackj';
+  lv_passwd bb_shopper.password%type := 'flyby';
+  lv_login  CHAR := 'N';
+BEGIN
+ -- call the login function
+  lv_login := login_pkg.login_ck_pf(lv_user, lv_passwd);
+ -- print confirmation that we logged in and the time/date
+  dbms_output.put_line(lv_login
+                       ||'   '
+                       ||login_pkg.pv_login_time);
 END;
 /
