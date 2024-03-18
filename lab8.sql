@@ -493,6 +493,65 @@ END;
 -- logons. Use an anonymous block to verify that the one-time-only procedure works and
 -- populates the packaged variable.
 -- Hands-On Assignments Part II
+CREATE OR REPLACE PACKAGE login_pkg IS
+  pv_login_time timestamp; -- declare variable to hold timestamp
+  pv_id_num     NUMBER(3);
+
+  FUNCTION login_ck_pf (
+    p_user IN VARCHAR2,
+    p_pass IN VARCHAR2
+  ) RETURN CHAR;
+END;
+/
+
+CREATE OR REPLACE PACKAGE BODY login_pkg IS
+
+  FUNCTION login_ck_pf (
+    p_user IN VARCHAR2,
+    p_pass IN VARCHAR2
+  ) RETURN CHAR IS
+    lv_ck_txt CHAR(1) := 'N';
+    lv_id_num NUMBER(5);
+  BEGIN
+    SELECT
+      idShopper INTO lv_id_num
+    FROM
+      bb_shopper
+    WHERE
+      username = p_user
+      AND password = p_pass;
+    lv_ck_txt := 'Y';
+    pv_id_num := lv_id_num;
+    RETURN lv_ck_txt;
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      RETURN lv_ck_txt;
+  END login_ck_pf;
+ -- get the timestamp when login is called
+BEGIN
+  SELECT
+    systimestamp INTO pv_login_time
+  FROM
+    dual;
+END;
+/
+
+-- anonymous block for testing
+DECLARE
+ -- a few local variables to hold needed data
+  lv_user   bb_shopper.username%type := 'Crackj';
+  lv_passwd bb_shopper.password%type := 'flyby';
+  lv_login  CHAR := 'N';
+BEGIN
+ -- call the login function
+  lv_login := login_pkg.login_ck_pf(lv_user, lv_passwd);
+ -- print confirmation that we logged in and the time/date
+  dbms_output.put_line(lv_login
+                       ||'   '
+                       ||login_pkg.pv_login_time);
+END;
+/
+
 -- Assignment 7-9: Creating a Package for Pledges
 -- Create a package named PLEDGE_PKG that includes two functions for determining dates of
 -- pledge payments. Use or create the functions described in Chapter 6 for Assignments 6-12 and
