@@ -145,6 +145,101 @@ ROLLBACK;
 -- modified correctly. Then issue a ROLLBACK statement to undo the modifications.
 -- 6. If you aren’t doing Assignment 9-3, disable the trigger so that it doesn’t affect
 -- other assignments.
+-- create product request
+INSERT INTO bb_product_request (
+  idrequest,
+  idproduct,
+  dtrequest,
+  qty
+) VALUES (
+  3,
+  5,
+  sysdate,
+  45
+);
+
+/
+
+-- Creat trigger to handle updating stock
+CREATE OR REPLACE TRIGGER bb_reqfill_trg AFTER
+  UPDATE OF dtrecd ON bb_product_request FOR EACH ROW
+BEGIN
+ /* update bb_product and set stock equal to
+      the new qty (from bb_product_update) plus
+      the old stock, where the id equals the
+      id referenced by the update that fired 
+      the trigger. */
+  UPDATE bb_product
+  SET
+    stock = :new.qty + stock
+  WHERE
+    idproduct = :new.idproduct;
+END;
+/
+
+-- show that product 5 is below reorder amount
+SELECT
+  stock,
+  reorder
+FROM
+  bb_product
+WHERE
+  idproduct = 5;
+
+/
+
+-- Show that 5 is currently up for reorder
+SELECT
+  idproduct,
+  idrequest,
+  dtrequest,
+  cost,
+  qty
+FROM
+  bb_product_request;
+
+/
+
+-- Do update and fire trigger
+UPDATE bb_product_request
+SET
+  dtrecd = sysdate,
+  cost = 225
+WHERE
+  idproduct = 5;
+
+/
+
+-- show that order was fulfilled
+SELECT
+  idproduct,
+  idrequest,
+  dtrequest,
+  cost,
+  qty
+FROM
+  bb_product_request;
+
+/
+
+-- show that trigger fired and stock was updated
+SELECT
+  stock,
+  reorder
+FROM
+  bb_product
+WHERE
+  idproduct = 5;
+
+/
+
+-- Undo all our effort
+ROLLBACK;
+
+-- DROP TRIGGER bb_reqfill_trg;
+
+/
+
 -- Assignment 9-3: Updating the Stock Level If a Product Fulfillment Is Canceled
 -- The Brewbean’s developers have made progress on the inventory-handling processes;
 -- however, they hit a snag when a store clerk incorrectly recorded a product request as fulfilled.
