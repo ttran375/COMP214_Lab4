@@ -305,6 +305,108 @@ END;
 -- name, city, state, phone number, and e-mail address. Test the package twice. First, call the
 -- procedure with shopper ID 23, and then call it with the last name Ratman. Both test values refer
 -- to the same shopper, so they should return the same shopper information.
+CREATE OR REPLACE PACKAGE shop_query_pkg IS
+ -- first overloaded procedure, takes id
+  PROCEDURE retrieve_shopper (
+    lv_id IN bb_shopper.idshopper%type,
+    lv_name OUT VARCHAR,
+    lv_city OUT bb_shopper.city%type,
+    lv_state OUT bb_shopper.state%type,
+    lv_phone OUT bb_shopper.phone%type
+  );
+ -- second overloaded procedure, takes last name
+  PROCEDURE retrieve_shopper (
+    lv_last IN bb_shopper.lastname%type,
+    lv_name OUT VARCHAR,
+    lv_city OUT bb_shopper.city%type,
+    lv_state OUT bb_shopper.state%type,
+    lv_phone OUT bb_shopper.phone%type
+  );
+END;
+/
+
+CREATE OR REPLACE PACKAGE BODY shop_query_pkg IS
+ -- first overloaded procedure, takes id
+  PROCEDURE retrieve_shopper (
+    lv_id IN bb_shopper.idshopper%type,
+    lv_name OUT VARCHAR,
+    lv_city OUT bb_shopper.city%type,
+    lv_state OUT bb_shopper.state%type,
+    lv_phone OUT bb_shopper.phone%type
+  ) IS
+  BEGIN -- this is almost the same as 7-1
+    SELECT
+      firstname
+      ||' '
+      ||lastname,
+      city,
+      state,
+      phone INTO lv_name,
+      lv_city,
+      lv_state,
+      lv_phone
+    FROM
+      bb_shopper
+    WHERE
+      idshopper = lv_id;
+  END retrieve_shopper;
+ -- second overloaded procedure, takes last name
+  PROCEDURE retrieve_shopper (
+    lv_last IN bb_shopper.lastname%type,
+    lv_name OUT VARCHAR,
+    lv_city OUT bb_shopper.city%type,
+    lv_state OUT bb_shopper.state%type,
+    lv_phone OUT bb_shopper.phone%type
+  ) IS
+  BEGIN -- again same as 7-1
+    SELECT
+      firstname
+      ||' '
+      ||lastname,
+      city,
+      state,
+      phone INTO lv_name,
+      lv_city,
+      lv_state,
+      lv_phone
+    FROM
+      bb_shopper
+    WHERE
+      lastname = lv_last;
+  END retrieve_shopper;
+END;
+/
+
+-- test procedure in block shopper id 23, Ratman
+DECLARE
+  lv_id    NUMBER := 23;
+  lv_last  bb_shopper.lastname%type := 'Ratman';
+  lv_name  VARCHAR2(25);
+  lv_city  bb_shopper.city%type;
+  lv_state bb_shopper.state%type;
+  lv_phone bb_shopper.phone%type;
+BEGIN
+ -- test procedure w/ id
+  shop_query_pkg.retrieve_shopper(lv_id, lv_name, lv_city, lv_state, lv_phone);
+  dbms_output.put_line(lv_name
+                       ||' '
+                       ||lv_city
+                       ||' '
+                       ||lv_state
+                       ||' '
+                       ||lv_phone);
+ -- test procedure w/ last name
+  shop_query_pkg.retrieve_shopper(lv_last, lv_name, lv_city, lv_state, lv_phone);
+  dbms_output.put_line(lv_name
+                       ||' '
+                       ||lv_city
+                       ||' '
+                       ||lv_state
+                       ||' '
+                       ||lv_phone);
+END;
+/
+
 -- Assignment 7-6: Creating a Package with Only a Specification
 -- In this assignment, you create a package consisting of only a specification. The Brewbean’s
 -- lead programmer has noticed that only a few states require Internet sales tax, and the rates
