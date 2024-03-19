@@ -92,6 +92,6 @@ variable g_ck char(1);
 -- test, asignment and output in one block for convenience
 BEGIN
   :g_ck := login_pckg.verify_user('gma1', 'goofy');
-  dbms_output.put_line(:g_ck); -- it worked!
+  DBMS_OUTPUT.PUT_LINE(:g_ck); -- it worked!
 END;
 /

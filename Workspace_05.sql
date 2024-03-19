@@ -89,7 +89,7 @@ DECLARE
 BEGIN
  -- test procedure w/ id
   shop_query_pkg.retrieve_shopper(lv_id, lv_name, lv_city, lv_state, lv_phone);
-  dbms_output.put_line(lv_name
+  DBMS_OUTPUT.PUT_LINE(lv_name
                        ||' '
                        ||lv_city
                        ||' '
@@ -98,7 +98,7 @@ BEGIN
                        ||lv_phone);
  -- test procedure w/ last name
   shop_query_pkg.retrieve_shopper(lv_last, lv_name, lv_city, lv_state, lv_phone);
-  dbms_output.put_line(lv_name
+  DBMS_OUTPUT.PUT_LINE(lv_name
                        ||' '
                        ||lv_city
                        ||' '

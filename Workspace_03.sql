@@ -78,7 +78,7 @@ DECLARE
 BEGIN
  -- test procedure
   order_info_pkg.basket_info_pp(lv_id, lv_shopper, lv_date, lv_name);
-  dbms_output.put_line(lv_id
+  DBMS_OUTPUT.PUT_LINE(lv_id
                        ||' '
                        ||lv_shopper
                        ||' '

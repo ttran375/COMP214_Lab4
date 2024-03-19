@@ -39,8 +39,7 @@ CREATE OR REPLACE PACKAGE BODY login_pkg IS
   EXCEPTION
     WHEN NO_DATA_FOUND THEN
       RETURN lv_ck_txt;
-  END login_ck_pf;
- -- get the timestamp when login is called
+  END login_ck_pf; -- get the timestamp when login is called
 BEGIN
   SELECT
     systimestamp INTO pv_login_time
@@ -59,7 +58,7 @@ BEGIN
  -- call the login function
   lv_login := login_pkg.login_ck_pf(lv_user, lv_passwd);
  -- print confirmation that we logged in and the time/date
-  dbms_output.put_line(lv_login
+  DBMS_OUTPUT.PUT_LINE(lv_login
                        ||'   '
                        ||login_pkg.pv_login_time);
 END;

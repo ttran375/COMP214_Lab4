@@ -60,7 +60,7 @@ BEGIN
  -- call the login function
   lv_login := login_pkg.login_ck_pf(lv_user, lv_passwd);
  -- print confirmation that we logged in and the time/date
-  dbms_output.put_line(lv_login
+  DBMS_OUTPUT.PUT_LINE(lv_login
                        ||'   '
                        ||login_pkg.pv_login_time);
 END;

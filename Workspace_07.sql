@@ -46,7 +46,7 @@ END;
 
 -- test our package with NC
 BEGIN
-  dbms_output.put_line('NC'
+  DBMS_OUTPUT.PUT_LINE('NC'
                        ||' '
                        ||tax_rate_pkg.get_tax('NC'));
 END;

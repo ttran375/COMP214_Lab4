@@ -15,8 +15,8 @@ END;
 
 -- test our body-less package by printing the variables
 BEGIN
-  dbms_output.put_line(tax_rate_pkg.pv_tax_nc);
-  dbms_output.put_line(tax_rate_pkg.pv_tax_tx);
-  dbms_output.put_line(tax_rate_pkg.pv_tax_tn);
+  DBMS_OUTPUT.PUT_LINE(tax_rate_pkg.pv_tax_nc);
+  DBMS_OUTPUT.PUT_LINE(tax_rate_pkg.pv_tax_tx);
+  DBMS_OUTPUT.PUT_LINE(tax_rate_pkg.pv_tax_tn);
 END;
 /
