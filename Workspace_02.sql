@@ -11,48 +11,90 @@
 -- 3. Also, test the packaged function by using it in a SELECT clause on the BB_BASKET table.
 -- Use a WHERE clause to select only the basket 12 row.
 -- Step 2: Anonymous block to test the package procedures and function
-CREATE OR REPLACE PACKAGE order_info_pkg AS
+CREATE OR REPLACE PACKAGE order_info_pkg IS
 
-  FUNCTION ship_name_pf(
-    p_id IN NUMBER
+  FUNCTION ship_name_pf (
+    p_basket IN NUMBER
   ) RETURN VARCHAR2;
 
-  FUNCTION basket_info_pp(
-    p_id IN NUMBER
-  ) RETURN VARCHAR2;
-END order_info_pkg;
+  PROCEDURE basket_info_pp (
+    p_basket IN NUMBER,
+    p_shop OUT NUMBER,
+    p_date OUT DATE
+  );
+END;
 /
 
-CREATE OR REPLACE PACKAGE BODY order_info_pkg AS
+CREATE OR REPLACE PACKAGE BODY order_info_pkg IS
 
-  FUNCTION ship_name_pf(
-    p_id IN NUMBER
+  FUNCTION ship_name_pf (
+    p_basket IN NUMBER
   ) RETURN VARCHAR2 IS
+    lv_name_txt VARCHAR2(25);
   BEGIN
- -- Your implementation to fetch ship name based on p_id
-    RETURN 'Sample Ship Name';
+    SELECT
+      shipfirstname
+      ||' '
+      ||shiplastname INTO lv_name_txt
+    FROM
+      bb_basket
+    WHERE
+      idBasket = p_basket;
+    RETURN lv_name_txt;
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      DBMS_OUTPUT.PUT_LINE('Invalid basket id');
   END ship_name_pf;
 
-  FUNCTION basket_info_pp(
-    p_id IN NUMBER
-  ) RETURN VARCHAR2 IS
+  PROCEDURE basket_info_pp (
+    p_basket IN NUMBER,
+    p_shop OUT NUMBER,
+    p_date OUT DATE
+  ) IS
   BEGIN
- -- Your implementation to fetch basket info based on p_id
-    RETURN 'Sample Basket Info';
+    SELECT
+      idshopper,
+      dtordered INTO p_shop,
+      p_date
+    FROM
+      bb_basket
+    WHERE
+      idbasket = p_basket;
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      DBMS_OUTPUT.PUT_LINE('Invalid basket id');
   END basket_info_pp;
-END order_info_pkg;
+END;
 /
 
+-- test procedure and function in block (returns nulls)
 DECLARE
-  v_ship_name VARCHAR2(100);
+  lv_id      NUMBER := 12;
+  lv_name    VARCHAR2(25);
+  lv_shopper bb_basket.idshopper%type;
+  lv_date    bb_basket.dtcreated%type;
 BEGIN
-  v_ship_name := order_info_pkg.ship_name_pf(12);
- -- Use v_ship_name as needed
-  DBMS_OUTPUT.PUT_LINE('Ship Name: '
-                       || v_ship_name);
-EXCEPTION
-  WHEN OTHERS THEN
-    DBMS_OUTPUT.PUT_LINE('Error: '
-                         || SQLERRM);
+ -- test function
+  lv_name := order_info_pkg.ship_name_pf(lv_id);
+  dbms_output.put_line(lv_id
+                       ||' '
+                       ||lv_name);
+ -- test procedure
+  order_info_pkg.basket_info_pp(lv_id, lv_shopper, lv_date);
+  dbms_output.put_line(lv_id
+                       ||' '
+                       ||lv_shopper
+                       ||' '
+                       ||lv_date);
 END;
+/
+
+-- test with select - again, prints nothing
+SELECT
+  lpad(order_info_pkg.ship_name_pf(idbasket), 20) "ship_name_pf on 12"
+FROM
+  bb_basket
+WHERE
+  idbasket = 12;
+
 /
