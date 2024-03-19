@@ -12,11 +12,9 @@
 -- Use a WHERE clause to select only the basket 12 row.
 -- Step 2: Anonymous block to test the package procedures and function
 CREATE OR REPLACE PACKAGE order_info_pkg IS
-
   FUNCTION ship_name_pf (
     p_basket IN NUMBER
   ) RETURN VARCHAR2;
-
   PROCEDURE basket_info_pp (
     p_basket IN NUMBER,
     p_shop OUT NUMBER,
