@@ -26,7 +26,6 @@ END;
 /
 
 CREATE OR REPLACE PACKAGE BODY order_info_pkg IS
-
   FUNCTION ship_name_pf (
     p_basket IN NUMBER
   ) RETURN VARCHAR2 IS
@@ -89,6 +88,7 @@ BEGIN
 END;
 /
 
+-- Step 3: Test the packaged function
 -- test with select - again, prints nothing
 SELECT
   lpad(order_info_pkg.ship_name_pf(idbasket), 20) "ship_name_pf on 12"
@@ -96,5 +96,4 @@ FROM
   bb_basket
 WHERE
   idbasket = 12;
-
 /
