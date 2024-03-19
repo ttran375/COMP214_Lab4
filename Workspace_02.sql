@@ -75,12 +75,12 @@ DECLARE
 BEGIN
  -- test function
   lv_name := order_info_pkg.ship_name_pf(lv_id);
-  dbms_output.put_line(lv_id
+  DBMS_OUTPUT.PUT_LINE(lv_id
                        ||' '
                        ||lv_name);
  -- test procedure
   order_info_pkg.basket_info_pp(lv_id, lv_shopper, lv_date);
-  dbms_output.put_line(lv_id
+  DBMS_OUTPUT.PUT_LINE(lv_id
                        ||' '
                        ||lv_shopper
                        ||' '
