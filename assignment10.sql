@@ -484,6 +484,66 @@ ALTER TRIGGER trg_update_product_id DISABLE;
 -- WHERE idBasket = 3;
 -- Do a rollback and disable the trigger when you’re finished so that it doesn’t affect other
 -- assignments.
+CREATE TABLE BB_SALES_SUM (
+  idProduct NUMBER(2),
+  TotalSales NUMBER(6, 2),
+  TotalQtySold NUMBER(5)
+);
+
+ALTER TABLE BB_SALES_SUM ADD CONSTRAINT pk_bb_sales_sum PRIMARY KEY (idProduct);
+
+UPDATE bb_basket
+SET
+  orderplaced = 0
+WHERE
+  idBasket = 3;
+
+CREATE OR REPLACE TRIGGER BB_SALESUM_TRG AFTER
+  UPDATE OF orderplaced ON bb_basket FOR EACH ROW WHEN (NEW.orderplaced = 1)
+BEGIN
+  FOR cur IN (
+    SELECT
+      idProduct,
+      SUM(Price * Quantity) AS TotalSales,
+      SUM(Quantity)         AS TotalQty
+    FROM
+      bb_basketItem
+    WHERE
+      idBasket = :NEW.idBasket
+    GROUP BY
+      idProduct
+  ) LOOP
+    UPDATE BB_SALES_SUM
+    SET
+      TotalSales = TotalSales + cur.TotalSales,
+      TotalQtySold = TotalQtySold + cur.TotalQty
+    WHERE
+      idProduct = cur.idProduct;
+    IF SQL%NOTFOUND THEN
+      INSERT INTO BB_SALES_SUM (
+        idProduct,
+        TotalSales,
+        TotalQtySold
+      ) VALUES (
+        cur.idProduct,
+        cur.TotalSales,
+        cur.TotalQty
+      );
+    END IF;
+  END LOOP;
+END;
+/
+
+UPDATE bb_basket
+SET
+  orderplaced = 1
+WHERE
+  idBasket = 3;
+
+ROLLBACK;
+
+ALTER TRIGGER BB_SALESUM_TRG DISABLE;
+
 -- Assignment 9-8: Maintaining an Audit Trail of Product Table Changes
 -- The accuracy of product table data is critical, and the Brewbean’s owner wants to have an audit
 -- file containing information on all DML activity on the BB_PRODUCT table. This information
