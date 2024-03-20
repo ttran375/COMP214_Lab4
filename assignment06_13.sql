@@ -28,13 +28,13 @@ BEGIN
 END DD_PAYEND_SF;
 /
 
--- DECLARE
---   lv_pledge_id          NUMBER := 104; -- Replace with the desired pledge ID
---   lv_final_payment_date DATE;
--- BEGIN
---   lv_final_payment_date := DD_PAYEND_SF(lv_pledge_id);
---   DBMS_OUTPUT.PUT_LINE('Final payment date for pledge '
---                        || lv_pledge_id
---                        || ': '
---                        || TO_CHAR(lv_final_payment_date, 'DD-MON-YYYY'));
--- END;
+DECLARE
+  lv_pledge_id          NUMBER := 104; -- Replace with the desired pledge ID
+  lv_final_payment_date DATE;
+BEGIN
+  lv_final_payment_date := DD_PAYEND_SF(lv_pledge_id);
+  DBMS_OUTPUT.PUT_LINE('Final payment date for pledge '
+                       || lv_pledge_id
+                       || ': '
+                       || TO_CHAR(lv_final_payment_date, 'DD-MON-YYYY'));
+END;
