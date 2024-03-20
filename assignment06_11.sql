@@ -4,6 +4,7 @@
 -- based on the status ID value. Create this function and name it DD_PLSTAT_SF. Use the function
 -- in an SQL statement that displays the pledge ID, pledge date, and pledge status for all pledges.
 -- Also, use it in an SQL statement that displays the same values but for only a specified pledge.
+
 CREATE OR REPLACE FUNCTION DD_PLSTAT_SF(
   lv_status_id IN NUMBER
 ) RETURN VARCHAR2 IS
