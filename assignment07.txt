@@ -1,9 +1,3 @@
--- Assignment 7-9: Creating a Package for Pledges
--- Create a package named PLEDGE_PKG that includes two functions for determining dates of
--- pledge payments. Use or create the functions described in Chapter 6 for Assignments 6-12 and
--- 6-13, using the names DD_PAYDATE1_PF and DD_PAYEND_PF for these packaged functions.
--- Test both functions with a specific pledge ID, using an anonymous block. Then test both
--- functions in a single query showing all pledges and associated payment dates.
 -- Assignment 7-10: Adding a Pledge Display Procedure to the Package
 -- Modify the package created in Assignment 7-9 as follows:
 -- • Add a procedure named DD_PLIST_PP that displays the donor name and all
