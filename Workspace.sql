@@ -1,72 +1,59 @@
--- Assignment 7-11: Adding a Payment Retrieval Procedure to the Package
--- Modify the package created in Assignment 7-10 as follows:
--- • Add a new procedure named DD_PAYS_PP that retrieves donor pledge payment
--- information and returns all the required data via a single parameter.
--- • A donor ID is the input for the procedure.
--- • The procedure should retrieve the donor’s last name and each pledge payment
--- made so far (including payment amount and payment date).
--- • Make the procedure public.
--- Test the procedure with an anonymous block. The procedure call must handle the data
--- being returned by means of a single parameter in the procedure. For each pledge payment,
--- make sure the pledge ID, donor’s last name, pledge payment amount, and pledge payment
--- date are displayed.
-CREATE OR REPLACE TYPE payment_info_record AS
-  OBJECT (
-    idPledge NUMBER,
-    lastname VARCHAR2(30),
-    payamt NUMBER(8, 2),
-    paydate VARCHAR2(20)
+-- Case 7-1: Reviewing Brewbean’s Order Checkout Package
+-- In Chapter 6, you created a procedure and functions to handle updating basket columns during
+-- the shopper checkout process. Create a package named SHOP_PROCESS_PKG that contains
+-- all the program units created in Chapter 6. Modify the BASK_CALC_PP procedure so that the
+-- subtotal, tax, shipping, and total amounts are placed in packaged variables rather than the
+-- database so that the application can display a purchase confirmation page for shoppers.
+-- Test this procedure with basket 3.
+-- The lead programmer has requested that all package program units be in alphabetical order
+-- to make them easy to locate. Use forward declarations, if needed, to allow alphabetizing
+-- program units.
+CREATE OR REPLACE PACKAGE SHOP_PROCESS_PKG IS
+ -- Forward declarations
+  FUNCTION UPDATE_STOCK_PF(
+    basket_id IN NUMBER
+  ) RETURN NUMBER;
+
+  PROCEDURE BASK_CALC_PP(
+    basket_id IN NUMBER
   );
+ -- Packaged variables for storing calculated amounts
+  g_subtotal NUMBER;
+  g_tax      NUMBER;
+  g_shipping NUMBER;
+  g_total    NUMBER;
+ -- You can add forward declarations for other procedures and functions here
+END SHOP_PROCESS_PKG;
 /
 
-CREATE OR REPLACE TYPE payment_info_table AS
-  TABLE OF payment_info_record;
-/
-
-CREATE OR REPLACE PROCEDURE DD_PAYS_PP (
-  donorId IN NUMBER,
-  paymentInfo OUT payment_info_table
-) AS
-BEGIN
- -- Initialize the output table
-  paymentInfo := payment_info_table();
-  FOR rec IN (
+CREATE OR REPLACE PACKAGE BODY SHOP_PROCESS_PKG IS
+ -- Implementation of UPDATE_STOCK_PF
+  FUNCTION UPDATE_STOCK_PF(
+    basket_id IN NUMBER
+  ) RETURN NUMBER IS
+  BEGIN
+ -- Implementation goes here
+    RETURN 0; -- Placeholder return value
+  END UPDATE_STOCK_PF;
+ -- Modified BASK_CALC_PP procedure
+  PROCEDURE BASK_CALC_PP(
+    basket_id IN NUMBER
+  ) IS
+  BEGIN
+ -- Example calculations (details depend on your business logic)
     SELECT
-      p.idPledge,
-      d.Lastname,
-      pay.Payamt,
-      pay.Paydate
+      100,
+      10,
+      5,
+      115 INTO g_subtotal,
+      g_tax,
+      g_shipping,
+      g_total
     FROM
-      DD_Donor   d
-      JOIN DD_Pledge p
-      ON d.idDonor = p.idDonor
-      JOIN DD_Payment pay
-      ON p.idPledge = pay.idPledge
-    WHERE
-      d.idDonor = donorId
-  ) LOOP
- -- Extend the collection and populate it with fetched data
-    paymentInfo.EXTEND;
-    paymentInfo(paymentInfo.LAST) := payment_info_record(rec.idPledge, rec.lastname, rec.payamt, rec.paydate);
-  END LOOP;
-END;
-/
-
-DECLARE
-  paymentData payment_info_table;
-BEGIN
- -- Call the procedure with a donor ID, for example, 301
-  DD_PAYS_PP(301, paymentData);
- -- Loop through the returned payment data and display each record
-  FOR i IN 1..paymentData.COUNT LOOP
-    DBMS_OUTPUT.PUT_LINE('Pledge ID: '
-                         || paymentData(i).idPledge
-                         || ', Last Name: '
-                         || paymentData(i).lastname
-                         || ', Payment Amount: '
-                         || paymentData(i).payamt
-                         || ', Payment Date: '
-                         || paymentData(i).paydate);
-  END LOOP;
-END;
+      dual; -- Placeholder values
+ -- Instead of updating the database, these values are now stored in packaged variables
+ -- Application can use these variables to display confirmation page to the shopper
+  END BASK_CALC_PP;
+ -- Implementation of other procedures and functions goes here
+END SHOP_PROCESS_PKG;
 /
