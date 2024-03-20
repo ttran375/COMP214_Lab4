@@ -1,51 +1,74 @@
--- Assignment 9-3: Updating the Stock Level If a Product Fulfillment Is Canceled
--- The Brewbean’s developers have made progress on the inventory-handling processes;
--- however, they hit a snag when a store clerk incorrectly recorded a product request as fulfilled.
--- When the product request was updated to record a DTRECD value, the product’s stock level
--- was updated automatically via an existing trigger, BB_REQFILL_TRG. If the clerk empties the
--- DTRECD column to indicate that the product request hasn’t been filled, the product’s stock
--- level needs to be corrected or reduced, too. Modify the BB_REQFILL_TRG trigger to solve
--- this problem.
--- 1. Modify the trigger code from Assignment 9-2 as needed. Add code to check whether the
--- DTRECD column already has a date in it and is now being set to NULL.
--- 2. Issue the following DML actions to create and update rows that you can use to test
--- the trigger:
--- INSERT INTO bb_product_request (idRequest, idProduct, dtRequest, qty,
--- dtRecd, cost)
--- VALUES (4, 5, SYSDATE, 45, '15-JUN-2012',225);
--- UPDATE bb_product
--- SET stock = 86
--- WHERE idProduct = 5;
--- COMMIT;
--- 3. Run the following UPDATE statement to test the trigger, and issue queries to verify that the
--- data has been modified correctly.
--- UPDATE bb_product_request
--- SET dtRecd = NULL
--- WHERE idRequest = 4;
--- 4. Be sure to run the following statement to disable this trigger so that it doesn’t affect other
+-- Assignment 9-4: Updating Stock Levels When an Order Is Canceled
+-- At times, customers make mistakes in submitting orders and call to cancel an order. Brewbean’s
+-- wants to create a trigger that automatically updates the stock level of all products associated
+-- with a canceled order and updates the ORDERPLACED column of the BB_BASKET table to
+-- zero, reflecting that the order wasn’t completed. Create a trigger named BB_ORDCANCEL_TRG to
+-- perform this task, taking into account the following points:
+-- • The trigger needs to fire when a new status record is added to the
+-- BB_BASKETSTATUS table and when the IDSTAGE column is set to 4,
+-- which indicates an order has been canceled.
+--  Each basket can contain multiple items in the BB_BASKETITEM table, so a
+-- CURSOR FOR loop might be a suitable mechanism for updating each item’s stock
+-- level.
+-- • Keep in mind that coffee can be ordered in half or whole pounds.
+-- • Use basket 6, which contains two items, for testing.
+-- 1. Run this INSERT statement to test the trigger:
+-- INSERT INTO bb_basketstatus (idStatus, idBasket, idStage, dtStage)
+-- VALUES (bb_status_seq.NEXTVAL, 6, 4, SYSDATE);
+-- 2. Issue queries to confirm that the trigger has modified the basket’s order status and product
+-- stock levels correctly.
+-- 3. Be sure to run the following statement to disable this trigger so that it doesn’t affect other
 -- assignments:
--- ALTER TRIGGER bb_reqfill_trg DISABLE;
-CREATE OR REPLACE TRIGGER BB_REQFILL_TRG AFTER
-  UPDATE OF DTRECD ON BB_PRODUCT_REQUEST FOR EACH ROW
+
+CREATE OR REPLACE TRIGGER BB_ORDCANCEL_TRG AFTER
+  INSERT ON bb_basketstatus FOR EACH ROW WHEN (NEW.idStage = 4)
 DECLARE
-  v_qty NUMBER;
+  v_qty_ordered NUMBER;
 BEGIN
-  IF :OLD.DTRECD IS NOT NULL AND :NEW.DTRECD IS NULL THEN
- -- Product request is being marked as not filled
- -- Adjust the product stock level
+ -- Retrieving the quantity ordered for the canceled order
+  SELECT
+    SUM(bi.Quantity) INTO v_qty_ordered
+  FROM
+    bb_basketitem bi
+  WHERE
+    bi.idBasket = :NEW.idBasket;
+ -- Updating the stock levels of the products associated with the canceled order
+  FOR item IN (
     SELECT
-      qty INTO v_qty
+      bi.idProduct,
+      SUM(bi.Quantity) AS total_quantity
     FROM
-      bb_product_request
+      bb_basketitem bi
     WHERE
-      idRequest = :OLD.idRequest;
+      bi.idBasket = :NEW.idBasket
+    GROUP BY
+      bi.idProduct
+  ) LOOP
     UPDATE bb_product
     SET
-      stock = stock + v_qty
+      stock = stock + item.total_quantity
     WHERE
-      idProduct = :OLD.idProduct;
-  END IF;
+      idProduct = item.idProduct;
+  END LOOP;
+ -- Updating ORDERPLACED column of BB_BASKET table to zero
+  UPDATE bb_basket
+  SET
+    orderplaced = 0
+  WHERE
+    idBasket = :NEW.idBasket;
 END;
 /
+
+INSERT INTO bb_basketstatus (
+  idStatus,
+  idBasket,
+  idStage,
+  dtStage
+) VALUES (
+  bb_status_seq.NEXTVAL,
+  6,
+  4,
+  SYSDATE
+);
 
 ALTER TRIGGER BB_REQFILL_TRG DISABLE;

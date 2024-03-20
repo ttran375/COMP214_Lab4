@@ -314,6 +314,7 @@ ALTER TRIGGER BB_REQFILL_TRG DISABLE;
 -- 3. Be sure to run the following statement to disable this trigger so that it doesn’t affect other
 -- assignments:
 -- ALTER TRIGGER bb_ordcancel_trg DISABLE;
+
 -- Assignment 9-5: Processing Discounts
 -- Brewbean’s is offering a new discount for return shoppers: Every fifth completed order gets a
 -- 10% discount. The count of orders for a shopper is placed in a packaged variable named
