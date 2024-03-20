@@ -313,7 +313,59 @@ ALTER TRIGGER BB_REQFILL_TRG DISABLE;
 -- stock levels correctly.
 -- 3. Be sure to run the following statement to disable this trigger so that it doesn’t affect other
 -- assignments:
--- ALTER TRIGGER bb_ordcancel_trg DISABLE;
+
+CREATE OR REPLACE TRIGGER BB_ORDCANCEL_TRG AFTER
+  INSERT ON bb_basketstatus FOR EACH ROW WHEN (NEW.idStage = 4)
+DECLARE
+  v_qty_ordered NUMBER;
+BEGIN
+ -- Retrieving the quantity ordered for the canceled order
+  SELECT
+    SUM(bi.Quantity) INTO v_qty_ordered
+  FROM
+    bb_basketitem bi
+  WHERE
+    bi.idBasket = :NEW.idBasket;
+ -- Updating the stock levels of the products associated with the canceled order
+  FOR item IN (
+    SELECT
+      bi.idProduct,
+      SUM(bi.Quantity) AS total_quantity
+    FROM
+      bb_basketitem bi
+    WHERE
+      bi.idBasket = :NEW.idBasket
+    GROUP BY
+      bi.idProduct
+  ) LOOP
+    UPDATE bb_product
+    SET
+      stock = stock + item.total_quantity
+    WHERE
+      idProduct = item.idProduct;
+  END LOOP;
+ -- Updating ORDERPLACED column of BB_BASKET table to zero
+  UPDATE bb_basket
+  SET
+    orderplaced = 0
+  WHERE
+    idBasket = :NEW.idBasket;
+END;
+/
+
+INSERT INTO bb_basketstatus (
+  idStatus,
+  idBasket,
+  idStage,
+  dtStage
+) VALUES (
+  bb_status_seq.NEXTVAL,
+  6,
+  4,
+  SYSDATE
+);
+
+ALTER TRIGGER BB_REQFILL_TRG DISABLE;
 
 -- Assignment 9-5: Processing Discounts
 -- Brewbean’s is offering a new discount for return shoppers: Every fifth completed order gets a
@@ -333,6 +385,49 @@ ALTER TRIGGER BB_REQFILL_TRG DISABLE;
 -- If you need to test the trigger multiple times, simply reset the ORDERPLACED column to 0
 -- for basket 13 and then run the UPDATE again. Also, disable this trigger when you’re finished so
 -- that it doesn’t affect other assignments.
+
+CREATE OR REPLACE PACKAGE DISC_PKG AS
+  pv_disc_num NUMBER := 0; -- Packaged variable to store the count of orders
+  pv_disc_txt VARCHAR2(1) := 'N'; -- Packaged variable to indicate whether a discount should be applied
+END DISC_PKG;
+/
+
+CREATE OR REPLACE TRIGGER BB_DISCOUNT_TRG AFTER
+  UPDATE OF ORDERPLACED ON bb_basket FOR EACH ROW
+BEGIN
+  IF :NEW.ORDERPLACED = 1 THEN
+    IF DISC_PKG.pv_disc_num = 5 THEN
+      DISC_PKG.pv_disc_txt := 'Y';
+    END IF;
+  END IF;
+END;
+/
+
+DECLARE
+  v_dummy NUMBER;
+BEGIN
+  DISC_PKG.pv_disc_num := 5; -- Set the count of orders to 5 for testing
+  DISC_PKG.pv_disc_txt := 'N'; -- Reset the discount indicator variable
+  SELECT
+    1 INTO v_dummy
+  FROM
+    dual
+  WHERE
+    DISC_PKG.pv_disc_txt = 'Y'; -- This will raise an exception if the trigger sets pv_disc_txt to 'Y'
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    NULL; -- This is expected if the trigger does not set pv_disc_txt to 'Y'
+END;
+/
+
+UPDATE bb_basket
+SET
+  orderplaced = 1
+WHERE
+  idBasket = 13;
+
+ALTER TRIGGER BB_DISCOUNT_TRG DISABLE;
+
 -- Assignment 9-6: Using Triggers to Maintain Referential Integrity
 -- At times, Brewbean’s has changed the ID numbers for existing products. In the past, developers
 -- had to add a new product row with the new ID to the BB_PRODUCT table, modify all the

@@ -1,74 +1,60 @@
--- Assignment 9-4: Updating Stock Levels When an Order Is Canceled
--- At times, customers make mistakes in submitting orders and call to cancel an order. Brewbean’s
--- wants to create a trigger that automatically updates the stock level of all products associated
--- with a canceled order and updates the ORDERPLACED column of the BB_BASKET table to
--- zero, reflecting that the order wasn’t completed. Create a trigger named BB_ORDCANCEL_TRG to
--- perform this task, taking into account the following points:
--- • The trigger needs to fire when a new status record is added to the
--- BB_BASKETSTATUS table and when the IDSTAGE column is set to 4,
--- which indicates an order has been canceled.
---  Each basket can contain multiple items in the BB_BASKETITEM table, so a
--- CURSOR FOR loop might be a suitable mechanism for updating each item’s stock
--- level.
--- • Keep in mind that coffee can be ordered in half or whole pounds.
--- • Use basket 6, which contains two items, for testing.
--- 1. Run this INSERT statement to test the trigger:
--- INSERT INTO bb_basketstatus (idStatus, idBasket, idStage, dtStage)
--- VALUES (bb_status_seq.NEXTVAL, 6, 4, SYSDATE);
--- 2. Issue queries to confirm that the trigger has modified the basket’s order status and product
--- stock levels correctly.
--- 3. Be sure to run the following statement to disable this trigger so that it doesn’t affect other
--- assignments:
+-- Assignment 9-5: Processing Discounts
+-- Brewbean’s is offering a new discount for return shoppers: Every fifth completed order gets a
+-- 10% discount. The count of orders for a shopper is placed in a packaged variable named
+-- pv_disc_num during the ordering process. This count needs to be tested at checkout to
+-- determine whether a discount should be applied. Create a trigger named BB_DISCOUNT_TRG
+-- so that when an order is confirmed (the ORDERPLACED value is changed from 0 to 1), the
+-- pv_disc_num packaged variable is checked. If it’s equal to 5, set a second variable named
+-- pv_disc_txt to Y. This variable is used in calculating the order summary so that a discount is
+-- applied, if necessary.
+-- Create a package specification named DISC_PKG containing the necessary packaged
+-- variables. Use an anonymous block to initialize the packaged variables to use for testing the
+-- trigger. Test the trigger with the following UPDATE statement:
+-- UPDATE bb_basket
+-- SET orderplaced = 1
+-- WHERE idBasket = 13;
+-- If you need to test the trigger multiple times, simply reset the ORDERPLACED column to 0
+-- for basket 13 and then run the UPDATE again. Also, disable this trigger when you’re finished so
+-- that it doesn’t affect other assignments.
 
-CREATE OR REPLACE TRIGGER BB_ORDCANCEL_TRG AFTER
-  INSERT ON bb_basketstatus FOR EACH ROW WHEN (NEW.idStage = 4)
-DECLARE
-  v_qty_ordered NUMBER;
+CREATE OR REPLACE PACKAGE DISC_PKG AS
+  pv_disc_num NUMBER := 0; -- Packaged variable to store the count of orders
+  pv_disc_txt VARCHAR2(1) := 'N'; -- Packaged variable to indicate whether a discount should be applied
+END DISC_PKG;
+/
+
+CREATE OR REPLACE TRIGGER BB_DISCOUNT_TRG AFTER
+  UPDATE OF ORDERPLACED ON bb_basket FOR EACH ROW
 BEGIN
- -- Retrieving the quantity ordered for the canceled order
-  SELECT
-    SUM(bi.Quantity) INTO v_qty_ordered
-  FROM
-    bb_basketitem bi
-  WHERE
-    bi.idBasket = :NEW.idBasket;
- -- Updating the stock levels of the products associated with the canceled order
-  FOR item IN (
-    SELECT
-      bi.idProduct,
-      SUM(bi.Quantity) AS total_quantity
-    FROM
-      bb_basketitem bi
-    WHERE
-      bi.idBasket = :NEW.idBasket
-    GROUP BY
-      bi.idProduct
-  ) LOOP
-    UPDATE bb_product
-    SET
-      stock = stock + item.total_quantity
-    WHERE
-      idProduct = item.idProduct;
-  END LOOP;
- -- Updating ORDERPLACED column of BB_BASKET table to zero
-  UPDATE bb_basket
-  SET
-    orderplaced = 0
-  WHERE
-    idBasket = :NEW.idBasket;
+  IF :NEW.ORDERPLACED = 1 THEN
+    IF DISC_PKG.pv_disc_num = 5 THEN
+      DISC_PKG.pv_disc_txt := 'Y';
+    END IF;
+  END IF;
 END;
 /
 
-INSERT INTO bb_basketstatus (
-  idStatus,
-  idBasket,
-  idStage,
-  dtStage
-) VALUES (
-  bb_status_seq.NEXTVAL,
-  6,
-  4,
-  SYSDATE
-);
+DECLARE
+  v_dummy NUMBER;
+BEGIN
+  DISC_PKG.pv_disc_num := 5; -- Set the count of orders to 5 for testing
+  DISC_PKG.pv_disc_txt := 'N'; -- Reset the discount indicator variable
+  SELECT
+    1 INTO v_dummy
+  FROM
+    dual
+  WHERE
+    DISC_PKG.pv_disc_txt = 'Y'; -- This will raise an exception if the trigger sets pv_disc_txt to 'Y'
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    NULL; -- This is expected if the trigger does not set pv_disc_txt to 'Y'
+END;
+/
 
-ALTER TRIGGER BB_REQFILL_TRG DISABLE;
+UPDATE bb_basket
+SET
+  orderplaced = 1
+WHERE
+  idBasket = 13;
+
+ALTER TRIGGER BB_DISCOUNT_TRG DISABLE;
