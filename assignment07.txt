@@ -1,0 +1,42 @@
+-- Assignment 7-9: Creating a Package for Pledges
+-- Create a package named PLEDGE_PKG that includes two functions for determining dates of
+-- pledge payments. Use or create the functions described in Chapter 6 for Assignments 6-12 and
+-- 6-13, using the names DD_PAYDATE1_PF and DD_PAYEND_PF for these packaged functions.
+-- Test both functions with a specific pledge ID, using an anonymous block. Then test both
+-- functions in a single query showing all pledges and associated payment dates.
+-- Assignment 7-10: Adding a Pledge Display Procedure to the Package
+-- Modify the package created in Assignment 7-9 as follows:
+-- • Add a procedure named DD_PLIST_PP that displays the donor name and all
+-- associated pledges (including pledge ID, first payment due date, and last payment
+-- due date). A donor ID is the input value for the procedure.
+-- • Make the procedure public and the two functions private.
+-- Test the procedure with an anonymous block.
+-- Assignment 7-11: Adding a Payment Retrieval Procedure to the Package
+-- Modify the package created in Assignment 7-10 as follows:
+-- • Add a new procedure named DD_PAYS_PP that retrieves donor pledge payment
+-- information and returns all the required data via a single parameter.
+-- • A donor ID is the input for the procedure.
+-- • The procedure should retrieve the donor’s last name and each pledge payment
+-- made so far (including payment amount and payment date).
+-- • Make the procedure public.
+-- Test the procedure with an anonymous block. The procedure call must handle the data
+-- being returned by means of a single parameter in the procedure. For each pledge payment,
+-- make sure the pledge ID, donor’s last name, pledge payment amount, and pledge payment
+-- date are displayed.
+-- Case Projects
+-- Case 7-1: Reviewing Brewbean’s Order Checkout Package
+-- In Chapter 6, you created a procedure and functions to handle updating basket columns during
+-- the shopper checkout process. Create a package named SHOP_PROCESS_PKG that contains
+-- all the program units created in Chapter 6. Modify the BASK_CALC_PP procedure so that the
+-- subtotal, tax, shipping, and total amounts are placed in packaged variables rather than the
+-- database so that the application can display a purchase confirmation page for shoppers.
+-- Test this procedure with basket 3.
+-- The lead programmer has requested that all package program units be in alphabetical order
+-- to make them easy to locate. Use forward declarations, if needed, to allow alphabetizing
+-- program units.
+-- Case 7-2: Working with More Movies Program Unit Packaging
+-- In the Chapter 5 More Movies case project, you created two procedures to support checking out
+-- and checking in rented movies. In Chapter 6, you created a function for making inquiries about
+-- movie availability. Create a package named MM_RENTALS_PKG to contain all these program
+-- units, and make all the program units public. Test the MOVIE_INFO function with the movie
+-- IDs 6 and 7.
