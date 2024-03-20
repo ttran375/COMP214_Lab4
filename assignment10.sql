@@ -267,6 +267,31 @@ ROLLBACK;
 -- 4. Be sure to run the following statement to disable this trigger so that it doesn’t affect other
 -- assignments:
 -- ALTER TRIGGER bb_reqfill_trg DISABLE;
+CREATE OR REPLACE TRIGGER BB_REQFILL_TRG AFTER
+  UPDATE OF DTRECD ON BB_PRODUCT_REQUEST FOR EACH ROW
+DECLARE
+  v_qty NUMBER;
+BEGIN
+  IF :OLD.DTRECD IS NOT NULL AND :NEW.DTRECD IS NULL THEN
+ -- Product request is being marked as not filled
+ -- Adjust the product stock level
+    SELECT
+      qty INTO v_qty
+    FROM
+      bb_product_request
+    WHERE
+      idRequest = :OLD.idRequest;
+    UPDATE bb_product
+    SET
+      stock = stock + v_qty
+    WHERE
+      idProduct = :OLD.idProduct;
+  END IF;
+END;
+/
+
+ALTER TRIGGER BB_REQFILL_TRG DISABLE;
+
 -- Assignment 9-4: Updating Stock Levels When an Order Is Canceled
 -- At times, customers make mistakes in submitting orders and call to cancel an order. Brewbean’s
 -- wants to create a trigger that automatically updates the stock level of all products associated
