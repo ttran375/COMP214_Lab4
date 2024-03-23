@@ -6,8 +6,10 @@
 -- name, city, state, phone number, and e-mail address. Test the package twice. First, call the
 -- procedure with shopper ID 23, and then call it with the last name Ratman. Both test values refer
 -- to the same shopper, so they should return the same shopper information.
+
+-- Create a package named SHOP_QUERY_PKG
 CREATE OR REPLACE PACKAGE shop_query_pkg IS
- -- first overloaded procedure, takes id
+  -- Containing overloaded procedures to perform these lookups
   PROCEDURE retrieve_shopper (
     lv_id IN bb_shopper.idshopper%type,
     lv_name OUT VARCHAR,
