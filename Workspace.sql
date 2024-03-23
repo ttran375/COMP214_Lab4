@@ -42,60 +42,59 @@ EXCEPTION
 END;
 /
 
--- test w/ host variables
-variable g_ck char(1);
-
+DECLARE
+  result CHAR(1);
 BEGIN
-  :g_ck := verify_user('gma1', 'goofy');
+  result := verify_user('gma1', 'goofy');
+  IF result = 'Y' THEN
+    DBMS_OUTPUT.PUT_LINE('Login successful!');
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('Login failed!');
+  END IF;
 END;
 /
 
--- it worked!
-print g_ck
 
-/
+CREATE OR REPLACE PACKAGE LOGIN_PKG AS
+  -- Packaged variables
+  shopper_id      bb_shopper.shopper_id%TYPE;
+  zip_code_prefix bb_shopper.zip_code%TYPE(3);
 
--- make it a package this time
-CREATE OR REPLACE PACKAGE login_pckg IS
-
+  -- Function to verify user
   FUNCTION verify_user (
     usernm IN VARCHAR2,
     passwd IN VARCHAR2
   ) RETURN CHAR;
-END;
+END LOGIN_PKG;
 /
 
--- body of the package
-CREATE OR REPLACE PACKAGE BODY login_pckg IS
-
+CREATE OR REPLACE PACKAGE BODY LOGIN_PKG AS
+  -- Function to verify user
   FUNCTION verify_user (
-    usernm IN VARCHAR2, -- everything in the function is the same
+    usernm IN VARCHAR2,
     passwd IN VARCHAR2
   ) RETURN CHAR IS
-    temp_user bb_shopper.username%type;
+    temp_user bb_shopper.username%TYPE;
     confirm   CHAR(1) := 'N';
   BEGIN
-    SELECT
-      username INTO temp_user
-    FROM
-      bb_shopper
-    WHERE
-      password = passwd;
+    SELECT username INTO temp_user
+    FROM bb_shopper
+    WHERE password = passwd;
+
+    -- If a match is found, set confirmation to Y
     confirm := 'Y';
+
+    -- Store shopper ID and zip code prefix in packaged variables
+    SELECT shopper_id, SUBSTR(zip_code, 1, 3)
+    INTO shopper_id, zip_code_prefix
+    FROM bb_shopper
+    WHERE username = usernm;
+
     RETURN confirm;
   EXCEPTION
     WHEN NO_DATA_FOUND THEN
-      DBMS_OUTPUT.PUT_LINE('logon values are invalid');
+      -- Handle invalid logon values
+      DBMS_OUTPUT.PUT_LINE('The logon values are invalid.');
   END verify_user;
-END;
-/
-
--- host variable
-variable g_ck char(1);
-
--- test, asignment and output in one block for convenience
-BEGIN
-  :g_ck := login_pckg.verify_user('gma1', 'goofy');
-  DBMS_OUTPUT.PUT_LINE(:g_ck); -- it worked!
-END;
+END LOGIN_PKG;
 /
