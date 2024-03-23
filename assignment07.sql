@@ -73,11 +73,9 @@ END;
 -- 3. Also, test the packaged function by using it in a SELECT clause on the BB_BASKET table.
 -- Use a WHERE clause to select only the basket 12 row.
 CREATE OR REPLACE PACKAGE order_info_pkg IS
-
   FUNCTION ship_name_pf (
     p_basket IN NUMBER
   ) RETURN VARCHAR2;
-
   PROCEDURE basket_info_pp (
     p_basket IN NUMBER,
     p_shop OUT NUMBER,
@@ -87,7 +85,6 @@ END;
 /
 
 CREATE OR REPLACE PACKAGE BODY order_info_pkg IS
-
   FUNCTION ship_name_pf (
     p_basket IN NUMBER
   ) RETURN VARCHAR2 IS
@@ -106,7 +103,6 @@ CREATE OR REPLACE PACKAGE BODY order_info_pkg IS
     WHEN NO_DATA_FOUND THEN
       DBMS_OUTPUT.PUT_LINE('Invalid basket id');
   END ship_name_pf;
-
   PROCEDURE basket_info_pp (
     p_basket IN NUMBER,
     p_shop OUT NUMBER,
