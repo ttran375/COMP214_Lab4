@@ -7,6 +7,7 @@
 -- 3. In SQL Developer, paste the copied code to build the package.
 -- 4. Review the compilation errors and identify the related coding error.
 -- 5. Edit the package to correct the error and compile the package.
+
 CREATE OR REPLACE PACKAGE order_info_pkg IS
   FUNCTION ship_name_pf (
     p_basket IN NUMBER
@@ -72,6 +73,7 @@ END;
 -- returned from the program units to verify the data.
 -- 3. Also, test the packaged function by using it in a SELECT clause on the BB_BASKET table.
 -- Use a WHERE clause to select only the basket 12 row.
+
 CREATE OR REPLACE PACKAGE order_info_pkg IS
   FUNCTION ship_name_pf (
     p_basket IN NUMBER
@@ -157,7 +159,6 @@ FROM
  -- Use a WHERE clause to select only the basket 12 row. 
 WHERE
   idbasket = 12;
-/
 
 -- Assignment 7-3: Creating a Package with Private Program Units
 -- In this assignment, you modify a package to make program units private. The Brewbean’s
@@ -173,8 +174,10 @@ WHERE
 -- 4. Create and run an anonymous block that calls the BASKET_INFO_PP procedure and
 -- displays the shopper ID, order date, and shipped-to name to check the values returned.
 -- Use DBMS_OUTPUT statements to display the values.
+
 CREATE OR REPLACE PACKAGE order_info_pkg IS
- -- deleted function
+ -- Make the SHIP_NAME_PF function private by remove it from the package specification
+
   PROCEDURE basket_info_pp (
     p_basket IN NUMBER,
     p_shop OUT NUMBER,
@@ -185,7 +188,6 @@ END;
 /
 
 CREATE OR REPLACE PACKAGE BODY order_info_pkg IS
-
   FUNCTION ship_name_pf (
     p_basket IN NUMBER
   ) RETURN VARCHAR2 IS
@@ -204,13 +206,13 @@ CREATE OR REPLACE PACKAGE BODY order_info_pkg IS
     WHEN NO_DATA_FOUND THEN
       DBMS_OUTPUT.PUT_LINE('Invalid basket id');
   END ship_name_pf;
-
   PROCEDURE basket_info_pp (
     p_basket IN NUMBER,
     p_shop OUT NUMBER,
     p_date OUT DATE,
+    -- Added the name an order is shipped
     p_ship OUT VARCHAR
-  ) -- added out variable
+  )
   IS
   BEGIN
     SELECT
@@ -221,7 +223,8 @@ CREATE OR REPLACE PACKAGE BODY order_info_pkg IS
       bb_basket
     WHERE
       idbasket = p_basket;
-    p_ship := ship_name_pf(p_basket); -- out variable used here
+    -- By using the SHIP_NAME_PF function
+    p_ship := ship_name_pf(p_basket);
   EXCEPTION
     WHEN NO_DATA_FOUND THEN
       DBMS_OUTPUT.PUT_LINE('Invalid basket id');
@@ -229,16 +232,16 @@ CREATE OR REPLACE PACKAGE BODY order_info_pkg IS
 END;
 /
 
--- test procedure in block, this time I used basket
--- id 6, so we could actually see a name
+-- Create and run an anonymous block that
 DECLARE
   lv_id      NUMBER := 6;
   lv_name    VARCHAR2(25);
   lv_shopper bb_basket.idshopper%type;
   lv_date    bb_basket.dtcreated%type;
 BEGIN
- -- test procedure
+  -- Calls the BASKET_INFO_PP procedure
   order_info_pkg.basket_info_pp(lv_id, lv_shopper, lv_date, lv_name);
+  -- Display the shopper ID, order date, and shipped-to name
   DBMS_OUTPUT.PUT_LINE(lv_id
                        ||' '
                        ||lv_shopper
