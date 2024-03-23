@@ -1,28 +1,30 @@
--- Assignment 7-2: Using Program Units in a Package
--- In this assignment, you use program units in a package created to store basket information. The
--- package contains a function that returns the recipient’s name and a procedure that retrieves the
--- shopper ID and order date for a basket.
--- 1. In SQL Developer, create the ORDER_INFO_PKG package, using the
--- Assignment07-02.txt file in the Chapter07 folder. Review the code to become familiar
--- with the two program units in the package.
--- 2. Create an anonymous block that calls both the packaged procedure and function with
--- basket ID 12 to test these program units. Use DBMS_OUTPUT statements to display values
--- returned from the program units to verify the data.
--- 3. Also, test the packaged function by using it in a SELECT clause on the BB_BASKET table.
--- Use a WHERE clause to select only the basket 12 row.
+-- Assignment 7-3: Creating a Package with Private Program Units
+-- In this assignment, you modify a package to make program units private. The Brewbean’s
+-- programming group decided that the SHIP_NAME_PF function in the ORDER_INFO_PKG
+-- package should be used only from inside the package. Follow these steps to make this
+-- modification:
+-- 1. In Notepad, open the Assignment07-03.txt file in the Chapter07 folder, and review the
+-- package code.
+-- 2. Modify the package code to add to the BASKET_INFO_PP procedure so that it also returns
+-- the name an order is shipped by using the SHIP_NAME_PF function. Make the necessary
+-- changes to make the SHIP_NAME_PF function private.
+-- 3. Create the package by using the modified code.
+-- 4. Create and run an anonymous block that calls the BASKET_INFO_PP procedure and
+-- displays the shopper ID, order date, and shipped-to name to check the values returned.
+-- Use DBMS_OUTPUT statements to display the values.
 CREATE OR REPLACE PACKAGE order_info_pkg IS
-  FUNCTION ship_name_pf (
-    p_basket IN NUMBER
-  ) RETURN VARCHAR2;
+ -- deleted function
   PROCEDURE basket_info_pp (
     p_basket IN NUMBER,
     p_shop OUT NUMBER,
-    p_date OUT DATE
-  );
+    p_date OUT DATE,
+    p_ship OUT VARCHAR
+  ); -- added out variable
 END;
 /
 
 CREATE OR REPLACE PACKAGE BODY order_info_pkg IS
+
   FUNCTION ship_name_pf (
     p_basket IN NUMBER
   ) RETURN VARCHAR2 IS
@@ -45,8 +47,10 @@ CREATE OR REPLACE PACKAGE BODY order_info_pkg IS
   PROCEDURE basket_info_pp (
     p_basket IN NUMBER,
     p_shop OUT NUMBER,
-    p_date OUT DATE
-  ) IS
+    p_date OUT DATE,
+    p_ship OUT VARCHAR
+  ) -- added out variable
+  IS
   BEGIN
     SELECT
       idshopper,
@@ -56,6 +60,7 @@ CREATE OR REPLACE PACKAGE BODY order_info_pkg IS
       bb_basket
     WHERE
       idbasket = p_basket;
+    p_ship := ship_name_pf(p_basket); -- out variable used here
   EXCEPTION
     WHEN NO_DATA_FOUND THEN
       DBMS_OUTPUT.PUT_LINE('Invalid basket id');
@@ -63,37 +68,22 @@ CREATE OR REPLACE PACKAGE BODY order_info_pkg IS
 END;
 /
 
--- Create an anonymous block
+-- test procedure in block, this time I used basket
+-- id 6, so we could actually see a name
 DECLARE
-  lv_id      NUMBER := 12;
+  lv_id      NUMBER := 6;
   lv_name    VARCHAR2(25);
   lv_shopper bb_basket.idshopper%type;
   lv_date    bb_basket.dtcreated%type;
 BEGIN
--- Test these program units
-  -- Call the packaged function 
-  lv_name := order_info_pkg.ship_name_pf(lv_id);
-  -- Use DBMS_OUTPUT statements to display values
-  dbms_output.put_line(lv_id
-                       ||' '
-                       ||lv_name);
-  -- Call the packaged procedure
-  order_info_pkg.basket_info_pp(lv_id, lv_shopper, lv_date);
-  -- Use DBMS_OUTPUT statements to display values
-  dbms_output.put_line(lv_id
+ -- test procedure
+  order_info_pkg.basket_info_pp(lv_id, lv_shopper, lv_date, lv_name);
+  DBMS_OUTPUT.PUT_LINE(lv_id
                        ||' '
                        ||lv_shopper
                        ||' '
-                       ||lv_date);
+                       ||lv_date
+                       ||' '
+                       ||lv_name);
 END;
-/
-
--- Test the packaged function by using it in a SELECT clause on the BB_BASKET table
-SELECT
-  lpad(order_info_pkg.ship_name_pf(idbasket), 20) "ship_name_pf on 12"
-FROM
-  bb_basket
- -- Use a WHERE clause to select only the basket 12 row. 
-WHERE
-  idbasket = 16;
 /
