@@ -72,7 +72,6 @@ END;
 -- returned from the program units to verify the data.
 -- 3. Also, test the packaged function by using it in a SELECT clause on the BB_BASKET table.
 -- Use a WHERE clause to select only the basket 12 row.
-
 CREATE OR REPLACE PACKAGE order_info_pkg IS
 
   FUNCTION ship_name_pf (
@@ -129,20 +128,23 @@ CREATE OR REPLACE PACKAGE BODY order_info_pkg IS
 END;
 /
 
--- test procedure and function in block (returns nulls)
+-- Create an anonymous block
 DECLARE
   lv_id      NUMBER := 12;
   lv_name    VARCHAR2(25);
   lv_shopper bb_basket.idshopper%type;
   lv_date    bb_basket.dtcreated%type;
 BEGIN
- -- test function
+-- Test these program units
+  -- Call the packaged function 
   lv_name := order_info_pkg.ship_name_pf(lv_id);
+  -- Use DBMS_OUTPUT statements to display values
   dbms_output.put_line(lv_id
                        ||' '
                        ||lv_name);
- -- test procedure
+  -- Call the packaged procedure
   order_info_pkg.basket_info_pp(lv_id, lv_shopper, lv_date);
+  -- Use DBMS_OUTPUT statements to display values
   dbms_output.put_line(lv_id
                        ||' '
                        ||lv_shopper
@@ -151,14 +153,14 @@ BEGIN
 END;
 /
 
--- test with select - again, prints nothing
+-- Test the packaged function by using it in a SELECT clause on the BB_BASKET table
 SELECT
   lpad(order_info_pkg.ship_name_pf(idbasket), 20) "ship_name_pf on 12"
 FROM
   bb_basket
+ -- Use a WHERE clause to select only the basket 12 row. 
 WHERE
   idbasket = 12;
-
 /
 
 -- Assignment 7-3: Creating a Package with Private Program Units
