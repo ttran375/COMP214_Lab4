@@ -48,8 +48,9 @@ CREATE OR REPLACE PACKAGE BODY order_info_pkg IS
     p_basket IN NUMBER,
     p_shop OUT NUMBER,
     p_date OUT DATE,
+    -- Added the name an order is shipped
     p_ship OUT VARCHAR
-  ) -- added out variable
+  )
   IS
   BEGIN
     SELECT
@@ -60,7 +61,8 @@ CREATE OR REPLACE PACKAGE BODY order_info_pkg IS
       bb_basket
     WHERE
       idbasket = p_basket;
-    p_ship := ship_name_pf(p_basket); -- out variable used here
+      -- By using the SHIP_NAME_PF function
+    p_ship := ship_name_pf(p_basket);
   EXCEPTION
     WHEN NO_DATA_FOUND THEN
       DBMS_OUTPUT.PUT_LINE('Invalid basket id');
