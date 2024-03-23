@@ -132,8 +132,8 @@ DECLARE
   lv_name    VARCHAR2(25);
   lv_shopper bb_basket.idshopper%type;
   lv_date    bb_basket.dtcreated%type;
-BEGIN
 -- Test these program units
+BEGIN
   -- Call the packaged function 
   lv_name := order_info_pkg.ship_name_pf(lv_id);
   -- Use DBMS_OUTPUT statements to display values
@@ -156,7 +156,7 @@ SELECT
   lpad(order_info_pkg.ship_name_pf(idbasket), 20) "ship_name_pf on 12"
 FROM
   bb_basket
- -- Use a WHERE clause to select only the basket 12 row. 
+-- Use a WHERE clause to select only the basket 12 row. 
 WHERE
   idbasket = 12;
 
@@ -176,14 +176,15 @@ WHERE
 -- Use DBMS_OUTPUT statements to display the values.
 
 CREATE OR REPLACE PACKAGE order_info_pkg IS
- -- Make the SHIP_NAME_PF function private by remove it from the package specification
+  -- Make the SHIP_NAME_PF function private by remove it from the package specification
 
   PROCEDURE basket_info_pp (
     p_basket IN NUMBER,
     p_shop OUT NUMBER,
     p_date OUT DATE,
+    -- Added the name an order is shipped
     p_ship OUT VARCHAR
-  ); -- added out variable
+  );
 END;
 /
 
@@ -223,7 +224,7 @@ CREATE OR REPLACE PACKAGE BODY order_info_pkg IS
       bb_basket
     WHERE
       idbasket = p_basket;
-    -- By using the SHIP_NAME_PF function
+    -- Use the SHIP_NAME_PF function
     p_ship := ship_name_pf(p_basket);
   EXCEPTION
     WHEN NO_DATA_FOUND THEN
@@ -270,14 +271,17 @@ END;
 -- the password goofy to verify that the procedure works correctly.
 -- 5. Use DBMS_OUTPUT statements in an anonymous block to display the values stored in the
 -- packaged variables.
--- create the function
+
+-- Create a function that accepts a username and password as arguments  .
 CREATE OR REPLACE FUNCTION verify_user (
   usernm IN VARCHAR2,
   passwd IN VARCHAR2
 ) RETURN CHAR IS
   temp_user bb_shopper.username%type;
+  -- Set the value of the variable holding the return value to N
   confirm   CHAR(1) := 'N';
-BEGIN -- if this select succeed, we can return Y
+-- If a match is found, return the value Y.
+BEGIN
   SELECT
     username INTO temp_user
   FROM
@@ -286,43 +290,46 @@ BEGIN -- if this select succeed, we can return Y
     password = passwd;
   confirm := 'Y';
   RETURN confirm;
-EXCEPTION -- if it fails, return N
+EXCEPTION
   WHEN NO_DATA_FOUND THEN
-    DBMS_OUTPUT.PUT_LINE('logon values are invalid');
+    -- Include a NO_DATA_FOUND exception handler to display a message that the logon values are invalid.
+    DBMS_OUTPUT.PUT_LINE('The logon values are invalid.');
 END;
 /
 
--- test w/ host variables
-variable g_ck char(1);
-
+-- Use an anonymous block to test the procedure, using the username gma1 and the password goofy
+DECLARE
+  result CHAR(1);
 BEGIN
-  :g_ck := verify_user('gma1', 'goofy');
+  result := verify_user('gma1', 'goofy');
+  IF result = 'Y' THEN
+    DBMS_OUTPUT.PUT_LINE('Login successful!');
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('Login failed!');
+  END IF;
 END;
 /
 
--- it worked!
-print g_ck
-
-/
-
--- make it a package this time
-CREATE OR REPLACE PACKAGE login_pckg IS
-
+-- Now place the function in a package, name the package LOGIN_PKG
+CREATE OR REPLACE PACKAGE LOGIN_PKG AS
+  -- Packaged variables
+  shopper_id      bb_shopper.shopper_id%TYPE;
+  zip_code_prefix bb_shopper.zip_code%TYPE(3);
+  -- Function to verify user
   FUNCTION verify_user (
     usernm IN VARCHAR2,
     passwd IN VARCHAR2
   ) RETURN CHAR;
-END;
+END LOGIN_PKG;
 /
 
--- body of the package
-CREATE OR REPLACE PACKAGE BODY login_pckg IS
-
+CREATE OR REPLACE PACKAGE BODY LOGIN_PKG AS
+  -- Function to verify user
   FUNCTION verify_user (
-    usernm IN VARCHAR2, -- everything in the function is the same
+    usernm IN VARCHAR2,
     passwd IN VARCHAR2
   ) RETURN CHAR IS
-    temp_user bb_shopper.username%type;
+    temp_user bb_shopper.username%TYPE;
     confirm   CHAR(1) := 'N';
   BEGIN
     SELECT
@@ -331,22 +338,41 @@ CREATE OR REPLACE PACKAGE BODY login_pckg IS
       bb_shopper
     WHERE
       password = passwd;
+    -- If a match is found, set confirmation to Y
     confirm := 'Y';
+    -- Store shopper ID and zip code prefix in packaged variables
+    SELECT
+      shopper_id,
+      SUBSTR(zip_code, 1, 3) INTO shopper_id,
+      zip_code_prefix
+    FROM
+      bb_shopper
+    WHERE
+      username = usernm;
     RETURN confirm;
   EXCEPTION
     WHEN NO_DATA_FOUND THEN
-      DBMS_OUTPUT.PUT_LINE('logon values are invalid');
+      -- Handle invalid logon values
+      DBMS_OUTPUT.PUT_LINE('The logon values are invalid.');
   END verify_user;
-END;
+END LOGIN_PKG;
 /
 
--- host variable
-variable g_ck char(1);
-
--- test, asignment and output in one block for convenience
+-- Use an anonymous block to test the packaged procedure
+DECLARE
+  result CHAR(1);
 BEGIN
-  :g_ck := login_pckg.verify_user('gma1', 'goofy');
-  DBMS_OUTPUT.PUT_LINE(:g_ck); -- it worked!
+  result := LOGIN_PKG.verify_user('gma1', 'goofy');
+  IF result = 'Y' THEN
+    DBMS_OUTPUT.PUT_LINE('Login successful!');
+    -- Use DBMS_OUTPUT statements in an anonymous block to display the values stored in the packaged variables
+    DBMS_OUTPUT.PUT_LINE('Shopper ID: '
+                         || LOGIN_PKG.shopper_id);
+    DBMS_OUTPUT.PUT_LINE('Zip Code Prefix: '
+                         || LOGIN_PKG.zip_code_prefix);
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('Login failed!');
+  END IF;
 END;
 /
 

@@ -17,7 +17,7 @@
 -- 5. Use DBMS_OUTPUT statements in an anonymous block to display the values stored in the
 -- packaged variables.
 
--- Create a function that accepts a username and password as arguments  . 
+-- Create a function that accepts a username and password as arguments  .
 CREATE OR REPLACE FUNCTION verify_user (
   usernm IN VARCHAR2,
   passwd IN VARCHAR2
@@ -42,6 +42,7 @@ EXCEPTION
 END;
 /
 
+-- Use an anonymous block to test the procedure, using the username gma1 and the password goofy
 DECLARE
   result CHAR(1);
 BEGIN
@@ -54,12 +55,11 @@ BEGIN
 END;
 /
 
-
+-- Now place the function in a package, name the package LOGIN_PKG
 CREATE OR REPLACE PACKAGE LOGIN_PKG AS
   -- Packaged variables
   shopper_id      bb_shopper.shopper_id%TYPE;
   zip_code_prefix bb_shopper.zip_code%TYPE(3);
-
   -- Function to verify user
   FUNCTION verify_user (
     usernm IN VARCHAR2,
@@ -69,7 +69,7 @@ END LOGIN_PKG;
 /
 
 CREATE OR REPLACE PACKAGE BODY LOGIN_PKG AS
-  -- Function to verify user
+ -- Function to verify user
   FUNCTION verify_user (
     usernm IN VARCHAR2,
     passwd IN VARCHAR2
@@ -77,19 +77,23 @@ CREATE OR REPLACE PACKAGE BODY LOGIN_PKG AS
     temp_user bb_shopper.username%TYPE;
     confirm   CHAR(1) := 'N';
   BEGIN
-    SELECT username INTO temp_user
-    FROM bb_shopper
-    WHERE password = passwd;
-
+    SELECT
+      username INTO temp_user
+    FROM
+      bb_shopper
+    WHERE
+      password = passwd;
     -- If a match is found, set confirmation to Y
     confirm := 'Y';
-
     -- Store shopper ID and zip code prefix in packaged variables
-    SELECT shopper_id, SUBSTR(zip_code, 1, 3)
-    INTO shopper_id, zip_code_prefix
-    FROM bb_shopper
-    WHERE username = usernm;
-
+    SELECT
+      shopper_id,
+      SUBSTR(zip_code, 1, 3) INTO shopper_id,
+      zip_code_prefix
+    FROM
+      bb_shopper
+    WHERE
+      username = usernm;
     RETURN confirm;
   EXCEPTION
     WHEN NO_DATA_FOUND THEN
@@ -97,4 +101,22 @@ CREATE OR REPLACE PACKAGE BODY LOGIN_PKG AS
       DBMS_OUTPUT.PUT_LINE('The logon values are invalid.');
   END verify_user;
 END LOGIN_PKG;
+/
+
+-- Use an anonymous block to test the packaged procedure
+DECLARE
+  result CHAR(1);
+BEGIN
+  result := LOGIN_PKG.verify_user('gma1', 'goofy');
+  IF result = 'Y' THEN
+    DBMS_OUTPUT.PUT_LINE('Login successful!');
+    -- Use DBMS_OUTPUT statements in an anonymous block to display the values stored in the packaged variables
+    DBMS_OUTPUT.PUT_LINE('Shopper ID: '
+                         || LOGIN_PKG.shopper_id);
+    DBMS_OUTPUT.PUT_LINE('Zip Code Prefix: '
+                         || LOGIN_PKG.zip_code_prefix);
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('Login failed!');
+  END IF;
+END;
 /
