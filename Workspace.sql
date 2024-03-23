@@ -1,122 +1,109 @@
--- Assignment 7-4: Using Packaged Variables
--- In this assignment, you create a package that uses packaged variables to assist in the user
--- logon process. When a returning shopper logs on, the username and password entered need
--- to be verified against the database. In addition, two values need to be stored in packaged
--- variables for reference during the user session: the shopper ID and the first three digits of
--- the shopper’s zip code (used for regional advertisements displayed on the site).
--- 1. Create a function that accepts a username and password as arguments and verifies these
--- values against the database for a match. If a match is found, return the value Y. Set the
--- value of the variable holding the return value to N. Include a NO_DATA_FOUND exception
--- handler to display a message that the logon values are invalid.
--- 2. Use an anonymous block to test the procedure, using the username gma1 and the
--- password goofy.
--- 3. Now place the function in a package, and add code to create and populate the packaged
--- variables specified earlier. Name the package LOGIN_PKG.
--- 4. Use an anonymous block to test the packaged procedure, using the username gma1 and
--- the password goofy to verify that the procedure works correctly.
--- 5. Use DBMS_OUTPUT statements in an anonymous block to display the values stored in the
--- packaged variables.
-
--- Create a function that accepts a username and password as arguments  .
-CREATE OR REPLACE FUNCTION verify_user (
-  usernm IN VARCHAR2,
-  passwd IN VARCHAR2
-) RETURN CHAR IS
-  temp_user bb_shopper.username%type;
-  -- Set the value of the variable holding the return value to N
-  confirm   CHAR(1) := 'N';
--- If a match is found, return the value Y.
-BEGIN
-  SELECT
-    username INTO temp_user
-  FROM
-    bb_shopper
-  WHERE
-    password = passwd;
-  confirm := 'Y';
-  RETURN confirm;
-EXCEPTION
-  WHEN NO_DATA_FOUND THEN
-    -- Include a NO_DATA_FOUND exception handler to display a message that the logon values are invalid.
-    DBMS_OUTPUT.PUT_LINE('The logon values are invalid.');
+-- Assignment 7-5: Overloading Packaged Procedures
+-- In this assignment, you create packaged procedures to retrieve shopper information.
+-- Brewbean’s is adding an application page where customer service agents can retrieve shopper
+-- information by using shopper ID or last name. Create a package named SHOP_QUERY_PKG
+-- containing overloaded procedures to perform these lookups. They should return the shopper’s
+-- name, city, state, phone number, and e-mail address. Test the package twice. First, call the
+-- procedure with shopper ID 23, and then call it with the last name Ratman. Both test values refer
+-- to the same shopper, so they should return the same shopper information.
+CREATE OR REPLACE PACKAGE shop_query_pkg IS
+ -- first overloaded procedure, takes id
+  PROCEDURE retrieve_shopper (
+    lv_id IN bb_shopper.idshopper%type,
+    lv_name OUT VARCHAR,
+    lv_city OUT bb_shopper.city%type,
+    lv_state OUT bb_shopper.state%type,
+    lv_phone OUT bb_shopper.phone%type
+  );
+ -- second overloaded procedure, takes last name
+  PROCEDURE retrieve_shopper (
+    lv_last IN bb_shopper.lastname%type,
+    lv_name OUT VARCHAR,
+    lv_city OUT bb_shopper.city%type,
+    lv_state OUT bb_shopper.state%type,
+    lv_phone OUT bb_shopper.phone%type
+  );
 END;
 /
 
--- Use an anonymous block to test the procedure, using the username gma1 and the password goofy
-DECLARE
-  result CHAR(1);
-BEGIN
-  result := verify_user('gma1', 'goofy');
-  IF result = 'Y' THEN
-    DBMS_OUTPUT.PUT_LINE('Login successful!');
-  ELSE
-    DBMS_OUTPUT.PUT_LINE('Login failed!');
-  END IF;
+CREATE OR REPLACE PACKAGE BODY shop_query_pkg IS
+ -- first overloaded procedure, takes id
+  PROCEDURE retrieve_shopper (
+    lv_id IN bb_shopper.idshopper%type,
+    lv_name OUT VARCHAR,
+    lv_city OUT bb_shopper.city%type,
+    lv_state OUT bb_shopper.state%type,
+    lv_phone OUT bb_shopper.phone%type
+  ) IS
+  BEGIN -- this is almost the same as 7-1
+    SELECT
+      firstname
+      ||' '
+      ||lastname,
+      city,
+      state,
+      phone INTO lv_name,
+      lv_city,
+      lv_state,
+      lv_phone
+    FROM
+      bb_shopper
+    WHERE
+      idshopper = lv_id;
+  END retrieve_shopper;
+ -- second overloaded procedure, takes last name
+  PROCEDURE retrieve_shopper (
+    lv_last IN bb_shopper.lastname%type,
+    lv_name OUT VARCHAR,
+    lv_city OUT bb_shopper.city%type,
+    lv_state OUT bb_shopper.state%type,
+    lv_phone OUT bb_shopper.phone%type
+  ) IS
+  BEGIN -- again same as 7-1
+    SELECT
+      firstname
+      ||' '
+      ||lastname,
+      city,
+      state,
+      phone INTO lv_name,
+      lv_city,
+      lv_state,
+      lv_phone
+    FROM
+      bb_shopper
+    WHERE
+      lastname = lv_last;
+  END retrieve_shopper;
 END;
 /
 
--- Now place the function in a package, name the package LOGIN_PKG
-CREATE OR REPLACE PACKAGE LOGIN_PKG AS
-  -- Packaged variables
-  shopper_id      bb_shopper.shopper_id%TYPE;
-  zip_code_prefix bb_shopper.zip_code%TYPE(3);
-  -- Function to verify user
-  FUNCTION verify_user (
-    usernm IN VARCHAR2,
-    passwd IN VARCHAR2
-  ) RETURN CHAR;
-END LOGIN_PKG;
-/
-
-CREATE OR REPLACE PACKAGE BODY LOGIN_PKG AS
- -- Function to verify user
-  FUNCTION verify_user (
-    usernm IN VARCHAR2,
-    passwd IN VARCHAR2
-  ) RETURN CHAR IS
-    temp_user bb_shopper.username%TYPE;
-    confirm   CHAR(1) := 'N';
-  BEGIN
-    SELECT
-      username INTO temp_user
-    FROM
-      bb_shopper
-    WHERE
-      password = passwd;
-    -- If a match is found, set confirmation to Y
-    confirm := 'Y';
-    -- Store shopper ID and zip code prefix in packaged variables
-    SELECT
-      shopper_id,
-      SUBSTR(zip_code, 1, 3) INTO shopper_id,
-      zip_code_prefix
-    FROM
-      bb_shopper
-    WHERE
-      username = usernm;
-    RETURN confirm;
-  EXCEPTION
-    WHEN NO_DATA_FOUND THEN
-      -- Handle invalid logon values
-      DBMS_OUTPUT.PUT_LINE('The logon values are invalid.');
-  END verify_user;
-END LOGIN_PKG;
-/
-
--- Use an anonymous block to test the packaged procedure
+-- test procedure in block shopper id 23, Ratman
 DECLARE
-  result CHAR(1);
+  lv_id    NUMBER := 23;
+  lv_last  bb_shopper.lastname%type := 'Ratman';
+  lv_name  VARCHAR2(25);
+  lv_city  bb_shopper.city%type;
+  lv_state bb_shopper.state%type;
+  lv_phone bb_shopper.phone%type;
 BEGIN
-  result := LOGIN_PKG.verify_user('gma1', 'goofy');
-  IF result = 'Y' THEN
-    DBMS_OUTPUT.PUT_LINE('Login successful!');
-    -- Use DBMS_OUTPUT statements in an anonymous block to display the values stored in the packaged variables
-    DBMS_OUTPUT.PUT_LINE('Shopper ID: '
-                         || LOGIN_PKG.shopper_id);
-    DBMS_OUTPUT.PUT_LINE('Zip Code Prefix: '
-                         || LOGIN_PKG.zip_code_prefix);
-  ELSE
-    DBMS_OUTPUT.PUT_LINE('Login failed!');
-  END IF;
+ -- test procedure w/ id
+  shop_query_pkg.retrieve_shopper(lv_id, lv_name, lv_city, lv_state, lv_phone);
+  DBMS_OUTPUT.PUT_LINE(lv_name
+                       ||' '
+                       ||lv_city
+                       ||' '
+                       ||lv_state
+                       ||' '
+                       ||lv_phone);
+ -- test procedure w/ last name
+  shop_query_pkg.retrieve_shopper(lv_last, lv_name, lv_city, lv_state, lv_phone);
+  DBMS_OUTPUT.PUT_LINE(lv_name
+                       ||' '
+                       ||lv_city
+                       ||' '
+                       ||lv_state
+                       ||' '
+                       ||lv_phone);
 END;
 /
