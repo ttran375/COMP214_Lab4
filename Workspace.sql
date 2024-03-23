@@ -9,7 +9,7 @@
 
 -- Create a package named SHOP_QUERY_PKG
 CREATE OR REPLACE PACKAGE shop_query_pkg IS
-  -- Containing overloaded procedures to perform these lookups
+ -- Containing overloaded procedure takes id
   PROCEDURE retrieve_shopper (
     lv_id IN bb_shopper.idshopper%type,
     lv_name OUT VARCHAR,
@@ -17,7 +17,7 @@ CREATE OR REPLACE PACKAGE shop_query_pkg IS
     lv_state OUT bb_shopper.state%type,
     lv_phone OUT bb_shopper.phone%type
   );
- -- second overloaded procedure, takes last name
+ -- Containing overloaded procedure takes lastname
   PROCEDURE retrieve_shopper (
     lv_last IN bb_shopper.lastname%type,
     lv_name OUT VARCHAR,
