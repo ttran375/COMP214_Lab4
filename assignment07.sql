@@ -38,6 +38,7 @@ CREATE OR REPLACE PACKAGE BODY order_info_pkg IS
     WHEN NO_DATA_FOUND THEN
       DBMS_OUTPUT.PUT_LINE('Invalid basket id');
   END ship_name_pf;
+  -- Rename the procedure basket_inf_pp in the original script's package body to basket_info_pp
   PROCEDURE basket_info_pp (
     p_basket IN NUMBER,
     p_shop OUT NUMBER,
