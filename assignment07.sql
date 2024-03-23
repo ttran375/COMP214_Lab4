@@ -384,70 +384,79 @@ END;
 -- name, city, state, phone number, and e-mail address. Test the package twice. First, call the
 -- procedure with shopper ID 23, and then call it with the last name Ratman. Both test values refer
 -- to the same shopper, so they should return the same shopper information.
+
 CREATE OR REPLACE PACKAGE shop_query_pkg IS
- -- first overloaded procedure, takes id
+
   PROCEDURE retrieve_shopper (
     lv_id IN bb_shopper.idshopper%type,
     lv_name OUT VARCHAR,
     lv_city OUT bb_shopper.city%type,
     lv_state OUT bb_shopper.state%type,
-    lv_phone OUT bb_shopper.phone%type
+    lv_phone OUT bb_shopper.phone%type,
+    lv_email OUT bb_shopper.email%type
   );
- -- second overloaded procedure, takes last name
+
   PROCEDURE retrieve_shopper (
     lv_last IN bb_shopper.lastname%type,
     lv_name OUT VARCHAR,
     lv_city OUT bb_shopper.city%type,
     lv_state OUT bb_shopper.state%type,
-    lv_phone OUT bb_shopper.phone%type
+    lv_phone OUT bb_shopper.phone%type,
+    lv_email OUT bb_shopper.email%type
   );
 END;
 /
 
 CREATE OR REPLACE PACKAGE BODY shop_query_pkg IS
- -- first overloaded procedure, takes id
+
   PROCEDURE retrieve_shopper (
     lv_id IN bb_shopper.idshopper%type,
     lv_name OUT VARCHAR,
     lv_city OUT bb_shopper.city%type,
     lv_state OUT bb_shopper.state%type,
-    lv_phone OUT bb_shopper.phone%type
+    lv_phone OUT bb_shopper.phone%type,
+    lv_email OUT bb_shopper.email%type
   ) IS
-  BEGIN -- this is almost the same as 7-1
+  BEGIN
     SELECT
       firstname
       ||' '
       ||lastname,
       city,
       state,
-      phone INTO lv_name,
+      phone,
+      email INTO lv_name,
       lv_city,
       lv_state,
-      lv_phone
+      lv_phone,
+      lv_email
     FROM
       bb_shopper
     WHERE
       idshopper = lv_id;
   END retrieve_shopper;
- -- second overloaded procedure, takes last name
+
   PROCEDURE retrieve_shopper (
     lv_last IN bb_shopper.lastname%type,
     lv_name OUT VARCHAR,
     lv_city OUT bb_shopper.city%type,
     lv_state OUT bb_shopper.state%type,
-    lv_phone OUT bb_shopper.phone%type
+    lv_phone OUT bb_shopper.phone%type,
+    lv_email OUT bb_shopper.email%type
   ) IS
-  BEGIN -- again same as 7-1
+  BEGIN
     SELECT
       firstname
       ||' '
       ||lastname,
       city,
       state,
-      phone INTO lv_name,
+      phone,
+      email INTO lv_name,
       lv_city,
       lv_state,
-      lv_phone
+      lv_phone,
+      lv_email
     FROM
       bb_shopper
     WHERE
@@ -456,7 +465,6 @@ CREATE OR REPLACE PACKAGE BODY shop_query_pkg IS
 END;
 /
 
--- test procedure in block shopper id 23, Ratman
 DECLARE
   lv_id    NUMBER := 23;
   lv_last  bb_shopper.lastname%type := 'Ratman';
@@ -464,25 +472,28 @@ DECLARE
   lv_city  bb_shopper.city%type;
   lv_state bb_shopper.state%type;
   lv_phone bb_shopper.phone%type;
+  lv_email bb_shopper.email%type;
 BEGIN
- -- test procedure w/ id
-  shop_query_pkg.retrieve_shopper(lv_id, lv_name, lv_city, lv_state, lv_phone);
-  DBMS_OUTPUT.PUT_LINE(lv_name
+  shop_query_pkg.retrieve_shopper(lv_id, lv_name, lv_city, lv_state, lv_phone, lv_email);
+  dbms_output.put_line(lv_name
                        ||' '
                        ||lv_city
                        ||' '
                        ||lv_state
                        ||' '
-                       ||lv_phone);
- -- test procedure w/ last name
-  shop_query_pkg.retrieve_shopper(lv_last, lv_name, lv_city, lv_state, lv_phone);
-  DBMS_OUTPUT.PUT_LINE(lv_name
+                       ||lv_phone
+                       ||' '
+                       ||lv_email);
+  shop_query_pkg.retrieve_shopper(lv_last, lv_name, lv_city, lv_state, lv_phone, lv_email);
+  dbms_output.put_line(lv_name
                        ||' '
                        ||lv_city
                        ||' '
                        ||lv_state
                        ||' '
-                       ||lv_phone);
+                       ||lv_phone
+                       ||' '
+                       ||lv_email);
 END;
 /
 
