@@ -10,3 +10,72 @@
 -- returned from the program units to verify the data.
 -- 3. Also, test the packaged function by using it in a SELECT clause on the BB_BASKET table.
 -- Use a WHERE clause to select only the basket 12 row.
+CREATE OR REPLACE PACKAGE order_info_pkg IS
+ FUNCTION ship_name_pf  
+   (p_basket IN NUMBER)
+   RETURN VARCHAR2;
+ PROCEDURE basket_info_pp
+  (p_basket IN NUMBER,
+   p_shop OUT NUMBER,
+   p_date OUT DATE);
+END;
+/
+
+CREATE OR REPLACE PACKAGE BODY order_info_pkg IS
+ FUNCTION ship_name_pf  
+   (p_basket IN NUMBER)
+   RETURN VARCHAR2
+  IS
+   lv_name_txt VARCHAR2(25);
+ BEGIN
+  SELECT shipfirstname||' '||shiplastname
+   INTO lv_name_txt
+   FROM bb_basket
+   WHERE idBasket = p_basket;
+  RETURN lv_name_txt;
+ EXCEPTION
+   WHEN NO_DATA_FOUND THEN
+     DBMS_OUTPUT.PUT_LINE('Invalid basket id');
+ END ship_name_pf;
+ PROCEDURE basket_info_pp
+  (p_basket IN NUMBER,
+   p_shop OUT NUMBER,
+   p_date OUT DATE)
+  IS
+ BEGIN
+   SELECT idshopper, dtordered
+    INTO p_shop, p_date
+    FROM bb_basket
+    WHERE idbasket = p_basket;
+ EXCEPTION
+   WHEN NO_DATA_FOUND THEN
+     DBMS_OUTPUT.PUT_LINE('Invalid basket id');
+ END basket_info_pp;
+END;
+/
+
+-- test procedure and function in block (returns nulls)
+declare
+  lv_id number := 12;
+  lv_name varchar2(25);
+  lv_shopper bb_basket.idshopper%type;
+  lv_date bb_basket.dtcreated%type;
+  
+begin
+  -- test function
+  lv_name := order_info_pkg.ship_name_pf(lv_id);
+  dbms_output.put_line(lv_id||' '||lv_name);
+  
+  -- test procedure
+  order_info_pkg.basket_info_pp(lv_id, lv_shopper, lv_date);
+  dbms_output.put_line(lv_id||' '||lv_shopper||' '||lv_date);
+
+end;
+/
+
+-- test with select - again, prints nothing
+select lpad(order_info_pkg.ship_name_pf(idbasket), 20)
+            "ship_name_pf on 12"
+from bb_basket
+where idbasket = 12;
+/
