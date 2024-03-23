@@ -16,14 +16,17 @@
 -- the password goofy to verify that the procedure works correctly.
 -- 5. Use DBMS_OUTPUT statements in an anonymous block to display the values stored in the
 -- packaged variables.
--- create the function
+
+-- Create a function that accepts a username and password as arguments  . 
 CREATE OR REPLACE FUNCTION verify_user (
   usernm IN VARCHAR2,
   passwd IN VARCHAR2
 ) RETURN CHAR IS
   temp_user bb_shopper.username%type;
+  -- Set the value of the variable holding the return value to N
   confirm   CHAR(1) := 'N';
-BEGIN -- if this select succeed, we can return Y
+-- If a match is found, return the value Y.
+BEGIN
   SELECT
     username INTO temp_user
   FROM
@@ -32,9 +35,10 @@ BEGIN -- if this select succeed, we can return Y
     password = passwd;
   confirm := 'Y';
   RETURN confirm;
-EXCEPTION -- if it fails, return N
+EXCEPTION
   WHEN NO_DATA_FOUND THEN
-    DBMS_OUTPUT.PUT_LINE('logon values are invalid');
+    -- Include a NO_DATA_FOUND exception handler to display a message that the logon values are invalid.
+    DBMS_OUTPUT.PUT_LINE('The logon values are invalid.');
 END;
 /
 
