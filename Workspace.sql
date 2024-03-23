@@ -7,37 +7,40 @@
 -- procedure with shopper ID 23, and then call it with the last name Ratman. Both test values refer
 -- to the same shopper, so they should return the same shopper information.
 
--- Create a package named SHOP_QUERY_PKG
+-- Create packaged procedures to retrieve shopper information
 CREATE OR REPLACE PACKAGE shop_query_pkg IS
+  -- Containing overloaded procedure takes id
+  PROCEDURE retrieve_shopper (
+    lv_id IN bb_shopper.idshopper%type,
+    lv_name OUT VARCHAR,
+    lv_city OUT bb_shopper.city%type,
+    lv_state OUT bb_shopper.state%type,
+    lv_phone OUT bb_shopper.phone%type,
+    lv_email OUT bb_shopper.email%type
+  );
+  -- Containing overloaded procedure takes lastname
+  PROCEDURE retrieve_shopper (
+    lv_last IN bb_shopper.lastname%type,
+    lv_name OUT VARCHAR,
+    lv_city OUT bb_shopper.city%type,
+    lv_state OUT bb_shopper.state%type,
+    lv_phone OUT bb_shopper.phone%type,
+    lv_email OUT bb_shopper.email%type
+  );
+END;
+/
+
+CREATE OR REPLACE PACKAGE BODY shop_query_pkg IS
  -- Containing overloaded procedure takes id
   PROCEDURE retrieve_shopper (
     lv_id IN bb_shopper.idshopper%type,
     lv_name OUT VARCHAR,
     lv_city OUT bb_shopper.city%type,
     lv_state OUT bb_shopper.state%type,
-    lv_phone OUT bb_shopper.phone%type
-  );
- -- Containing overloaded procedure takes lastname
-  PROCEDURE retrieve_shopper (
-    lv_last IN bb_shopper.lastname%type,
-    lv_name OUT VARCHAR,
-    lv_city OUT bb_shopper.city%type,
-    lv_state OUT bb_shopper.state%type,
-    lv_phone OUT bb_shopper.phone%type
-  );
-END;
-/
-
-CREATE OR REPLACE PACKAGE BODY shop_query_pkg IS
- -- first overloaded procedure, takes id
-  PROCEDURE retrieve_shopper (
-    lv_id IN bb_shopper.idshopper%type,
-    lv_name OUT VARCHAR,
-    lv_city OUT bb_shopper.city%type,
-    lv_state OUT bb_shopper.state%type,
-    lv_phone OUT bb_shopper.phone%type
+    lv_phone OUT bb_shopper.phone%type,
+    lv_email OUT bb_shopper.email%type
   ) IS
-  BEGIN -- this is almost the same as 7-1
+  BEGIN
     SELECT
       firstname
       ||' '
@@ -47,21 +50,23 @@ CREATE OR REPLACE PACKAGE BODY shop_query_pkg IS
       phone INTO lv_name,
       lv_city,
       lv_state,
-      lv_phone
+      lv_phone,
+      lv_email
     FROM
       bb_shopper
     WHERE
       idshopper = lv_id;
   END retrieve_shopper;
- -- second overloaded procedure, takes last name
+  -- Containing overloaded procedure takes lastname
   PROCEDURE retrieve_shopper (
     lv_last IN bb_shopper.lastname%type,
     lv_name OUT VARCHAR,
     lv_city OUT bb_shopper.city%type,
     lv_state OUT bb_shopper.state%type,
-    lv_phone OUT bb_shopper.phone%type
+    lv_phone OUT bb_shopper.phone%type,
+    lv_email OUT bb_shopper.email%type
   ) IS
-  BEGIN -- again same as 7-1
+  BEGIN
     SELECT
       firstname
       ||' '
@@ -71,7 +76,8 @@ CREATE OR REPLACE PACKAGE BODY shop_query_pkg IS
       phone INTO lv_name,
       lv_city,
       lv_state,
-      lv_phone
+      lv_phone,
+      lv_email
     FROM
       bb_shopper
     WHERE
@@ -88,6 +94,7 @@ DECLARE
   lv_city  bb_shopper.city%type;
   lv_state bb_shopper.state%type;
   lv_phone bb_shopper.phone%type;
+  lv_email bb_shopper.email%type;
 BEGIN
  -- test procedure w/ id
   shop_query_pkg.retrieve_shopper(lv_id, lv_name, lv_city, lv_state, lv_phone);
@@ -97,7 +104,8 @@ BEGIN
                        ||' '
                        ||lv_state
                        ||' '
-                       ||lv_phone);
+                       ||lv_phone
+                       ||lv_email);
  -- test procedure w/ last name
   shop_query_pkg.retrieve_shopper(lv_last, lv_name, lv_city, lv_state, lv_phone);
   DBMS_OUTPUT.PUT_LINE(lv_name
@@ -106,6 +114,7 @@ BEGIN
                        ||' '
                        ||lv_state
                        ||' '
-                       ||lv_phone);
+                       ||lv_phone
+                       ||lv_email);
 END;
 /
