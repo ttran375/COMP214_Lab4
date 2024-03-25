@@ -27,6 +27,7 @@ CREATE OR REPLACE PACKAGE BODY login_pkg IS
   ) RETURN CHAR IS
     lv_ck_txt CHAR(1) := 'N';
     lv_id_num NUMBER(5);
+  
   BEGIN
     SELECT
       idShopper INTO lv_id_num
@@ -42,12 +43,14 @@ CREATE OR REPLACE PACKAGE BODY login_pkg IS
     WHEN NO_DATA_FOUND THEN
       RETURN lv_ck_txt;
   END login_ck_pf;
-BEGIN
-  SELECT
-    systimestamp INTO pv_login_time
-  FROM
-    dual;
-END;
+
+   -- Populate a packaged variable with the date and time of user logons
+  BEGIN
+    SELECT
+      systimestamp INTO pv_login_time
+    FROM
+      dual;
+  END;
 /
 
 -- anonymous block for testing
