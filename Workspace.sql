@@ -8,7 +8,8 @@
 -- populates the packaged variable.
 
 CREATE OR REPLACE PACKAGE login_pkg IS
-  pv_login_time timestamp; -- declare variable to hold timestamp
+  -- Declare variable to hold timestamp
+  pv_login_time timestamp;
   pv_id_num     NUMBER(3);
 
   FUNCTION login_ck_pf (
