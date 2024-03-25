@@ -1,64 +1,67 @@
--- Assignment 7-8: Using a One-Time-Only Procedure in a Package
--- The Brewbean’s application currently contains a package used in the shopper logon process.
--- However, one of the developers wants to be able to reference the time users log on to
--- determine when the session should be timed out and entries rolled back. Modify the
--- LOGIN_PKG package (in the Assignment07-08.txt file in the Chapter07 folder). Use a
--- one-time-only procedure to populate a packaged variable with the date and time of user
--- logons. Use an anonymous block to verify that the one-time-only procedure works and
--- populates the packaged variable.
-
-CREATE OR REPLACE PACKAGE login_pkg IS
-  -- Declare variable with the date and time of user of user logons
-  pv_login_time timestamp;
-  pv_id_num     NUMBER(3);
-  FUNCTION login_ck_pf (
-    p_user IN VARCHAR2,
-    p_pass IN VARCHAR2
-  ) RETURN CHAR;
-END;
+-- Assignment 7-9: Creating a Package for Pledges
+-- Create a package named PLEDGE_PKG that includes two functions for determining dates of
+-- pledge payments. Use or create the functions described in Chapter 6 for Assignments 6-12 and
+-- 6-13, using the names DD_PAYDATE1_PF and DD_PAYEND_PF for these packaged functions.
+-- Test both functions with a specific pledge ID, using an anonymous block. Then test both
+-- functions in a single query showing all pledges and associated payment dates.
+CREATE OR REPLACE PACKAGE PLEDGE_PKG AS
+ -- Function to calculate the first payment date for a given pledge.
+  FUNCTION DD_PAYDATE1_PF(
+    idPledge IN NUMBER
+  ) RETURN DATE;
+ -- Function to calculate the end payment date for a given pledge.
+  FUNCTION DD_PAYEND_PF(
+    idPledge IN NUMBER
+  ) RETURN DATE;
+END PLEDGE_PKG;
 /
 
-CREATE OR REPLACE PACKAGE BODY login_pkg IS
-  FUNCTION login_ck_pf (
-    p_user IN VARCHAR2,
-    p_pass IN VARCHAR2
-  ) RETURN CHAR IS
-    lv_ck_txt CHAR(1) := 'N';
-    lv_id_num NUMBER(5);
+CREATE OR REPLACE PACKAGE BODY PLEDGE_PKG AS
+
+  FUNCTION DD_PAYDATE1_PF(
+    idPledge IN NUMBER
+  ) RETURN DATE IS
+    v_paydate DATE;
   BEGIN
+ -- Dummy implementation, replace with actual logic
     SELECT
-      idShopper INTO lv_id_num
+      MIN(Paydate) INTO v_paydate
     FROM
-      bb_shopper
+      DD_PAYMENT
     WHERE
-      username = p_user
-      AND password = p_pass;
-    lv_ck_txt := 'Y';
-    pv_id_num := lv_id_num;
-    RETURN lv_ck_txt;
-  EXCEPTION
-    WHEN NO_DATA_FOUND THEN
-      RETURN lv_ck_txt;
-  END login_ck_pf;
-  -- One-time-only procedure to populate the variable
+      idPledge = idPledge;
+    RETURN v_paydate;
+  END DD_PAYDATE1_PF;
+
+  FUNCTION DD_PAYEND_PF(
+    idPledge IN NUMBER
+  ) RETURN DATE IS
+    v_enddate DATE;
   BEGIN
+ -- Dummy implementation, replace with actual logic
     SELECT
-      systimestamp INTO pv_login_time
+      MAX(Paydate) INTO v_enddate
     FROM
-      dual;
-  END;
+      DD_PAYMENT
+    WHERE
+      idPledge = idPledge;
+    RETURN v_enddate;
+  END DD_PAYEND_PF;
+END PLEDGE_PKG;
 /
 
--- Verify that the one-time-only procedure works
-DECLARE
-  lv_user   bb_shopper.username%type := 'Crackj';
-  lv_passwd bb_shopper.password%type := 'flyby';
-  lv_login  CHAR := 'N';
 BEGIN
-  -- Populate the packaged variable
-  lv_login := login_pkg.login_ck_pf(lv_user, lv_passwd);
-  dbms_output.put_line(lv_login
-                       ||'   '
-                       ||login_pkg.pv_login_time);
+ -- Replace 101 with your specific pledge ID
+  DBMS_OUTPUT.PUT_LINE('First Payment Date: '
+                       || PLEDGE_PKG.DD_PAYDATE1_PF(101));
+  DBMS_OUTPUT.PUT_LINE('End Payment Date: '
+                       || PLEDGE_PKG.DD_PAYEND_PF(101));
 END;
 /
+
+SELECT
+  p.idPledge,
+  PLEDGE_PKG.DD_PAYDATE1_PF(p.idPledge) AS First_Payment_Date,
+  PLEDGE_PKG.DD_PAYEND_PF(p.idPledge)   AS Last_Payment_Date
+FROM
+  DD_PLEDGE p;
