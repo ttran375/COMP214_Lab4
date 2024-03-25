@@ -8,10 +8,9 @@
 -- populates the packaged variable.
 
 CREATE OR REPLACE PACKAGE login_pkg IS
- -- Declare variable to hold the date and time of user logons
+  -- Declare variable to hold the date and time of user logons
   pv_login_time timestamp;
   pv_id_num     NUMBER(3);
-
   FUNCTION login_ck_pf (
     p_user IN VARCHAR2,
     p_pass IN VARCHAR2
@@ -20,14 +19,12 @@ END;
 /
 
 CREATE OR REPLACE PACKAGE BODY login_pkg IS
-
   FUNCTION login_ck_pf (
     p_user IN VARCHAR2,
     p_pass IN VARCHAR2
   ) RETURN CHAR IS
     lv_ck_txt CHAR(1) := 'N';
     lv_id_num NUMBER(5);
-  
   BEGIN
     SELECT
       idShopper INTO lv_id_num
@@ -43,7 +40,6 @@ CREATE OR REPLACE PACKAGE BODY login_pkg IS
     WHEN NO_DATA_FOUND THEN
       RETURN lv_ck_txt;
   END login_ck_pf;
-
    -- Populate a packaged variable with the date and time of user logons
   BEGIN
     SELECT
