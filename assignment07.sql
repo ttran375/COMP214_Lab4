@@ -434,7 +434,8 @@ CREATE OR REPLACE PACKAGE BODY shop_query_pkg IS
       bb_shopper
     WHERE
       idshopper = lv_id; -- Filter by shopper ID
-  END retrieve_shopper; -- Implementation of retrieve_shopper procedure by last name
+  END retrieve_shopper;
+  -- Implementation of retrieve_shopper procedure by last name
   PROCEDURE retrieve_shopper (
     lv_last IN bb_shopper.lastname%type,
     lv_name OUT VARCHAR,
@@ -476,9 +477,9 @@ DECLARE
   lv_phone bb_shopper.phone%type;
   lv_email bb_shopper.email%type;
 BEGIN
- -- Retrieve shopper information by shopper ID
+  -- Retrieve shopper information by shopper ID
   shop_query_pkg.retrieve_shopper(lv_id, lv_name, lv_city, lv_state, lv_phone, lv_email);
- -- Display shopper information
+  -- Display shopper information
   dbms_output.put_line(lv_name
                        ||' '
                        ||lv_city
@@ -488,9 +489,9 @@ BEGIN
                        ||lv_phone
                        ||' '
                        ||lv_email);
- -- Retrieve shopper information by last name
+  -- Retrieve shopper information by last name
   shop_query_pkg.retrieve_shopper(lv_last, lv_name, lv_city, lv_state, lv_phone, lv_email);
- -- Display shopper information
+  -- Display shopper information
   dbms_output.put_line(lv_name
                        ||' '
                        ||lv_city
@@ -510,19 +511,21 @@ END;
 -- packaged variables for reference: pv_tax_nc = .035, pv_tax_tx = .05, and pv_tax_tn = .02.
 -- Code the variables to prevent the rates from being modified. Use an anonymous block with
 -- DBMS_OUTPUT statements to display the value of each packaged variable.
--- create a reference package w/ no body
-CREATE OR REPLACE PACKAGE tax_rate_pkg IS
-  pv_tax_nc CONSTANT NUMBER := .035; -- all variables are constants
+
+-- Create a package consisting of only a specification
+CREATE OR REPLACE PACKAGE TAX_RATE_PKG IS
+  -- Hold the tax rates in packaged variables that prevent the rates from being modified
+  pv_tax_nc CONSTANT NUMBER := .035;
   pv_tax_tx CONSTANT NUMBER := .05;
   pv_tax_tn CONSTANT NUMBER := .02;
 END;
 /
 
--- test our body-less package by printing the variables
+-- Display the value of each packaged variable
 BEGIN
-  DBMS_OUTPUT.PUT_LINE(tax_rate_pkg.pv_tax_nc);
-  DBMS_OUTPUT.PUT_LINE(tax_rate_pkg.pv_tax_tx);
-  DBMS_OUTPUT.PUT_LINE(tax_rate_pkg.pv_tax_tn);
+  DBMS_OUTPUT.PUT_LINE(TAX_RATE_PKG.pv_tax_nc);
+  DBMS_OUTPUT.PUT_LINE(TAX_RATE_PKG.pv_tax_tx);
+  DBMS_OUTPUT.PUT_LINE(TAX_RATE_PKG.pv_tax_tn);
 END;
 /
 

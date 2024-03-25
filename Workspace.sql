@@ -8,14 +8,14 @@
 
 -- Create a package consisting of only a specification
 CREATE OR REPLACE PACKAGE TAX_RATE_PKG IS
-  -- Hold the tax rates in packaged variables
-  pv_tax_nc CONSTANT NUMBER := .035; -- all variables are constants
+  -- Hold the tax rates in packaged variables that prevent the rates from being modified
+  pv_tax_nc CONSTANT NUMBER := .035;
   pv_tax_tx CONSTANT NUMBER := .05;
   pv_tax_tn CONSTANT NUMBER := .02;
 END;
 /
 
--- test our body-less package by printing the variables
+-- Display the value of each packaged variable
 BEGIN
   DBMS_OUTPUT.PUT_LINE(TAX_RATE_PKG.pv_tax_nc);
   DBMS_OUTPUT.PUT_LINE(TAX_RATE_PKG.pv_tax_tx);
