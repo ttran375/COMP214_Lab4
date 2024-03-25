@@ -8,7 +8,7 @@
 -- populates the packaged variable.
 
 CREATE OR REPLACE PACKAGE login_pkg IS
-  -- Declare variable to hold timestamp
+ -- Declare variable to hold the date and time of user logons
   pv_login_time timestamp;
   pv_id_num     NUMBER(3);
 
@@ -42,7 +42,6 @@ CREATE OR REPLACE PACKAGE BODY login_pkg IS
     WHEN NO_DATA_FOUND THEN
       RETURN lv_ck_txt;
   END login_ck_pf;
- -- get the timestamp when login is called
 BEGIN
   SELECT
     systimestamp INTO pv_login_time
