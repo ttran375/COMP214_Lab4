@@ -21,16 +21,16 @@ CREATE OR REPLACE PACKAGE BODY PLEDGE_PKG AS
   FUNCTION DD_PAYDATE1_PF(
     idPledge IN NUMBER
   ) RETURN DATE IS
-    v_paydate DATE;
+    lv_paydate DATE;
   BEGIN
  -- Dummy implementation, replace with actual logic
     SELECT
-      MIN(Paydate) INTO v_paydate
+      MIN(Paydate) INTO lv_paydate
     FROM
       DD_PAYMENT
     WHERE
       idPledge = idPledge;
-    RETURN v_paydate;
+    RETURN lv_paydate;
   END DD_PAYDATE1_PF;
 
   FUNCTION DD_PAYEND_PF(
