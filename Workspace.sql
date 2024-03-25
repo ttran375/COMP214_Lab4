@@ -17,7 +17,7 @@ create or replace package tax_rate_pkg is
     select taxrate, state
     from bb_tax;
    
-  -- spec a functionto get tax rate 
+  -- spec a function to get tax rate 
   function get_tax
     (pv_state in bb_tax.state%type)
     return bb_tax.taxrate%type;
