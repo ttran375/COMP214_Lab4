@@ -652,12 +652,13 @@ END;
 -- 6-13, using the names DD_PAYDATE1_PF and DD_PAYEND_PF for these packaged functions.
 -- Test both functions with a specific pledge ID, using an anonymous block. Then test both
 -- functions in a single query showing all pledges and associated payment dates.
+
 CREATE OR REPLACE PACKAGE PLEDGE_PKG AS
- -- Function to calculate the first payment date for a given pledge.
+  -- Function to calculate the first payment date for a given pledge.
   FUNCTION DD_PAYDATE1_PF(
     idPledge IN NUMBER
   ) RETURN DATE;
- -- Function to calculate the end payment date for a given pledge.
+  -- Function to calculate the end payment date for a given pledge.
   FUNCTION DD_PAYEND_PF(
     idPledge IN NUMBER
   ) RETURN DATE;
@@ -665,28 +666,26 @@ END PLEDGE_PKG;
 /
 
 CREATE OR REPLACE PACKAGE BODY PLEDGE_PKG AS
-
+  -- Determine a Pledge’s First Payment Date
   FUNCTION DD_PAYDATE1_PF(
     idPledge IN NUMBER
   ) RETURN DATE IS
-    v_paydate DATE;
+    lv_paydate DATE;
   BEGIN
- -- Dummy implementation, replace with actual logic
     SELECT
-      MIN(Paydate) INTO v_paydate
+      MIN(Paydate) INTO lv_paydate
     FROM
       DD_PAYMENT
     WHERE
       idPledge = idPledge;
-    RETURN v_paydate;
+    RETURN lv_paydate;
   END DD_PAYDATE1_PF;
-
+  -- Determining a Pledge’s Final Payment Date
   FUNCTION DD_PAYEND_PF(
     idPledge IN NUMBER
   ) RETURN DATE IS
     v_enddate DATE;
   BEGIN
- -- Dummy implementation, replace with actual logic
     SELECT
       MAX(Paydate) INTO v_enddate
     FROM
@@ -698,8 +697,8 @@ CREATE OR REPLACE PACKAGE BODY PLEDGE_PKG AS
 END PLEDGE_PKG;
 /
 
+-- Test both functions with a specific pledge ID, using an anonymous block
 BEGIN
- -- Replace 101 with your specific pledge ID
   DBMS_OUTPUT.PUT_LINE('First Payment Date: '
                        || PLEDGE_PKG.DD_PAYDATE1_PF(101));
   DBMS_OUTPUT.PUT_LINE('End Payment Date: '
@@ -707,12 +706,14 @@ BEGIN
 END;
 /
 
+-- Test both functions in a single query showing all pledges and associated payment dates
 SELECT
   p.idPledge,
   PLEDGE_PKG.DD_PAYDATE1_PF(p.idPledge) AS First_Payment_Date,
   PLEDGE_PKG.DD_PAYEND_PF(p.idPledge)   AS Last_Payment_Date
 FROM
   DD_PLEDGE p;
+
 
 -- Assignment 7-10: Adding a Pledge Display Procedure to the Package
 -- Modify the package created in Assignment 7-9 as follows:
