@@ -8,7 +8,7 @@
 -- populates the packaged variable.
 
 CREATE OR REPLACE PACKAGE login_pkg IS
-  -- Declare variable to hold the date and time of user logons
+  -- Declare variable with the date and time of user of user logons
   pv_login_time timestamp;
   pv_id_num     NUMBER(3);
   FUNCTION login_ck_pf (
@@ -40,7 +40,7 @@ CREATE OR REPLACE PACKAGE BODY login_pkg IS
     WHEN NO_DATA_FOUND THEN
       RETURN lv_ck_txt;
   END login_ck_pf;
-   -- Populate a packaged variable with the date and time of user logons
+  -- One-time-only procedure to populate the variable
   BEGIN
     SELECT
       systimestamp INTO pv_login_time
@@ -49,16 +49,14 @@ CREATE OR REPLACE PACKAGE BODY login_pkg IS
   END;
 /
 
--- anonymous block for testing
+-- Verify that the one-time-only procedure works
 DECLARE
- -- a few local variables to hold needed data
   lv_user   bb_shopper.username%type := 'Crackj';
   lv_passwd bb_shopper.password%type := 'flyby';
   lv_login  CHAR := 'N';
 BEGIN
- -- call the login function
+  -- Populate the packaged variable
   lv_login := login_pkg.login_ck_pf(lv_user, lv_passwd);
- -- print confirmation that we logged in and the time/date
   dbms_output.put_line(lv_login
                        ||'   '
                        ||login_pkg.pv_login_time);
