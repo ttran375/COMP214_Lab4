@@ -9,15 +9,12 @@
 -- must be able to find a match in the cursor and return the correct tax rate. Use an anonymous
 -- block to test the function with the state value NC.
 
--- create a tax package
 create or replace package tax_rate_pkg is
-  
-  -- spec a cursor to hold state and tax rate
+  -- Hold state and tax rate in a cursor
   cursor cur_tax is
     select taxrate, state
     from bb_tax;
-   
-  -- spec a function to get tax rate 
+  -- Spec a function to get tax rate 
   function get_tax
     (pv_state in bb_tax.state%type)
     return bb_tax.taxrate%type;
@@ -25,17 +22,13 @@ create or replace package tax_rate_pkg is
 end;
 /
 
--- create a tax package body
 create or replace package body tax_rate_pkg is
-  
-  -- define our function
   function get_tax
     (pv_state in bb_tax.state%type)
     return bb_tax.taxrate%type
    is
     -- we need a holding variable for the tax rate
     pv_tax bb_tax.taxrate%type := 0.00;
-    
   begin -- use cursor for loop to find state and rate
     for rec_tax in cur_tax loop
         if rec_tax.state = pv_state then
