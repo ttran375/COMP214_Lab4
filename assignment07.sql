@@ -714,7 +714,6 @@ SELECT
 FROM
   DD_PLEDGE p;
 
-
 -- Assignment 7-10: Adding a Pledge Display Procedure to the Package
 -- Modify the package created in Assignment 7-9 as follows:
 -- • Add a procedure named DD_PLIST_PP that displays the donor name and all
@@ -722,52 +721,87 @@ FROM
 -- due date). A donor ID is the input value for the procedure.
 -- • Make the procedure public and the two functions private.
 -- Test the procedure with an anonymous block.
+
 CREATE OR REPLACE PACKAGE PLEDGE_PKG AS
-  -- Procedure to display donor name and all associated pledges
-  PROCEDURE DD_PLIST_PP(idDonor IN NUMBER);
+ -- Function to calculate the first payment date for a given pledge.
+  FUNCTION DD_PAYDATE1_PF(
+    idPledge IN NUMBER
+  ) RETURN DATE;
+ -- Function to calculate the end payment date for a given pledge.
+  FUNCTION DD_PAYEND_PF(
+    idPledge IN NUMBER
+  ) RETURN DATE;
+ -- Procedure to display donor name and associated pledges.
+  PROCEDURE DD_PLIST_PP(
+    idDonor IN NUMBER
+  );
 END PLEDGE_PKG;
 /
 
 CREATE OR REPLACE PACKAGE BODY PLEDGE_PKG AS
-
-  -- Private function to calculate the first payment date for a given pledge.
-  FUNCTION DD_PAYDATE1_PF(idPledge IN NUMBER) RETURN DATE IS
-    v_paydate DATE;
+ -- Determine a Pledge’s First Payment Date
+  FUNCTION DD_PAYDATE1_PF(
+    idPledge IN NUMBER
+  ) RETURN DATE IS
+    lv_paydate DATE;
   BEGIN
-    -- Implement the logic as per your assignment requirements
-    SELECT MIN(Paydate) INTO v_paydate
-    FROM DD_PAYMENT
-    WHERE idPledge = idPledge;
-    RETURN v_paydate;
+    SELECT
+      MIN(Paydate) INTO lv_paydate
+    FROM
+      DD_PAYMENT
+    WHERE
+      idPledge = idPledge;
+    RETURN lv_paydate;
   END DD_PAYDATE1_PF;
-
-  -- Private function to calculate the end payment date for a given pledge.
-  FUNCTION DD_PAYEND_PF(idPledge IN NUMBER) RETURN DATE IS
+  -- Determining a Pledge’s Final Payment Date
+  FUNCTION DD_PAYEND_PF(
+    idPledge IN NUMBER
+  ) RETURN DATE IS
     v_enddate DATE;
   BEGIN
-    -- Implement the logic as per your assignment requirements
-    SELECT MAX(Paydate) INTO v_enddate
-    FROM DD_PAYMENT
-    WHERE idPledge = idPledge;
+    SELECT
+      MAX(Paydate) INTO v_enddate
+    FROM
+      DD_PAYMENT
+    WHERE
+      idPledge = idPledge;
     RETURN v_enddate;
   END DD_PAYEND_PF;
-
-  -- Public procedure as specified
-  PROCEDURE DD_PLIST_PP(idDonor IN NUMBER) IS
+  -- Display donor name and associated pledges
+  PROCEDURE DD_PLIST_PP(
+    idDonor IN NUMBER
+  ) IS
   BEGIN
-    FOR r IN (SELECT d.Firstname || ' ' || d.Lastname AS DonorName, p.idPledge, DD_PAYDATE1_PF(p.idPledge) AS FirstPaymentDate, DD_PAYEND_PF(p.idPledge) AS LastPaymentDate
-              FROM DD_DONOR d
-              JOIN DD_PLEDGE p ON d.idDonor = p.idDonor
-              WHERE d.idDonor = idDonor) LOOP
-      DBMS_OUTPUT.PUT_LINE('Donor: ' || r.DonorName || ', Pledge ID: ' || r.idPledge || ', First Payment Date: ' || r.FirstPaymentDate || ', Last Payment Date: ' || r.LastPaymentDate);
+    FOR pledge_rec IN (
+      SELECT
+        pl.idPledge,
+        pl.Pledgedate,
+        pl.Pledgeamt,
+        PLEDGE_PKG.DD_PAYDATE1_PF(pl.idPledge) AS First_Payment_Date,
+        PLEDGE_PKG.DD_PAYEND_PF(pl.idPledge)   AS Last_Payment_Date
+      FROM
+        DD_PLEDGE pl
+      WHERE
+        pl.idDonor = idDonor
+    ) LOOP
+      DBMS_OUTPUT.PUT_LINE('Pledge ID: '
+                           || pledge_rec.idPledge);
+      DBMS_OUTPUT.PUT_LINE('Pledge Date: '
+                           || pledge_rec.Pledgedate);
+      DBMS_OUTPUT.PUT_LINE('Pledge Amount: '
+                           || pledge_rec.Pledgeamt);
+      DBMS_OUTPUT.PUT_LINE('First Payment Date: '
+                           || pledge_rec.First_Payment_Date);
+      DBMS_OUTPUT.PUT_LINE('Last Payment Date: '
+                           || pledge_rec.Last_Payment_Date);
+      DBMS_OUTPUT.PUT_LINE('-------------------------');
     END LOOP;
   END DD_PLIST_PP;
-
 END PLEDGE_PKG;
 /
 
 BEGIN
-  PLEDGE_PKG.DD_PLIST_PP(301);
+  PLEDGE_PKG.DD_PLIST_PP(303); -- Replace 303 with the desired donor ID
 END;
 /
 
@@ -783,6 +817,8 @@ END;
 -- being returned by means of a single parameter in the procedure. For each pledge payment,
 -- make sure the pledge ID, donor’s last name, pledge payment amount, and pledge payment
 -- date are displayed.
+
+-- Creating a record type to hold payment information
 CREATE OR REPLACE TYPE payment_info_record AS
   OBJECT (
     idPledge NUMBER,
@@ -792,10 +828,12 @@ CREATE OR REPLACE TYPE payment_info_record AS
   );
 /
 
+-- Creating a table type of the payment information records
 CREATE OR REPLACE TYPE payment_info_table AS
   TABLE OF payment_info_record;
 /
 
+-- Procedure to retrieve donor pledge payment information
 CREATE OR REPLACE PROCEDURE DD_PAYS_PP (
   donorId IN NUMBER,
   paymentInfo OUT payment_info_table
@@ -803,6 +841,7 @@ CREATE OR REPLACE PROCEDURE DD_PAYS_PP (
 BEGIN
  -- Initialize the output table
   paymentInfo := payment_info_table();
+ -- Fetching pledge payment information for the donor
   FOR rec IN (
     SELECT
       p.idPledge,
@@ -825,6 +864,7 @@ BEGIN
 END;
 /
 
+-- Anonymous block to test the procedure
 DECLARE
   paymentData payment_info_table;
 BEGIN
