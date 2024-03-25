@@ -7,6 +7,14 @@
 -- Test the procedure with an anonymous block.
 
 CREATE OR REPLACE PACKAGE PLEDGE_PKG AS
+  -- Determine a Pledge’s First Payment Date
+  FUNCTION DD_PAYDATE1_PF(
+    idPledge IN NUMBER
+  ) RETURN DATE;
+  -- Determining a Pledge’s Final Payment Date
+  FUNCTION DD_PAYEND_PF(
+    idPledge IN NUMBER
+  ) RETURN DATE;
   -- Procedure to display donor name and all associated pledges. A donor ID is the input value for the procedure
   PROCEDURE DD_PLIST_PP(
     idDonor IN NUMBER
