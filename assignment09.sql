@@ -439,34 +439,33 @@ ALTER TRIGGER BB_DISCOUNT_TRG DISABLE;
 -- product ID? If so, create the trigger and test it by issuing an UPDATE statement that changes the
 -- IDPRODUCT 7 to 22. Do a rollback to return the data to its original state, and disable the new
 -- trigger after you have finished this assignment.
-
-CREATE OR REPLACE TRIGGER trg_update_product_id BEFORE
-  UPDATE OF idProduct ON BB_PRODUCT FOR EACH ROW
+CREATE OR REPLACE TRIGGER BB_PRODUCT_ID_UPDATE_TRG AFTER
+  UPDATE OF IDPRODUCT ON BB_PRODUCT FOR EACH ROW
 BEGIN
  -- Update BB_BASKETITEM table
   UPDATE BB_BASKETITEM
   SET
-    idProduct = :NEW.idProduct
+    IDPRODUCT = :NEW.IDPRODUCT
   WHERE
-    idProduct = :OLD.idProduct;
+    IDPRODUCT = :OLD.IDPRODUCT;
  -- Update BB_PRODUCTOPTION table
   UPDATE BB_PRODUCTOPTION
   SET
-    idProduct = :NEW.idProduct
+    IDPRODUCT = :NEW.IDPRODUCT
   WHERE
-    idProduct = :OLD.idProduct;
+    IDPRODUCT = :OLD.IDPRODUCT;
 END;
 /
 
 UPDATE BB_PRODUCT
 SET
-  idProduct = 22
+  IDPRODUCT = 22
 WHERE
-  idProduct = 7;
+  IDPRODUCT = 7;
 
 ROLLBACK;
 
-ALTER TRIGGER trg_update_product_id DISABLE;
+ALTER TRIGGER BB_PRODUCT_ID_UPDATE_TRG DISABLE;
 
 -- Assignment 9-7: Updating Summary Data Tables
 -- The Brewbean’s owner uses several summary sales data tables every day to monitor business
