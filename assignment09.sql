@@ -318,41 +318,50 @@ ALTER TRIGGER BB_REQFILL_TRG DISABLE;
 -- stock levels correctly.
 -- 3. Be sure to run the following statement to disable this trigger so that it doesn’t affect other
 -- assignments:
+-- ALTER TRIGGER bb_ordcancel_trg DISABLE;
 
 CREATE OR REPLACE TRIGGER BB_ORDCANCEL_TRG AFTER
-  INSERT ON bb_basketstatus FOR EACH ROW WHEN (NEW.idStage = 4)
+  INSERT ON BB_BASKETSTATUS FOR EACH ROW WHEN (NEW.IDSTAGE = 4)
 DECLARE
-  v_qty_ordered NUMBER;
-BEGIN
- -- Retrieving the quantity ordered for the canceled order
+  CURSOR c_basket_items IS
   SELECT
-    SUM(bi.Quantity) INTO v_qty_ordered
+    idProduct,
+    Quantity,
+    option1,
+    option2
   FROM
-    bb_basketitem bi
+    bb_basketItem
   WHERE
-    bi.idBasket = :NEW.idBasket;
- -- Updating the stock levels of the products associated with the canceled order
-  FOR item IN (
-    SELECT
-      bi.idProduct,
-      SUM(bi.Quantity) AS total_quantity
-    FROM
-      bb_basketitem bi
-    WHERE
-      bi.idBasket = :NEW.idBasket
-    GROUP BY
-      bi.idProduct
-  ) LOOP
+    idBasket = :NEW.idBasket;
+BEGIN
+ -- Update stock levels for each item in the canceled order
+  FOR item_rec IN c_basket_items LOOP
     UPDATE bb_product
     SET
-      stock = stock + item.total_quantity
+      stock = stock + item_rec.Quantity * CASE WHEN item_rec.option1 IS NOT NULL THEN (
+        SELECT
+          Price
+        FROM
+          bb_ProductOption
+        WHERE
+          idProduct = item_rec.idProduct
+          AND idProductOption = item_rec.option1
+      ) ELSE 1 END * CASE WHEN item_rec.option2 IS NOT NULL THEN (
+        SELECT
+          Price
+        FROM
+          bb_ProductOption
+        WHERE
+          idProduct = item_rec.idProduct
+          AND idProductOption = item_rec.option2
+      ) ELSE 1 END
     WHERE
-      idProduct = item.idProduct;
+      idProduct = item_rec.idProduct;
   END LOOP;
- -- Updating ORDERPLACED column of BB_BASKET table to zero
+ -- Update ORDERPLACED column of BB_BASKET table to zero
   UPDATE bb_basket
   SET
-    orderplaced = 0
+    OrderPlaced = 0
   WHERE
     idBasket = :NEW.idBasket;
 END;
@@ -370,7 +379,7 @@ INSERT INTO bb_basketstatus (
   SYSDATE
 );
 
-ALTER TRIGGER BB_REQFILL_TRG DISABLE;
+ALTER TRIGGER bb_ordcancel_trg DISABLE;
 
 -- Assignment 9-5: Processing Discounts
 -- Brewbean’s is offering a new discount for return shoppers: Every fifth completed order gets a
