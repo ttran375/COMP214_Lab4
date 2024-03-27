@@ -399,17 +399,16 @@ ALTER TRIGGER bb_ordcancel_trg DISABLE;
 -- If you need to test the trigger multiple times, simply reset the ORDERPLACED column to 0
 -- for basket 13 and then run the UPDATE again. Also, disable this trigger when you’re finished so
 -- that it doesn’t affect other assignments.
-
 CREATE OR REPLACE PACKAGE DISC_PKG AS
-  pv_disc_num NUMBER := 0; -- Packaged variable to store the count of orders
-  pv_disc_txt VARCHAR2(1) := 'N'; -- Packaged variable to indicate whether a discount should be applied
+  pv_disc_num NUMBER;
+  pv_disc_txt VARCHAR2(1);
 END DISC_PKG;
 /
 
 CREATE OR REPLACE TRIGGER BB_DISCOUNT_TRG AFTER
-  UPDATE OF ORDERPLACED ON bb_basket FOR EACH ROW
+  UPDATE OF orderplaced ON bb_basket FOR EACH ROW
 BEGIN
-  IF :NEW.ORDERPLACED = 1 THEN
+  IF :NEW.orderplaced = 1 THEN
     IF DISC_PKG.pv_disc_num = 5 THEN
       DISC_PKG.pv_disc_txt := 'Y';
     END IF;
@@ -417,20 +416,9 @@ BEGIN
 END;
 /
 
-DECLARE
-  v_dummy NUMBER;
 BEGIN
-  DISC_PKG.pv_disc_num := 5; -- Set the count of orders to 5 for testing
-  DISC_PKG.pv_disc_txt := 'N'; -- Reset the discount indicator variable
-  SELECT
-    1 INTO v_dummy
-  FROM
-    dual
-  WHERE
-    DISC_PKG.pv_disc_txt = 'Y'; -- This will raise an exception if the trigger sets pv_disc_txt to 'Y'
-EXCEPTION
-  WHEN NO_DATA_FOUND THEN
-    NULL; -- This is expected if the trigger does not set pv_disc_txt to 'Y'
+  DISC_PKG.pv_disc_num := 5; -- Set the count of orders for testing
+  DISC_PKG.pv_disc_txt := 'N'; -- Initialize pv_disc_txt
 END;
 /
 
