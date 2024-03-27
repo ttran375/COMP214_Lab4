@@ -28,7 +28,7 @@
 -- 5. Run the UPDATE statement shown in Figure 9-37. It should cause the trigger to fire. Notice
 -- the query to check whether the trigger fired and whether a product stock request was
 -- inserted in the BB_PRODUCT_REQUEST table.
--- UPDATE bb_product SET stock 25
+-- UPDATE bb_product SET stock = 25
 -- WHERE idProduct = 4;
 -- SELECT *
 -- FROM bb_product_request;
@@ -79,3 +79,18 @@ FROM
   bb_product
 WHERE
   idProduct = 4;
+
+UPDATE bb_product
+SET
+  stock = 25
+WHERE
+  idProduct = 4;
+
+SELECT
+  *
+FROM
+  bb_product_request;
+
+ROLLBACK;
+
+ALTER TRIGGER bb_reorder_trg DISABLE;
