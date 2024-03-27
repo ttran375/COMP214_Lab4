@@ -112,117 +112,102 @@ ALTER TRIGGER bb_reorder_trg DISABLE;
 -- BB_PRODUCT table to reflect the increased inventory.
 -- 3. Now test the trigger. First, query the stock and reorder data for product 5, as shown in
 -- Figure 9-38.
--- Stock level currently
--- below reorder level
--- Current request for
--- a quantity of 45
+-- SELECT stock, reorder FROM bb_product
+-- WHERE idProduct = 5;
+-- SELECT *
+-- FROM bb_product_request WHERE idProduct = 5;
 -- FIGURE 9-38 Querying the data for product 5 stock and reorder amount
--- An UPDATE statement
--- that records receiving a
--- request res the trigger.
--- Order received
--- Stock level increased
--- FIGURE 9-39 Updating the product request
 -- 4. Now update the product request to record it as fulfilled by using the UPDATE statement
 -- shown in Figure 9-39.
+-- UPDATE
+-- bb_product_request
+-- SET dtRecd= SYSDATE, cost = 225
+-- WHERE idRequest = 3;
+-- SELECT *
+-- FROM bb_product_request WHERE idProduct = 5;
+-- SELECT stock, reorder FROM bb_product
+-- WHERE idProduct = 5;
 -- 5. Issue queries to verify that the trigger fired and the stock level of product 5 has been
 -- modified correctly. Then issue a ROLLBACK statement to undo the modifications.
 -- 6. If you aren’t doing Assignment 9-3, disable the trigger so that it doesn’t affect
 -- other assignments.
--- create product request
+
+-- Insert a product request
 INSERT INTO bb_product_request (
-  idrequest,
-  idproduct,
-  dtrequest,
+  idRequest,
+  idProduct,
+  dtRequest,
   qty
 ) VALUES (
   3,
   5,
-  sysdate,
+  SYSDATE,
   45
 );
 
-/
+COMMIT;
 
--- Creat trigger to handle updating stock
-CREATE OR REPLACE TRIGGER bb_reqfill_trg AFTER
-  UPDATE OF dtrecd ON bb_product_request FOR EACH ROW
+-- Create the trigger
+CREATE OR REPLACE TRIGGER BB_REQFILL_TRG AFTER
+  UPDATE OF dtRecd, cost ON bb_product_request FOR EACH ROW
 BEGIN
- /* update bb_product and set stock equal to
-      the new qty (from bb_product_update) plus
-      the old stock, where the id equals the
-      id referenced by the update that fired 
-      the trigger. */
-  UPDATE bb_product
-  SET
-    stock = :new.qty + stock
-  WHERE
-    idproduct = :new.idproduct;
+  IF :OLD.dtRecd IS NULL AND :NEW.dtRecd IS NOT NULL THEN -- Check if dtRecd is updated
+ -- Update stock level in bb_product table
+    UPDATE bb_product
+    SET
+      stock = stock + :NEW.qty
+    WHERE
+      idProduct = :NEW.idProduct;
+  END IF;
 END;
 /
 
--- show that product 5 is below reorder amount
+-- Test the trigger
+-- Query stock and reorder data for product 5
 SELECT
   stock,
   reorder
 FROM
   bb_product
 WHERE
-  idproduct = 5;
+  idProduct = 5;
 
-/
-
--- Show that 5 is currently up for reorder
 SELECT
-  idproduct,
-  idrequest,
-  dtrequest,
-  cost,
-  qty
+  *
 FROM
-  bb_product_request;
+  bb_product_request
+WHERE
+  idProduct = 5;
 
-/
-
--- Do update and fire trigger
+-- Update the product request to record it as fulfilled
 UPDATE bb_product_request
 SET
-  dtrecd = sysdate,
+  dtRecd = SYSDATE,
   cost = 225
 WHERE
-  idproduct = 5;
+  idRequest = 3;
 
-/
-
--- show that order was fulfilled
 SELECT
-  idproduct,
-  idrequest,
-  dtrequest,
-  cost,
-  qty
+  *
 FROM
-  bb_product_request;
+  bb_product_request
+WHERE
+  idProduct = 5;
 
-/
-
--- show that trigger fired and stock was updated
 SELECT
   stock,
   reorder
 FROM
   bb_product
 WHERE
-  idproduct = 5;
+  idProduct = 5;
 
-/
-
--- Undo all our effort
+-- Verify trigger fired and stock level modified correctly
+-- Rollback changes
 ROLLBACK;
 
--- DROP TRIGGER bb_reqfill_trg;
-
-/
+-- Disable the trigger (if not needed for other assignments)
+-- ALTER TRIGGER BB_REQFILL_TRG DISABLE;
 
 -- Assignment 9-3: Updating the Stock Level If a Product Fulfillment Is Canceled
 -- The Brewbean’s developers have made progress on the inventory-handling processes;
@@ -251,30 +236,66 @@ ROLLBACK;
 -- 4. Be sure to run the following statement to disable this trigger so that it doesn’t affect other
 -- assignments:
 -- ALTER TRIGGER bb_reqfill_trg DISABLE;
+-- Create the trigger
 CREATE OR REPLACE TRIGGER BB_REQFILL_TRG AFTER
-  UPDATE OF DTRECD ON BB_PRODUCT_REQUEST FOR EACH ROW
-DECLARE
-  v_qty NUMBER;
+  UPDATE OF dtRecd, cost ON bb_product_request FOR EACH ROW
 BEGIN
-  IF :OLD.DTRECD IS NOT NULL AND :NEW.DTRECD IS NULL THEN
- -- Product request is being marked as not filled
- -- Adjust the product stock level
-    SELECT
-      qty INTO v_qty
-    FROM
-      bb_product_request
-    WHERE
-      idRequest = :OLD.idRequest;
+  -- Check if dtRecd is updated from not null to null
+  IF :OLD.dtRecd IS NOT NULL AND :NEW.dtRecd IS NULL THEN
+    -- Reduce stock level in bb_product table
     UPDATE bb_product
     SET
-      stock = stock + v_qty
+      stock = stock - :OLD.qty
     WHERE
-      idProduct = :OLD.idProduct;
+      idProduct = :NEW.idProduct;
+  ELSIF :OLD.dtRecd IS NULL AND :NEW.dtRecd IS NOT NULL THEN
+    -- Update stock level in bb_product table
+    UPDATE bb_product
+    SET
+      stock = stock + :NEW.qty
+    WHERE
+      idProduct = :NEW.idProduct;
   END IF;
 END;
 /
 
+-- Test the trigger
+-- Insert a product request
+INSERT INTO bb_product_request (
+  idRequest,
+  idProduct,
+  dtRequest,
+  qty
+) VALUES (
+  4,
+  5,
+  SYSDATE,
+  45
+);
+COMMIT;
+
+-- Update the product stock to a specific value
+UPDATE bb_product
+SET
+  stock = 86
+WHERE
+  idProduct = 5;
+COMMIT;
+
+-- Update the product request to record it as unfulfilled
+UPDATE bb_product_request
+SET
+  dtRecd = NULL
+WHERE
+  idRequest = 4;
+
+-- Query to verify data modifications
+SELECT * FROM bb_product_request WHERE idRequest = 4;
+SELECT stock FROM bb_product WHERE idProduct = 5;
+
+-- Disable the trigger (if not needed for other assignments)
 ALTER TRIGGER BB_REQFILL_TRG DISABLE;
+
 
 -- Assignment 9-4: Updating Stock Levels When an Order Is Canceled
 -- At times, customers make mistakes in submitting orders and call to cancel an order. Brewbean’s
