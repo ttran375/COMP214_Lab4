@@ -1,0 +1,31 @@
+{
+  "name": "Docker in Docker",
+  "image": "mcr.microsoft.com/devcontainers/base:bullseye",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "enableNonRootDocker": "true",
+      "moby": "true"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "GitHub.copilot",
+        "vsls-contrib.gitdoc",
+        "CrappyCodeMaker.ccm-plsql-oracle",
+        "EwanDubashinski.plsqllint",
+        "Oracle.oracledevtools",
+        "Oracle.sql-developer",
+        "apng.orclapex-autocomplete",
+        "casian.plsql",
+        "mycelo.oracle-plsql",
+        "xyz.plsql-language",
+        "streetsidesoftware.code-spell-checker",
+        "EditorConfig.EditorConfig",
+        "DavidAnson.vscode-markdownlint",
+        "markdownlint.markdownlint"
+      ]
+    }
+  }
+}
